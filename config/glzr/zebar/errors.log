@@ -1,0 +1,58 @@
+[2m2026-02-13T18:14:41.436913Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-13T18:14:41.437171Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T03:54:36.851452Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T03:54:36.851752Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T06:29:38.587340Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T06:29:38.587804Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T07:24:22.622103Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T07:24:22.630957Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T07:43:17.397680Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T07:43:17.400174Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T10:54:00.383287Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T10:54:00.385332Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T11:32:26.468386Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T11:32:26.470464Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T12:04:43.982350Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T12:04:43.983860Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T12:13:21.216445Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T12:13:21.219694Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-14T12:15:51.150467Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-14T12:15:51.153971Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-15T04:05:58.080638Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-15T04:05:58.082712Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-15T11:46:41.577377Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-15T11:46:41.673222Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-15T12:00:58.527272Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-15T12:00:58.548966Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-15T12:11:22.485513Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-15T12:11:22.514919Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T03:46:38.821692Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T03:46:38.829746Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T06:36:19.953636Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T06:36:19.957123Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T07:21:24.380765Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T07:21:24.383552Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T11:05:45.018014Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T11:05:45.020808Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T11:19:13.110278Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T11:19:13.112450Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T11:21:15.437048Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T11:21:15.437693Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T11:45:31.775607Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T11:45:31.775846Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T12:02:33.843304Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T12:02:33.843806Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T12:21:49.237037Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T12:21:49.237624Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T13:20:04.694363Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T13:20:04.694915Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T14:20:28.763469Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T14:20:28.763667Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-16T16:20:07.017609Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-16T16:20:07.017876Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-17T05:31:53.856864Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-17T05:31:53.857147Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-17T15:33:46.817301Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-17T15:33:46.817518Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
+[2m2026-02-18T00:50:46.615853Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No widget pack found for 'attaquer-solid-ts'.
+[2m2026-02-18T00:50:46.616047Z[0m [31mERROR[0m [2mzebar::widget_factory[0m[2m:[0m Failed to start widget on startup: No preset with name 'default' at config 'C:\Users\dev\.glzr\zebar\attaquer-solid-ts\zpack.json'.
