@@ -35,8 +35,6 @@ function Install-Scoop {
         $env:PATH += ';C:\Program Files\Git\cmd'
         Write-Success 'Git installed'
     }
-
-    & "$DOTFILES\packages\scoop.ps1"
 }
 
 function Sync-Repo {
@@ -50,6 +48,11 @@ function Sync-Repo {
     }
 
     Write-Success "Repo ready: $DOTFILES"
+}
+
+function Install-ScoopPackages {
+    Write-Title 'Installing Scoop packages'
+    & "$DOTFILES\packages\scoop.ps1"
 }
 
 function Install-WingetApps {
@@ -85,6 +88,7 @@ function Set-Symlinks {
 function Main {
     Install-Scoop
     Sync-Repo
+    Install-ScoopPackages
     Install-WingetApps
     Install-Fonts
     Install-PSModules
