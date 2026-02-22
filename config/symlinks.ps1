@@ -18,7 +18,8 @@ $PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
 $SYMLINKS = @(
     @{ Src = "$DOTFILES\config\powershell"; Dst = "$env:USERPROFILE\.config\powershell" },
     @{ Src = "$DOTFILES\config\nvim";       Dst = "$env:LOCALAPPDATA\nvim"              },
-    @{ Src = "$DOTFILES\config\glzr";       Dst = "$env:USERPROFILE\.glzr"             }
+    @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm" },
+    @{ Src = "$DOTFILES\config\glzr\zebar";   Dst = "$env:USERPROFILE\.zebar"        }
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
