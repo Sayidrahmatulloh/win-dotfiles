@@ -40,20 +40,21 @@ Link "$DOTFILES\config\nvim" "$env:LOCALAPPDATA\nvim"
 Link "$DOTFILES\config\glzr" "$env:USERPROFILE\.glzr"
 
 # ── Write entry point to $PROFILE ────────────────────────────
+$userProfile = "C:\Users\$env:USERNAME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 $profileLine = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
-$profileDir  = Split-Path $PROFILE -Parent
+$profileDir  = Split-Path $userProfile -Parent
 
 if (-not (Test-Path $profileDir)) {
     New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
 }
 
-if (-not (Test-Path $PROFILE)) {
-    New-Item -ItemType File -Path $PROFILE -Force | Out-Null
+if (-not (Test-Path $userProfile)) {
+    New-Item -ItemType File -Path $userProfile -Force | Out-Null
 }
 
-if (-not (Get-Content $PROFILE -ErrorAction SilentlyContinue | Select-String -SimpleMatch $profileLine)) {
-    Add-Content -Path $PROFILE -Value $profileLine
-    Write-Host "  linked: $PROFILE" -ForegroundColor Green
+if (-not (Get-Content $userProfile -ErrorAction SilentlyContinue | Select-String -SimpleMatch $profileLine)) {
+    Add-Content -Path $userProfile -Value $profileLine
+    Write-Host "  linked: $userProfile" -ForegroundColor Green
 } else {
-    Write-Host "  skipped: $PROFILE (already linked)" -ForegroundColor Gray
+    Write-Host "  skipped: $userProfile (already linked)" -ForegroundColor Gray
 }
