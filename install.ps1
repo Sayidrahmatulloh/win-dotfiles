@@ -26,7 +26,8 @@ function Install-Scoop {
     if (Get-Command scoop -ErrorAction SilentlyContinue) {
         Write-Skipped 'Scoop already installed'
     } else {
-        Invoke-RestMethod get.scoop.sh | Invoke-Expression
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+        Invoke-RestMethod -Uri 'https://get.scoop.sh' | Invoke-Expression
         Write-Success 'Scoop installed'
     }
 
