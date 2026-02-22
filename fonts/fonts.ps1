@@ -38,9 +38,13 @@ function Install-FontFile {
         return
     }
 
-    # 0x4   = FOF_SILENT        - no progress dialog
-    # 0x10  = FOF_NOCONFIRMATION - no replace prompt
-    # 0x400 = FOF_NOERRORUI     - no error dialogs
+    # Remove existing font from registry if present (prevents replace dialog)
+    $regPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
+    $regKey  = Get-ItemProperty $regPath | Get-Member -Name "*$([System.IO.Path]::GetFileNameWithoutExtension($name))*" -ErrorAction SilentlyContinue
+    if ($regKey) {
+        Remove-ItemProperty -Path $regPath -Name $regKey.Name -ErrorAction SilentlyContinue
+    }
+
     $shell = New-Object -ComObject Shell.Application
     $shell.Namespace(0x14).CopyHere($FontPath, 0x4 -bor 0x10 -bor 0x400)
     Write-Done $name
