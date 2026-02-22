@@ -8,7 +8,7 @@ $buckets = @("main", "extras", "nerd-fonts")
 Write-Host ""
 Write-Host "  Buckets:" -ForegroundColor White
 foreach ($bucket in $buckets) {
-    $exists = scoop bucket list 2>$null | Select-String --SimpleMatch $bucket
+    $exists = scoop bucket list 2>$null | Out-String | Select-String --SimpleMatch $bucket
     if ($exists) {
         Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
     } else {
