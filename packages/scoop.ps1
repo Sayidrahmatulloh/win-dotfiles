@@ -1,5 +1,5 @@
 # ============================================================
-#  packages/scoop.ps1 — Install and upgrade packages via Scoop
+#  packages/winget.ps1 — Install and upgrade apps via Winget
 # ============================================================
 
 Set-StrictMode -Version Latest
@@ -9,92 +9,90 @@ $ErrorActionPreference = 'Stop'
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-$BUCKETS = @('main', 'extras', 'nerd-fonts')
-
-$TOOLS = @(
-    # Core utilities
-    'bun', 'cacert', 'curl', 'dark', 'fd', 'ffmpeg',
-    'fzf', 'gcc', 'gh', '7zip', 'go', 'helix', 'innounp',
-    'jq', 'llvm', 'lua', 'luajit', 'luarocks', 'make',
-    'neovim', 'nodejs', 'oh-my-posh', 'python',
-    'ripgrep', 'rust', 'stylua', 'tree-sitter',
-    # Extras
-    'autohotkey', 'keyviz', 'lazygit', 'posh-git', 'psfzf', 'terminal-icons'
+$APPS = @(
+    # Browsers
+    'Zen-Team.Zen-Browser',
+    'Google.Chrome.EXE',
+    # Window management
+    'glzr-io.glazewm',
+    'RamenSoftware.Windhawk',
+    # Development
+    'Microsoft.VisualStudioCode',
+    'Microsoft.VisualStudio.2022.BuildTools',
+    'Microsoft.PowerShell',
+    'Microsoft.WindowsTerminal',
+    'Microsoft.WSL',
+    # Utilities
+    'HaiNguyen.Mechvibes',
+    'Voidstar.FilePilot',
+    'Microsoft.PowerToys',
+    'MartiCliment.UniGetUI'
 )
 
-# ── Scoop helpers ──────────────────────────────────────────────────────────────
+$WINGET_FLAGS = '--silent --accept-package-agreements --accept-source-agreements'
 
-function Get-InstalledBuckets { scoop bucket list 2>$null }
-function Get-InstalledTools   { scoop list 2>$null }
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
-function Add-Bucket  { param([string]$Name) scoop bucket add $Name 2>$null; return $LASTEXITCODE -eq 0 }
-function Install-Tool { param([string]$Name) scoop install $Name *>$null;   return $LASTEXITCODE -eq 0 }
-function Update-Tool  { param([string]$Name) scoop update $Name *>$null;    return $LASTEXITCODE -eq 0 }
+function Test-AppInstalled {
+    param([string]$AppId)
+    winget list --id $AppId --exact --accept-source-agreements *>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Install-App {
+    param([string]$AppId)
+    Invoke-Expression "winget install --id $AppId $WINGET_FLAGS *>`$null"
+    return $LASTEXITCODE -eq 0
+}
+
+function Update-App {
+    param([string]$AppId)
+    $output = Invoke-Expression "winget upgrade --id $AppId $WINGET_FLAGS 2>&1"
+    if ($output -match 'No applicable upgrade found|already installed') { return 'latest' }
+    if ($LASTEXITCODE -eq 0) { return 'upgraded' }
+    return 'failed'
+}
 
 # ── Core logic ─────────────────────────────────────────────────────────────────
 
-function Sync-Buckets {
-    param([string[]]$Buckets)
+function Sync-Apps {
+    param([string[]]$Apps)
 
-    Write-Section 'Buckets:'
+    Write-Section 'Apps:'
 
-    $installed = Get-InstalledBuckets
-    $total     = $Buckets.Count
-    $index     = 0
+    $results = @{ Installed = @(); Upgraded = @(); Failed = @() }
+    $total   = $Apps.Count
+    $index   = 0
 
-    foreach ($bucket in $Buckets) {
+    foreach ($app in $Apps) {
         $index++
         $prefix = '  [{0}/{1}]' -f $index, $total
 
-        if ($installed -contains $bucket) {
-            Write-Step $prefix $bucket 'already added'
-            Write-Skip "bucket: $bucket"
-            continue
-        }
+        if (Test-AppInstalled $app) {
+            Write-Step $prefix $app 'checking update'
 
-        Write-Step $prefix $bucket 'adding'
-
-        if (Add-Bucket $bucket) {
-            Write-Done "bucket: $bucket"
-        } else {
-            Write-Fail "bucket: $bucket"
-        }
-    }
-}
-
-function Sync-Tools {
-    param([string[]]$Tools)
-
-    Write-Section 'Tools:'
-
-    $installed = Get-InstalledTools
-    $results   = @{ Installed = @(); Upgraded = @(); Failed = @() }
-    $total     = $Tools.Count
-    $index     = 0
-
-    foreach ($tool in $Tools) {
-        $index++
-        $prefix = '  [{0}/{1}]' -f $index, $total
-
-        if ($installed -contains $tool) {
-            Write-Step $prefix $tool 'upgrading'
-
-            if (Update-Tool $tool) {
-                Write-Host "  [^] upgraded:  $tool" -ForegroundColor Cyan
-                $results.Upgraded += $tool
-            } else {
-                Write-Fail "upgrade failed: $tool"
-                $results.Failed += $tool
+            switch (Update-App $app) {
+                'upgraded' {
+                    Write-Host "  [^] upgraded:  $app" -ForegroundColor Cyan
+                    $results.Upgraded += $app
+                }
+                'latest' {
+                    Write-Skip "up to date: $app"
+                }
+                'failed' {
+                    Write-Fail "update failed: $app"
+                    $results.Failed += $app
+                }
             }
         } else {
-            Write-Step $prefix $tool 'installing'
+            Write-Step $prefix $app 'installing'
 
-            if (Install-Tool $tool) {
-                Write-Done "installed: $tool"
-                $results.Installed += $tool
+            if (Install-App $app) {
+                Write-Done "installed: $app"
+                $results.Installed += $app
             } else {
-                Write-Fail "install failed: $tool"
-                $results.Failed += $tool
+                Write-Fail "install failed: $app"
+                $results.Failed += $app
             }
         }
     }
@@ -105,9 +103,8 @@ function Sync-Tools {
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 function Main {
-    Sync-Buckets $BUCKETS
-    $results = Sync-Tools $TOOLS
-    Write-Summary 'Scoop' $results
+    $results = Sync-Apps $APPS
+    Write-Summary 'Winget' $results
 }
 
 Main
