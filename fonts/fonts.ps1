@@ -38,8 +38,7 @@ function Install-FontFile {
         return
     }
 
-    $shell = New-Object -ComObject Shell.Application
-    $shell.Namespace(0x14).CopyHere($FontPath, 0x10)
+    Copy-Item -Path $FontPath -Destination $dest -Force
     Write-Done $name
 }
 
