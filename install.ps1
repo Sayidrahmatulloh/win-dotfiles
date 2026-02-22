@@ -3,57 +3,94 @@
 #  Usage: irm https://raw.githubusercontent.com/sayidrahmatulloh/win-dotfiles/main/install.ps1 | iex
 # ============================================================
 
-$ErrorActionPreference = "Stop"
-$DOTFILES = "$HOME\.dotfiles"
-$REPO     = "https://github.com/sayidrahmatulloh/win-dotfiles"
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-function Title($msg)   { Write-Host "`n==> $msg" -ForegroundColor Cyan }
-function Success($msg) { Write-Host "  $msg"     -ForegroundColor Green }
-function Warn($msg)    { Write-Host "  ! $msg"   -ForegroundColor Yellow }
+# ── Constants ──────────────────────────────────────────────────────────────────
 
-# 0. Git check
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    Title "Installing Git"
-    winget install --id Git.Git --silent --accept-package-agreements --accept-source-agreements
-    $env:PATH += ";C:\Program Files\Git\cmd"
-    Success "Git installed"
+$DOTFILES = "$HOME\.win-dotfiles"
+$REPO     = 'https://github.com/sayidrahmatulloh/win-dotfiles'
+
+# ── Output helpers ─────────────────────────────────────────────────────────────
+
+function Write-Title   { param([string]$Msg) Write-Host "`n  ==> $Msg" -ForegroundColor Cyan   }
+function Write-Success { param([string]$Msg) Write-Host "  [+] $Msg"   -ForegroundColor Green  }
+function Write-Skipped { param([string]$Msg) Write-Host "  [~] $Msg"   -ForegroundColor Gray   }
+function Write-Warning { param([string]$Msg) Write-Host "  [!] $Msg"   -ForegroundColor Yellow }
+
+# ── Step functions ─────────────────────────────────────────────────────────────
+
+function Install-Scoop {
+    Write-Title 'Setting up Scoop'
+
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        Write-Skipped 'Scoop already installed'
+    } else {
+        Invoke-RestMethod get.scoop.sh | Invoke-Expression
+        Write-Success 'Scoop installed'
+    }
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        scoop install git
+        $env:PATH += ';C:\Program Files\Git\cmd'
+        Write-Success 'Git installed'
+    }
+
+    & "$DOTFILES\packages\scoop.ps1"
 }
 
-# 1. Clone
-Title "Cloning dotfiles"
-if (Test-Path $DOTFILES) {
-    Warn "Already exists, pulling..."
-    git -C $DOTFILES pull
-} else {
-    git clone $REPO $DOTFILES
+function Sync-Repo {
+    Write-Title 'Cloning dotfiles'
+
+    if (Test-Path $DOTFILES) {
+        Write-Warning 'Already exists — pulling latest...'
+        git -C $DOTFILES pull
+    } else {
+        git clone $REPO $DOTFILES
+    }
+
+    Write-Success "Repo ready: $DOTFILES"
 }
-Success "Repo ready: $DOTFILES"
 
-# 2. Scoop
-Title "Setting up Scoop"
-if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-    Invoke-RestMethod get.scoop.sh | Invoke-Expression
-    Success "Scoop installed"
-} else { Success "Scoop already installed" }
-& "$DOTFILES\packages\scoop.ps1"
+function Install-WingetApps {
+    Write-Title 'Installing Winget apps'
+    & "$DOTFILES\packages\winget.ps1"
+}
 
-# 3. Winget
-Title "Installing Winget apps"
-& "$DOTFILES\packages\winget.ps1"
+function Install-Fonts {
+    Write-Title 'Installing fonts'
+    & "$DOTFILES\fonts\fonts.ps1"
+}
 
-# 4. Fonts
-Title "Installing fonts"
-& "$DOTFILES\fonts\fonts.ps1"
+function Install-PSModules {
+    Write-Title 'Installing PowerShell modules'
 
-# 5. PowerShell modules
-Title "Installing PowerShell modules"
-if (-not (Get-Module -ListAvailable -Name Microsoft.WinGet.CommandNotFound)) {
-    Install-Module Microsoft.WinGet.CommandNotFound -Repository PSGallery -Force -Scope CurrentUser
-    Success "Microsoft.WinGet.CommandNotFound installed"
-} else { Success "Microsoft.WinGet.CommandNotFound already installed" }
+    $module = 'Microsoft.WinGet.CommandNotFound'
 
-# 6. Symlinks
-Title "Linking configs"
-& "$DOTFILES\config\symlinks.ps1"
+    if (Get-Module -ListAvailable -Name $module) {
+        Write-Skipped "$module already installed"
+    } else {
+        Install-Module $module -Repository PSGallery -Force -Scope CurrentUser
+        Write-Success "$module installed"
+    }
+}
 
-Write-Host "`n  All done! Restart your terminal." -ForegroundColor Green
+function Set-Symlinks {
+    Write-Title 'Linking configs'
+    & "$DOTFILES\config\symlinks.ps1"
+}
+
+# ── Entry point ────────────────────────────────────────────────────────────────
+
+function Main {
+    Install-Scoop
+    Sync-Repo
+    Install-WingetApps
+    Install-Fonts
+    Install-PSModules
+    Set-Symlinks
+
+    Write-Host "`n  All done! Restart your terminal.`n" -ForegroundColor Green
+}
+
+Main

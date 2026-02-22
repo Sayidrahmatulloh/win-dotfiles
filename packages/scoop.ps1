@@ -1,102 +1,170 @@
 # ============================================================
-#  packages/scoop.ps1
+#  packages/scoop.ps1 — Install and upgrade packages via Scoop
 # ============================================================
 
-# --- Buckets ---
-$buckets = @("main", "extras", "nerd-fonts")
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-Write-Host ""
-Write-Host "  Buckets:" -ForegroundColor White
-$installedBuckets = scoop bucket list 2>$null
-$bTotal = $buckets.Count
-$bi     = 0
+# ── Constants ─────────────────────────────────────────────────────────────────
 
-foreach ($bucket in $buckets) {
-    $bi++
-    $prefix = "  [{0}/{1}]" -f $bi, $bTotal
-    Write-Host "$prefix " -NoNewline -ForegroundColor DarkGray
-    Write-Host $bucket -NoNewline -ForegroundColor White
-    Write-Host "..." -NoNewline -ForegroundColor DarkGray
+$BUCKETS = @('main', 'extras', 'nerd-fonts')
 
-    if ($installedBuckets -notcontains $bucket) {
-        Write-Host " adding" -ForegroundColor DarkGray
-        scoop bucket add $bucket 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [+] added:    $bucket" -ForegroundColor Green
-        } else {
-            Write-Host "  [x] failed:   $bucket" -ForegroundColor Red
-        }
-    } else {
-        Write-Host " installed" -ForegroundColor DarkGray
-        Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
-    }
-}
-
-# --- Tools ---
-$tools = @(
-    # Main
-    "bun", "cacert", "curl", "dark", "fd", "ffmpeg",
-    "fzf", "gcc", "gh", "7zip", "go", "helix", "innounp",
-    "jq", "llvm", "lua", "luajit", "luarocks", "make",
-    "neovim", "nodejs", "oh-my-posh", "python",
-    "ripgrep", "rust", "stylua", "tree-sitter",
+$TOOLS = @(
+    # Core utilities
+    'bun', 'cacert', 'curl', 'dark', 'fd', 'ffmpeg',
+    'fzf', 'gcc', 'gh', '7zip', 'go', 'helix', 'innounp',
+    'jq', 'llvm', 'lua', 'luajit', 'luarocks', 'make',
+    'neovim', 'nodejs', 'oh-my-posh', 'python',
+    'ripgrep', 'rust', 'stylua', 'tree-sitter',
     # Extras
-    "autohotkey", "keyviz", "lazygit", "posh-git", "psfzf", "terminal-icons"
+    'autohotkey', 'keyviz', 'lazygit', 'posh-git', 'psfzf', 'terminal-icons'
 )
 
-$results = @{ installed = @(); upgraded = @(); failed = @() }
-$total   = $tools.Count
-$i       = 0
+# ── Output helpers ─────────────────────────────────────────────────────────────
 
-Write-Host ""
-Write-Host "  Tools:" -ForegroundColor White
+function Write-Step {
+    param([string]$Prefix, [string]$Name, [string]$Status)
+    Write-Host $Prefix      -NoNewline -ForegroundColor DarkGray
+    Write-Host " $Name"     -NoNewline -ForegroundColor White
+    Write-Host "... $Status"            -ForegroundColor DarkGray
+}
 
-foreach ($tool in $tools) {
-    $i++
-    $prefix = "  [{0}/{1}]" -f $i, $total
-    Write-Host "$prefix " -NoNewline -ForegroundColor DarkGray
-    Write-Host $tool -NoNewline -ForegroundColor White
-    Write-Host "..." -NoNewline -ForegroundColor DarkGray
+function Write-Result {
+    param([string]$Icon, [string]$Label, [string]$Name, [ConsoleColor]$Color)
+    Write-Host "  $Icon $Label" -NoNewline -ForegroundColor $Color
+    Write-Host $Name             -ForegroundColor White
+}
 
-    $isInstalled = (scoop list 2>$null) -contains $tool
+function Write-SectionHeader {
+    param([string]$Title)
+    Write-Host ""
+    Write-Host "  $Title" -ForegroundColor White
+}
 
-    if ($isInstalled) {
-        Write-Host " upgrading" -ForegroundColor DarkCyan
-        scoop update $tool *>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [^] upgraded: " -NoNewline -ForegroundColor Cyan
-            Write-Host $tool -ForegroundColor White
-            $results.upgraded += $tool
-        } else {
-            Write-Host "  [x] failed:   " -NoNewline -ForegroundColor Red
-            Write-Host $tool -ForegroundColor White
-            $results.failed += $tool
+# ── Scoop helpers ──────────────────────────────────────────────────────────────
+
+function Get-InstalledBuckets {
+    scoop bucket list 2>$null
+}
+
+function Get-InstalledTools {
+    scoop list 2>$null
+}
+
+function Install-Bucket {
+    param([string]$Bucket)
+    scoop bucket add $Bucket 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Install-Tool {
+    param([string]$Tool)
+    scoop install $Tool *>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Update-Tool {
+    param([string]$Tool)
+    scoop update $Tool *>$null
+    return $LASTEXITCODE -eq 0
+}
+
+# ── Core logic ─────────────────────────────────────────────────────────────────
+
+function Sync-Buckets {
+    param([string[]]$Buckets)
+
+    Write-SectionHeader 'Buckets:'
+
+    $installed = Get-InstalledBuckets
+    $total     = $Buckets.Count
+    $index     = 0
+
+    foreach ($bucket in $Buckets) {
+        $index++
+        $prefix = '  [{0}/{1}]' -f $index, $total
+
+        if ($installed -contains $bucket) {
+            Write-Step $prefix $bucket 'already installed'
+            Write-Result '[~]' 'skipped:  ' $bucket DarkGray
+            continue
         }
-    } else {
-        Write-Host " installing" -ForegroundColor DarkGray
-        scoop install $tool *>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [+] installed: " -NoNewline -ForegroundColor Green
-            Write-Host $tool -ForegroundColor White
-            $results.installed += $tool
+
+        Write-Step $prefix $bucket 'adding'
+
+        if (Install-Bucket $bucket) {
+            Write-Result '[+]' 'added:    ' $bucket Green
         } else {
-            Write-Host "  [x] failed:    " -NoNewline -ForegroundColor Red
-            Write-Host $tool -ForegroundColor White
-            $results.failed += $tool
+            Write-Result '[x]' 'failed:   ' $bucket Red
         }
     }
 }
 
-# Summary
-Write-Host ""
-Write-Host "  ----------------------------------------" -ForegroundColor DarkGray
-Write-Host "  Scoop summary:" -ForegroundColor White
-Write-Host ("  [+] Installed : {0}" -f $results.installed.Count) -ForegroundColor Green
-Write-Host ("  [^] Upgraded  : {0}" -f $results.upgraded.Count)  -ForegroundColor Cyan
-Write-Host ("  [x] Failed    : {0}" -f $results.failed.Count)    -ForegroundColor Red
-if ($results.failed.Count -gt 0) {
-    foreach ($f in $results.failed) {
+function Sync-Tools {
+    param([string[]]$Tools)
+
+    Write-SectionHeader 'Tools:'
+
+    $installed = Get-InstalledTools
+    $results   = @{ Installed = @(); Upgraded = @(); Failed = @() }
+    $total     = $Tools.Count
+    $index     = 0
+
+    foreach ($tool in $Tools) {
+        $index++
+        $prefix = '  [{0}/{1}]' -f $index, $total
+
+        if ($installed -contains $tool) {
+            Write-Step $prefix $tool 'upgrading'
+
+            if (Update-Tool $tool) {
+                Write-Result '[^]' 'upgraded: ' $tool Cyan
+                $results.Upgraded += $tool
+            } else {
+                Write-Result '[x]' 'failed:   ' $tool Red
+                $results.Failed   += $tool
+            }
+        } else {
+            Write-Step $prefix $tool 'installing'
+
+            if (Install-Tool $tool) {
+                Write-Result '[+]' 'installed:' $tool Green
+                $results.Installed += $tool
+            } else {
+                Write-Result '[x]' 'failed:   ' $tool Red
+                $results.Failed    += $tool
+            }
+        }
+    }
+
+    return $results
+}
+
+function Write-Summary {
+    param([hashtable]$Results)
+
+    $divider = '  ' + ('-' * 40)
+
+    Write-Host ''
+    Write-Host $divider                                                    -ForegroundColor DarkGray
+    Write-Host '  Scoop summary:'                                          -ForegroundColor White
+    Write-Host ('  [+] Installed : {0}' -f $Results.Installed.Count)     -ForegroundColor Green
+    Write-Host ('  [^] Upgraded  : {0}' -f $Results.Upgraded.Count)      -ForegroundColor Cyan
+    Write-Host ('  [x] Failed    : {0}' -f $Results.Failed.Count)        -ForegroundColor Red
+
+    foreach ($f in $Results.Failed) {
         Write-Host "       - $f" -ForegroundColor DarkRed
     }
+
+    Write-Host $divider -ForegroundColor DarkGray
 }
-Write-Host "  ----------------------------------------" -ForegroundColor DarkGray
+
+# ── Entry point ────────────────────────────────────────────────────────────────
+
+function Main {
+    Sync-Buckets $BUCKETS
+    $results = Sync-Tools $TOOLS
+    Write-Summary $results
+}
+
+Main

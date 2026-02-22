@@ -1,74 +1,140 @@
 # ============================================================
-#  packages/winget.ps1
+#  packages/winget.ps1 — Install and upgrade apps via Winget
 # ============================================================
 
-$apps = @(
-    "Zen-Team.Zen-Browser",
-    "Google.Chrome.EXE",
-    "glzr-io.glazewm",
-    "Microsoft.VisualStudioCode",
-    "Microsoft.VisualStudio.2022.BuildTools",
-    "Microsoft.PowerShell",
-    "Microsoft.WindowsTerminal",
-    "Microsoft.WSL",
-    "HaiNguyen.Mechvibes",
-    "RamenSoftware.Windhawk",
-    "Voidstar.FilePilot",
-    "Microsoft.PowerToys",
-    "MartiCliment.UniGetUI"
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# ── Constants ──────────────────────────────────────────────────────────────────
+
+$APPS = @(
+    # Browsers
+    'Zen-Team.Zen-Browser',
+    'Google.Chrome.EXE',
+    # Window management
+    'glzr-io.glazewm',
+    'RamenSoftware.Windhawk',
+    # Development
+    'Microsoft.VisualStudioCode',
+    'Microsoft.VisualStudio.2022.BuildTools',
+    'Microsoft.PowerShell',
+    'Microsoft.WindowsTerminal',
+    'Microsoft.WSL',
+    # Utilities
+    'HaiNguyen.Mechvibes',
+    'Voidstar.FilePilot',
+    'Microsoft.PowerToys',
+    'MartiCliment.UniGetUI'
 )
 
-$results = @{ installed = @(); upgraded = @(); failed = @() }
-$total   = $apps.Count
-$i       = 0
+$WINGET_FLAGS = '--silent --accept-package-agreements --accept-source-agreements'
 
-foreach ($app in $apps) {
-    $i++
-    $prefix = "  [{0}/{1}]" -f $i, $total
-    Write-Host "$prefix " -NoNewline -ForegroundColor DarkGray
-    Write-Host $app -NoNewline -ForegroundColor White
-    Write-Host "..." -NoNewline -ForegroundColor DarkGray
+# ── Output helpers ─────────────────────────────────────────────────────────────
 
-    winget list --id $app --exact --accept-source-agreements *>$null
-    $isInstalled = $LASTEXITCODE -eq 0
-
-    if ($isInstalled) {
-        Write-Host " installed" -ForegroundColor DarkGray
-        winget upgrade --id $app --silent --accept-package-agreements --accept-source-agreements *>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [^] upgraded: " -NoNewline -ForegroundColor Cyan
-            Write-Host $app -ForegroundColor White
-            $results.upgraded += $app
-        } else {
-            Write-Host "  [x] failed:   " -NoNewline -ForegroundColor Red
-            Write-Host $app -ForegroundColor White
-            $results.failed += $app
-        }
-    } else {
-        Write-Host " installing" -ForegroundColor DarkGray
-        winget install --id $app --silent --accept-package-agreements --accept-source-agreements *>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [+] installed: " -NoNewline -ForegroundColor Green
-            Write-Host $app -ForegroundColor White
-            $results.installed += $app
-        } else {
-            Write-Host "  [x] failed:    " -NoNewline -ForegroundColor Red
-            Write-Host $app -ForegroundColor White
-            $results.failed += $app
-        }
-    }
+function Write-Step {
+    param([string]$Prefix, [string]$Name, [string]$Status)
+    Write-Host $Prefix       -NoNewline -ForegroundColor DarkGray
+    Write-Host " $Name"      -NoNewline -ForegroundColor White
+    Write-Host "... $Status"             -ForegroundColor DarkGray
 }
 
-# Summary
-Write-Host ""
-Write-Host "  ----------------------------------------" -ForegroundColor DarkGray
-Write-Host "  Winget summary:" -ForegroundColor White
-Write-Host ("  [+] Installed : {0}" -f $results.installed.Count) -ForegroundColor Green
-Write-Host ("  [^] Upgraded  : {0}" -f $results.upgraded.Count)  -ForegroundColor Cyan
-Write-Host ("  [x] Failed    : {0}" -f $results.failed.Count)    -ForegroundColor Red
-if ($results.failed.Count -gt 0) {
-    foreach ($f in $results.failed) {
+function Write-Result {
+    param([string]$Icon, [string]$Label, [string]$Name, [ConsoleColor]$Color)
+    Write-Host "  $Icon $Label" -NoNewline -ForegroundColor $Color
+    Write-Host $Name             -ForegroundColor White
+}
+
+function Write-SectionHeader {
+    param([string]$Title)
+    Write-Host ''
+    Write-Host "  $Title" -ForegroundColor White
+}
+
+# ── Winget helpers ─────────────────────────────────────────────────────────────
+
+function Test-AppInstalled {
+    param([string]$AppId)
+    winget list --id $AppId --exact --accept-source-agreements *>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Install-App {
+    param([string]$AppId)
+    Invoke-Expression "winget install --id $AppId $WINGET_FLAGS *>`$null"
+    return $LASTEXITCODE -eq 0
+}
+
+function Update-App {
+    param([string]$AppId)
+    Invoke-Expression "winget upgrade --id $AppId $WINGET_FLAGS *>`$null"
+    return $LASTEXITCODE -eq 0
+}
+
+# ── Core logic ─────────────────────────────────────────────────────────────────
+
+function Sync-Apps {
+    param([string[]]$Apps)
+
+    Write-SectionHeader 'Apps:'
+
+    $results = @{ Installed = @(); Upgraded = @(); Failed = @() }
+    $total   = $Apps.Count
+    $index   = 0
+
+    foreach ($app in $Apps) {
+        $index++
+        $prefix = '  [{0}/{1}]' -f $index, $total
+
+        if (Test-AppInstalled $app) {
+            Write-Step $prefix $app 'upgrading'
+
+            if (Update-App $app) {
+                Write-Result '[^]' 'upgraded: ' $app Cyan
+                $results.Upgraded += $app
+            } else {
+                Write-Result '[x]' 'failed:   ' $app Red
+                $results.Failed   += $app
+            }
+        } else {
+            Write-Step $prefix $app 'installing'
+
+            if (Install-App $app) {
+                Write-Result '[+]' 'installed:' $app Green
+                $results.Installed += $app
+            } else {
+                Write-Result '[x]' 'failed:   ' $app Red
+                $results.Failed    += $app
+            }
+        }
+    }
+
+    return $results
+}
+
+function Write-Summary {
+    param([hashtable]$Results)
+
+    $divider = '  ' + ('-' * 40)
+
+    Write-Host ''
+    Write-Host $divider                                                  -ForegroundColor DarkGray
+    Write-Host '  Winget summary:'                                       -ForegroundColor White
+    Write-Host ('  [+] Installed : {0}' -f $Results.Installed.Count)   -ForegroundColor Green
+    Write-Host ('  [^] Upgraded  : {0}' -f $Results.Upgraded.Count)    -ForegroundColor Cyan
+    Write-Host ('  [x] Failed    : {0}' -f $Results.Failed.Count)      -ForegroundColor Red
+
+    foreach ($f in $Results.Failed) {
         Write-Host "       - $f" -ForegroundColor DarkRed
     }
+
+    Write-Host $divider -ForegroundColor DarkGray
 }
-Write-Host "  ----------------------------------------" -ForegroundColor DarkGray
+
+# ── Entry point ────────────────────────────────────────────────────────────────
+
+function Main {
+    $results = Sync-Apps $APPS
+    Write-Summary $results
+}
+
+Main

@@ -2,78 +2,126 @@
 #  config/symlinks.ps1 — Link configs to their correct paths
 # ============================================================
 
-# ── Admin check ──────────────────────────────────────────────
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# ── Admin check ────────────────────────────────────────────────────────────────
+
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+    [Security.Principal.WindowsBuiltInRole]::Administrator
+)
 if (-not $isAdmin) {
-    Write-Host "  Run as Administrator!" -ForegroundColor Red
+    Write-Host '  Run as Administrator!' -ForegroundColor Red
     exit 1
 }
 
-$DOTFILES = Split-Path $PSScriptRoot -Parent
+# ── Constants ──────────────────────────────────────────────────────────────────
 
-# ── Create config dirs if not exists ─────────────────────────
-$dirs = @(
-    "$DOTFILES\config\powershell"
-    "$DOTFILES\config\nvim"
-    "$DOTFILES\config\glzr"
+$DOTFILES     = Split-Path $PSScriptRoot -Parent
+$PROFILE_PATH = "C:\Users\$env:USERNAME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+$PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
+
+$SYMLINKS = @(
+    @{ Src = "$DOTFILES\config\powershell"; Dst = "$env:USERPROFILE\.config\powershell" },
+    @{ Src = "$DOTFILES\config\nvim";       Dst = "$env:LOCALAPPDATA\nvim"              },
+    @{ Src = "$DOTFILES\config\glzr";       Dst = "$env:USERPROFILE\.glzr"             }
 )
 
-foreach ($dir in $dirs) {
+# ── Output helpers ─────────────────────────────────────────────────────────────
+
+function Write-Linked  { param([string]$Path) Write-Host "  [+] linked:  $Path" -ForegroundColor Green }
+function Write-Skipped { param([string]$Path) Write-Host "  [~] skipped: $Path (already linked)" -ForegroundColor Gray }
+
+# ── Symlink helpers ────────────────────────────────────────────────────────────
+
+function Assert-ParentDir {
+    param([string]$Path)
+    $dir = Split-Path $Path -Parent
     if (-not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Host "  created: $dir" -ForegroundColor Cyan
     }
 }
 
-# ── Symlink function ──────────────────────────────────────────
-function Link($src, $dst) {
-    # Create parent dir if not exists
-    $dir = Split-Path $dst -Parent
-    if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-    }
-
+function Test-SymlinkValid {
+    param([string]$Src, [string]$Dst)
     # Get-Item -Force detects broken symlinks too (Test-Path misses them)
-    $existing = Get-Item $dst -Force -ErrorAction SilentlyContinue
-    if ($existing) {
-        if ($existing.LinkType -eq 'SymbolicLink' -and $existing.Target -eq $src) {
-            Write-Host "  [~] already: $dst" -ForegroundColor DarkGray
-            return
-        }
-        Remove-Item $dst -Recurse -Force
+    $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
+    return $item -and $item.LinkType -eq 'SymbolicLink' -and $item.Target -eq $Src
+}
+
+function New-Symlink {
+    param([string]$Src, [string]$Dst)
+
+    Assert-ParentDir $Dst
+
+    if (Test-SymlinkValid -Src $Src -Dst $Dst) {
+        Write-Skipped $Dst
+        return
     }
 
-    New-Item -ItemType SymbolicLink -Path $dst -Target $src -Force | Out-Null
-    Write-Host "  [+] linked: $dst" -ForegroundColor Green
+    $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
+    if ($existing) {
+        Remove-Item $Dst -Recurse -Force
+    }
+
+    New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force | Out-Null
+    Write-Linked $Dst
 }
 
-# ── Symlinks ──────────────────────────────────────────────────
+# ── Profile helpers ────────────────────────────────────────────────────────────
 
-# PowerShell config dir (user_profile.ps1 + dev.omp.json)
-Link "$DOTFILES\config\powershell" "$env:USERPROFILE\.config\powershell"
-
-# Neovim
-Link "$DOTFILES\config\nvim" "$env:LOCALAPPDATA\nvim"
-
-# GlazeWM
-Link "$DOTFILES\config\glzr" "$env:USERPROFILE\.glzr"
-
-# ── Write entry point to $PROFILE ────────────────────────────
-$userProfile = "C:\Users\$env:USERNAME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-$profileLine = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
-$profileDir  = Split-Path $userProfile -Parent
-
-if (-not (Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+function Assert-ProfileFile {
+    param([string]$Path)
+    $dir = Split-Path $Path -Parent
+    if (-not (Test-Path $dir))  { New-Item -ItemType Directory -Path $dir  -Force | Out-Null }
+    if (-not (Test-Path $Path)) { New-Item -ItemType File      -Path $Path -Force | Out-Null }
 }
 
-if (-not (Test-Path $userProfile)) {
-    New-Item -ItemType File -Path $userProfile -Force | Out-Null
+function Set-ProfileEntry {
+    param([string]$ProfilePath, [string]$Line)
+
+    Assert-ProfileFile $ProfilePath
+
+    $exists = Get-Content $ProfilePath -ErrorAction SilentlyContinue |
+              Select-String -SimpleMatch $Line
+
+    if ($exists) {
+        Write-Skipped $ProfilePath
+    } else {
+        Add-Content -Path $ProfilePath -Value $Line
+        Write-Linked $ProfilePath
+    }
 }
 
-if (-not (Get-Content $userProfile -ErrorAction SilentlyContinue | Select-String -SimpleMatch $profileLine)) {
-    Add-Content -Path $userProfile -Value $profileLine
-    Write-Host "  linked: $userProfile" -ForegroundColor Green
-} else {
-    Write-Host "  skipped: $userProfile (already linked)" -ForegroundColor Gray
+# ── Entry point ────────────────────────────────────────────────────────────────
+
+function Initialize-ConfigDirs {
+    Write-Host ''
+    Write-Host '  Config dirs:' -ForegroundColor White
+
+    foreach ($link in $SYMLINKS) {
+        if (-not (Test-Path $link.Src)) {
+            New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
+            Write-Host "  [+] created: $($link.Src)" -ForegroundColor Cyan
+        } else {
+            Write-Host "  [~] exists:  $($link.Src)" -ForegroundColor Gray
+        }
+    }
 }
+
+function Main {
+    Initialize-ConfigDirs
+
+    Write-Host ''
+    Write-Host '  Symlinks:' -ForegroundColor White
+
+    foreach ($link in $SYMLINKS) {
+        New-Symlink -Src $link.Src -Dst $link.Dst
+    }
+
+    Write-Host ''
+    Write-Host '  Profile:' -ForegroundColor White
+    Set-ProfileEntry -ProfilePath $PROFILE_PATH -Line $PROFILE_LINE
+}
+
+Main
