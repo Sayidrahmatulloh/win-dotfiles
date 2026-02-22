@@ -44,7 +44,7 @@ foreach ($tool in $tools) {
     Write-Host $tool -NoNewline -ForegroundColor White
     Write-Host "..." -NoNewline -ForegroundColor DarkGray
 
-    $isInstalled = scoop list $tool 2>&1 | Select-String --SimpleMatch $tool
+    $isInstalled = (scoop list 2>$null) -contains $tool
 
     if ($isInstalled) {
         Write-Host " upgrading" -ForegroundColor DarkCyan
