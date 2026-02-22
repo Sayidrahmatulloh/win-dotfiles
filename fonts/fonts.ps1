@@ -39,7 +39,7 @@ $scoopFonts = @(
 )
 
 foreach ($font in $scoopFonts) {
-    if (-not (scoop list $font 2>$null | Select-String $font)) {
+    if (-not (scoop list $font 2>&1 | Select-String $font)) {
         scoop install $font
         Write-Host "  installed: $font" -ForegroundColor Green
     } else {

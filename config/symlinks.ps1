@@ -4,23 +4,30 @@
 
 $DOTFILES = Split-Path $PSScriptRoot -Parent
 
+# ── Symlink function ──────────────────────────────────────────
 function Link($src, $dst) {
+    # Create parent dir if not exists
     $dir = Split-Path $dst -Parent
     if (-not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
+
     if (Test-Path $dst) {
         $item = Get-Item $dst -Force
         if ($item.LinkType -eq "SymbolicLink") {
             Remove-Item $dst -Force
         } else {
-            Write-Host "  skipped $dst (exists, not a symlink)" -ForegroundColor Yellow
-            return
+            # Backup existing folder/file
+            Rename-Item $dst "$dst.bak" -Force
+            Write-Host "  backed up: $dst -> $dst.bak" -ForegroundColor Yellow
         }
     }
+
     New-Item -ItemType SymbolicLink -Path $dst -Target $src -Force | Out-Null
-    Write-Host "  linked $dst" -ForegroundColor Green
+    Write-Host "  linked: $dst" -ForegroundColor Green
 }
+
+# ── Symlinks ──────────────────────────────────────────────────
 
 # PowerShell config dir (user_profile.ps1 + dev.omp.json)
 Link "$DOTFILES\config\powershell" "$env:USERPROFILE\.config\powershell"
@@ -31,10 +38,10 @@ Link "$DOTFILES\config\nvim" "$env:LOCALAPPDATA\nvim"
 # GlazeWM
 Link "$DOTFILES\config\glzr" "$env:USERPROFILE\.glzr"
 
-# Write entry point to $PROFILE
+# ── Write entry point to $PROFILE ────────────────────────────
 $profileLine = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
+$profileDir  = Split-Path $PROFILE -Parent
 
-$profileDir = Split-Path $PROFILE -Parent
 if (-not (Test-Path $profileDir)) {
     New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
 }
