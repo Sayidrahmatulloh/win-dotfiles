@@ -1,23 +1,17 @@
-# Windows
+# ── OS ────────────────────────────────────────────────────────
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+.DS_Store
 
-# Fonts (zip fayllar og'ir, kerak emas)
-fonts/files/*.zip
-
-# Secrets / shaxsiy ma'lumotlar
+# ── Secrets ───────────────────────────────────────────────────
 *.env
 secrets.*
 auth.json
 
-# Editor
+# ── Editor ────────────────────────────────────────────────────
 .vscode/
 *.tmp
 
-# Logs
+# ── Logs ──────────────────────────────────────────────────────
 *.log
-errors.log
-
-# OS
-.DS_Store

@@ -5,20 +5,14 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ── Admin check ────────────────────────────────────────────────────────────────
+. "$PSScriptRoot\..\lib\utils.ps1"
 
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator
-)
-if (-not $isAdmin) {
-    Write-Host '  Run as Administrator!' -ForegroundColor Red
-    exit 1
-}
+Assert-Admin
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 $DOTFILES     = Split-Path $PSScriptRoot -Parent
-$PROFILE_PATH = "C:\Users\$env:USERNAME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+$PROFILE_PATH = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 $PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
 
 $SYMLINKS = @(
@@ -27,24 +21,21 @@ $SYMLINKS = @(
     @{ Src = "$DOTFILES\config\glzr";       Dst = "$env:USERPROFILE\.glzr"             }
 )
 
-# ── Output helpers ─────────────────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
-function Write-Linked  { param([string]$Path) Write-Host "  [+] linked:  $Path" -ForegroundColor Green }
-function Write-Skipped { param([string]$Path) Write-Host "  [~] skipped: $Path (already linked)" -ForegroundColor Gray }
-
-# ── Symlink helpers ────────────────────────────────────────────────────────────
-
-function Assert-ParentDir {
-    param([string]$Path)
-    $dir = Split-Path $Path -Parent
-    if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+function Initialize-ConfigDirs {
+    param([array]$Links)
+    foreach ($link in $Links) {
+        if (-not (Test-Path $link.Src)) {
+            New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
+            Write-Done "created: $($link.Src)"
+        }
     }
 }
 
 function Test-SymlinkValid {
     param([string]$Src, [string]$Dst)
-    # Get-Item -Force detects broken symlinks too (Test-Path misses them)
+    # Get-Item -Force detects broken symlinks that Test-Path misses
     $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
     return $item -and $item.LinkType -eq 'SymbolicLink' -and $item.Target -eq $Src
 }
@@ -52,75 +43,53 @@ function Test-SymlinkValid {
 function New-Symlink {
     param([string]$Src, [string]$Dst)
 
-    Assert-ParentDir $Dst
+    $parentDir = Split-Path $Dst -Parent
+    if (-not (Test-Path $parentDir)) {
+        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+    }
 
     if (Test-SymlinkValid -Src $Src -Dst $Dst) {
-        Write-Skipped $Dst
+        Write-Skip $Dst
         return
     }
 
     $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-    if ($existing) {
-        Remove-Item $Dst -Recurse -Force
-    }
+    if ($existing) { Remove-Item $Dst -Recurse -Force }
 
     New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force | Out-Null
-    Write-Linked $Dst
-}
-
-# ── Profile helpers ────────────────────────────────────────────────────────────
-
-function Assert-ProfileFile {
-    param([string]$Path)
-    $dir = Split-Path $Path -Parent
-    if (-not (Test-Path $dir))  { New-Item -ItemType Directory -Path $dir  -Force | Out-Null }
-    if (-not (Test-Path $Path)) { New-Item -ItemType File      -Path $Path -Force | Out-Null }
+    Write-Done "linked: $Dst"
 }
 
 function Set-ProfileEntry {
     param([string]$ProfilePath, [string]$Line)
 
-    Assert-ProfileFile $ProfilePath
+    $dir = Split-Path $ProfilePath -Parent
+    if (-not (Test-Path $dir))          { New-Item -ItemType Directory -Path $dir          -Force | Out-Null }
+    if (-not (Test-Path $ProfilePath))  { New-Item -ItemType File      -Path $ProfilePath  -Force | Out-Null }
 
     $exists = Get-Content $ProfilePath -ErrorAction SilentlyContinue |
               Select-String -SimpleMatch $Line
 
     if ($exists) {
-        Write-Skipped $ProfilePath
+        Write-Skip $ProfilePath
     } else {
         Add-Content -Path $ProfilePath -Value $Line
-        Write-Linked $ProfilePath
+        Write-Done "profile: $ProfilePath"
     }
 }
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 
-function Initialize-ConfigDirs {
-    Write-Host ''
-    Write-Host '  Config dirs:' -ForegroundColor White
-
-    foreach ($link in $SYMLINKS) {
-        if (-not (Test-Path $link.Src)) {
-            New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
-            Write-Host "  [+] created: $($link.Src)" -ForegroundColor Cyan
-        } else {
-            Write-Host "  [~] exists:  $($link.Src)" -ForegroundColor Gray
-        }
-    }
-}
-
 function Main {
-    Initialize-ConfigDirs
+    Write-Section 'Config dirs:'
+    Initialize-ConfigDirs $SYMLINKS
 
-    Write-Host ''
-    Write-Host '  Symlinks:' -ForegroundColor White
-
+    Write-Section 'Symlinks:'
     foreach ($link in $SYMLINKS) {
         New-Symlink -Src $link.Src -Dst $link.Dst
     }
 
-    Write-Host ''
-    Write-Host '  Profile:' -ForegroundColor White
+    Write-Section 'Profile:'
     Set-ProfileEntry -ProfilePath $PROFILE_PATH -Line $PROFILE_LINE
 }
 

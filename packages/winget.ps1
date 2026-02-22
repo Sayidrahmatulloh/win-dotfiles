@@ -5,6 +5,8 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\..\lib\utils.ps1"
+
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 $APPS = @(
@@ -28,27 +30,6 @@ $APPS = @(
 )
 
 $WINGET_FLAGS = '--silent --accept-package-agreements --accept-source-agreements'
-
-# ── Output helpers ─────────────────────────────────────────────────────────────
-
-function Write-Step {
-    param([string]$Prefix, [string]$Name, [string]$Status)
-    Write-Host $Prefix       -NoNewline -ForegroundColor DarkGray
-    Write-Host " $Name"      -NoNewline -ForegroundColor White
-    Write-Host "... $Status"             -ForegroundColor DarkGray
-}
-
-function Write-Result {
-    param([string]$Icon, [string]$Label, [string]$Name, [ConsoleColor]$Color)
-    Write-Host "  $Icon $Label" -NoNewline -ForegroundColor $Color
-    Write-Host $Name             -ForegroundColor White
-}
-
-function Write-SectionHeader {
-    param([string]$Title)
-    Write-Host ''
-    Write-Host "  $Title" -ForegroundColor White
-}
 
 # ── Winget helpers ─────────────────────────────────────────────────────────────
 
@@ -75,7 +56,7 @@ function Update-App {
 function Sync-Apps {
     param([string[]]$Apps)
 
-    Write-SectionHeader 'Apps:'
+    Write-Section 'Apps:'
 
     $results = @{ Installed = @(); Upgraded = @(); Failed = @() }
     $total   = $Apps.Count
@@ -89,20 +70,20 @@ function Sync-Apps {
             Write-Step $prefix $app 'upgrading'
 
             if (Update-App $app) {
-                Write-Result '[^]' 'upgraded: ' $app Cyan
+                Write-Host "  [^] upgraded:  $app" -ForegroundColor Cyan
                 $results.Upgraded += $app
             } else {
-                Write-Result '[x]' 'failed:   ' $app Red
+                Write-Fail "upgrade failed: $app"
                 $results.Failed   += $app
             }
         } else {
             Write-Step $prefix $app 'installing'
 
             if (Install-App $app) {
-                Write-Result '[+]' 'installed:' $app Green
+                Write-Done "installed: $app"
                 $results.Installed += $app
             } else {
-                Write-Result '[x]' 'failed:   ' $app Red
+                Write-Fail "install failed: $app"
                 $results.Failed    += $app
             }
         }
@@ -111,30 +92,11 @@ function Sync-Apps {
     return $results
 }
 
-function Write-Summary {
-    param([hashtable]$Results)
-
-    $divider = '  ' + ('-' * 40)
-
-    Write-Host ''
-    Write-Host $divider                                                  -ForegroundColor DarkGray
-    Write-Host '  Winget summary:'                                       -ForegroundColor White
-    Write-Host ('  [+] Installed : {0}' -f $Results.Installed.Count)   -ForegroundColor Green
-    Write-Host ('  [^] Upgraded  : {0}' -f $Results.Upgraded.Count)    -ForegroundColor Cyan
-    Write-Host ('  [x] Failed    : {0}' -f $Results.Failed.Count)      -ForegroundColor Red
-
-    foreach ($f in $Results.Failed) {
-        Write-Host "       - $f" -ForegroundColor DarkRed
-    }
-
-    Write-Host $divider -ForegroundColor DarkGray
-}
-
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 function Main {
     $results = Sync-Apps $APPS
-    Write-Summary $results
+    Write-Summary 'Winget' $results
 }
 
 Main

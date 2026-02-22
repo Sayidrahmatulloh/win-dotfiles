@@ -11,30 +11,30 @@ $ErrorActionPreference = 'Stop'
 $DOTFILES = "$HOME\.win-dotfiles"
 $REPO     = 'https://github.com/sayidrahmatulloh/win-dotfiles'
 
-# ── Output helpers ─────────────────────────────────────────────────────────────
+# ── Output helpers (inline — lib not available before clone) ───────────────────
 
 function Write-Title   { param([string]$Msg) Write-Host "`n  ==> $Msg" -ForegroundColor Cyan   }
-function Write-Success { param([string]$Msg) Write-Host "  [+] $Msg"   -ForegroundColor Green  }
-function Write-Skipped { param([string]$Msg) Write-Host "  [~] $Msg"   -ForegroundColor Gray   }
-function Write-Warning { param([string]$Msg) Write-Host "  [!] $Msg"   -ForegroundColor Yellow }
+function Write-Done    { param([string]$Msg) Write-Host "  [+] $Msg"   -ForegroundColor Green  }
+function Write-Skip    { param([string]$Msg) Write-Host "  [~] $Msg"   -ForegroundColor Gray   }
+function Write-Warn    { param([string]$Msg) Write-Host "  [!] $Msg"   -ForegroundColor Yellow }
 
-# ── Step functions ─────────────────────────────────────────────────────────────
+# ── Steps ──────────────────────────────────────────────────────────────────────
 
 function Install-Scoop {
     Write-Title 'Setting up Scoop'
 
     if (Get-Command scoop -ErrorAction SilentlyContinue) {
-        Write-Skipped 'Scoop already installed'
+        Write-Skip 'Scoop already installed'
     } else {
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
         Invoke-RestMethod -Uri 'https://get.scoop.sh' | Invoke-Expression
-        Write-Success 'Scoop installed'
+        Write-Done 'Scoop installed'
     }
 
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         scoop install git
         $env:PATH += ';C:\Program Files\Git\cmd'
-        Write-Success 'Git installed'
+        Write-Done 'Git installed'
     }
 }
 
@@ -42,13 +42,13 @@ function Sync-Repo {
     Write-Title 'Cloning dotfiles'
 
     if (Test-Path $DOTFILES) {
-        Write-Warning 'Already exists — pulling latest...'
+        Write-Warn 'Already exists — pulling latest...'
         git -C $DOTFILES pull
     } else {
         git clone $REPO $DOTFILES
     }
 
-    Write-Success "Repo ready: $DOTFILES"
+    Write-Done "Repo ready: $DOTFILES"
 }
 
 function Install-ScoopPackages {
@@ -72,10 +72,10 @@ function Install-PSModules {
     $module = 'Microsoft.WinGet.CommandNotFound'
 
     if (Get-Module -ListAvailable -Name $module) {
-        Write-Skipped "$module already installed"
+        Write-Skip "$module already installed"
     } else {
         Install-Module $module -Repository PSGallery -Force -Scope CurrentUser
-        Write-Success "$module installed"
+        Write-Done "$module installed"
     }
 }
 
