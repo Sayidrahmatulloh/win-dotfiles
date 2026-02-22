@@ -8,12 +8,26 @@ $buckets = @("main", "extras", "nerd-fonts")
 Write-Host ""
 Write-Host "  Buckets:" -ForegroundColor White
 $installedBuckets = scoop bucket list 2>$null
+$bTotal = $buckets.Count
+$bi     = 0
 
 foreach ($bucket in $buckets) {
+    $bi++
+    $prefix = "  [{0}/{1}]" -f $bi, $bTotal
+    Write-Host "$prefix " -NoNewline -ForegroundColor DarkGray
+    Write-Host $bucket -NoNewline -ForegroundColor White
+    Write-Host "..." -NoNewline -ForegroundColor DarkGray
+
     if ($installedBuckets -notcontains $bucket) {
+        Write-Host " adding" -ForegroundColor DarkGray
         scoop bucket add $bucket 2>$null
-        Write-Host "  [+] added:    $bucket" -ForegroundColor Green
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  [+] added:    $bucket" -ForegroundColor Green
+        } else {
+            Write-Host "  [x] failed:   $bucket" -ForegroundColor Red
+        }
     } else {
+        Write-Host ""
         Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
     }
 }
