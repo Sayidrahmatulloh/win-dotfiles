@@ -1,0 +1,23 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Fonts (zip fayllar og'ir, kerak emas)
+fonts/files/*.zip
+
+# Secrets / shaxsiy ma'lumotlar
+*.env
+secrets.*
+auth.json
+
+# Editor
+.vscode/
+*.tmp
+
+# Logs
+*.log
+errors.log
+
+# OS
+.DS_Store
