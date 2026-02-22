@@ -2,6 +2,13 @@
 #  config/symlinks.ps1 — Link configs to their correct paths
 # ============================================================
 
+# ── Admin check ──────────────────────────────────────────────
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "  Run as Administrator!" -ForegroundColor Red
+    exit 1
+}
+
 $DOTFILES = Split-Path $PSScriptRoot -Parent
 
 # ── Symlink function ──────────────────────────────────────────
