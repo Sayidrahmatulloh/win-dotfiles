@@ -7,13 +7,14 @@ $buckets = @("main", "extras", "nerd-fonts")
 
 Write-Host ""
 Write-Host "  Buckets:" -ForegroundColor White
+$installedBuckets = scoop bucket list 2>$null
+
 foreach ($bucket in $buckets) {
-    $exists = scoop bucket list 2>$null | Out-String | Select-String --SimpleMatch $bucket
-    if ($exists) {
-        Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
-    } else {
+    if ($installedBuckets -notcontains $bucket) {
         scoop bucket add $bucket 2>$null
         Write-Host "  [+] added:    $bucket" -ForegroundColor Green
+    } else {
+        Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
     }
 }
 
