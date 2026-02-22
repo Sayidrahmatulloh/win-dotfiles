@@ -27,7 +27,6 @@ function Write-Summary {
     Write-Host $divider                                                   -ForegroundColor DarkGray
     Write-Host "  $Label summary:"                                        -ForegroundColor White
     Write-Host ('  [+] Installed : {0}' -f $Results.Installed.Count)    -ForegroundColor Green
-    Write-Host ('  [^] Upgraded  : {0}' -f $Results.Upgraded.Count)     -ForegroundColor Cyan
     Write-Host ('  [x] Failed    : {0}' -f $Results.Failed.Count)       -ForegroundColor Red
 
     foreach ($f in $Results.Failed) {

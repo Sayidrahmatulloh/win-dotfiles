@@ -89,21 +89,8 @@ function Sync-Tools {
         $prefix = '  [{0}/{1}]' -f $index, $total
 
         if (Test-ToolInstalled $tool) {
-            Write-Step $prefix $tool 'checking update'
-
-            switch (Update-Tool $tool) {
-                'upgraded' {
-                    Write-Host "  [^] upgraded:  $tool" -ForegroundColor Cyan
-                    $results.Upgraded += $tool
-                }
-                'latest' {
-                    Write-Skip "up to date: $tool"
-                }
-                'failed' {
-                    Write-Fail "update failed: $tool"
-                    $results.Failed += $tool
-                }
-            }
+            Write-Step $prefix $tool 'checking'
+            Write-Skip $tool
         } else {
             Write-Step $prefix $tool 'installing'
 

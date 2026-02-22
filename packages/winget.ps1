@@ -31,7 +31,7 @@ $APPS = @(
 
 $WINGET_FLAGS = '--silent --accept-package-agreements --accept-source-agreements'
 
-# ── Winget helpers ─────────────────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
 function Test-AppInstalled {
     param([string]$AppId)
@@ -45,11 +45,6 @@ function Install-App {
     return $LASTEXITCODE -eq 0
 }
 
-function Update-App {
-    param([string]$AppId)
-    Invoke-Expression "winget upgrade --id $AppId $WINGET_FLAGS *>`$null"
-    return $LASTEXITCODE -eq 0
-}
 
 # ── Core logic ─────────────────────────────────────────────────────────────────
 
@@ -58,7 +53,7 @@ function Sync-Apps {
 
     Write-Section 'Apps:'
 
-    $results = @{ Installed = @(); Upgraded = @(); Failed = @() }
+    $results = @{ Installed = @(); Failed = @() }
     $total   = $Apps.Count
     $index   = 0
 
@@ -67,15 +62,8 @@ function Sync-Apps {
         $prefix = '  [{0}/{1}]' -f $index, $total
 
         if (Test-AppInstalled $app) {
-            Write-Step $prefix $app 'upgrading'
-
-            if (Update-App $app) {
-                Write-Host "  [^] upgraded:  $app" -ForegroundColor Cyan
-                $results.Upgraded += $app
-            } else {
-                Write-Fail "upgrade failed: $app"
-                $results.Failed   += $app
-            }
+            Write-Step $prefix $app 'checking'
+            Write-Skip $app
         } else {
             Write-Step $prefix $app 'installing'
 
@@ -84,7 +72,7 @@ function Sync-Apps {
                 $results.Installed += $app
             } else {
                 Write-Fail "install failed: $app"
-                $results.Failed    += $app
+                $results.Failed += $app
             }
         }
     }
