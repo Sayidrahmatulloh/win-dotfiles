@@ -12,15 +12,9 @@ function Link($src, $dst) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
 
+    # Remove existing file or folder
     if (Test-Path $dst) {
-        $item = Get-Item $dst -Force
-        if ($item.LinkType -eq "SymbolicLink") {
-            Remove-Item $dst -Force
-        } else {
-            # Backup existing folder/file
-            Rename-Item $dst "$dst.bak" -Force
-            Write-Host "  backed up: $dst -> $dst.bak" -ForegroundColor Yellow
-        }
+        Remove-Item $dst -Recurse -Force
     }
 
     New-Item -ItemType SymbolicLink -Path $dst -Target $src -Force | Out-Null
