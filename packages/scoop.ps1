@@ -27,7 +27,7 @@ foreach ($bucket in $buckets) {
             Write-Host "  [x] failed:   $bucket" -ForegroundColor Red
         }
     } else {
-        Write-Host ""
+        Write-Host " installed" -ForegroundColor DarkGray
         Write-Host "  [~] already:  $bucket" -ForegroundColor DarkGray
     }
 }
