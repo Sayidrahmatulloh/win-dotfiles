@@ -7,8 +7,6 @@ $ErrorActionPreference = 'Stop'
 
 . "$PSScriptRoot\..\lib\utils.ps1"
 
-Assert-Admin
-
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 $DOTFILES     = Split-Path $PSScriptRoot -Parent
@@ -16,10 +14,10 @@ $PROFILE_PATH = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_prof
 $PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
 
 $SYMLINKS = @(
-    @{ Src = "$DOTFILES\config\powershell"; Dst = "$env:USERPROFILE\.config\powershell" },
-    @{ Src = "$DOTFILES\config\nvim";       Dst = "$env:LOCALAPPDATA\nvim"              },
-    @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm" },
-    @{ Src = "$DOTFILES\config\glzr\zebar";   Dst = "$env:USERPROFILE\.zebar"        }
+    @{ Src = "$DOTFILES\config\powershell";       Dst = "$env:USERPROFILE\.config\powershell" },
+    @{ Src = "$DOTFILES\config\nvim";             Dst = "$env:LOCALAPPDATA\nvim"               },
+    @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm"       },
+    @{ Src = "$DOTFILES\config\glzr\zebar";   Dst = "$env:USERPROFILE\.zebar"               }
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -27,10 +25,14 @@ $SYMLINKS = @(
 function Initialize-ConfigDirs {
     param([array]$Links)
     foreach ($link in $Links) {
-        if (-not (Test-Path $link.Src)) {
-            New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
-            Write-Done "created: $($link.Src)"
+        if (Test-Path $link.Src) {
+            Write-Skip "exists: $($link.Src)"
+            continue
         }
+        New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
+        # Add .gitkeep so git tracks the empty directory
+        New-Item -ItemType File -Path "$($link.Src)\.gitkeep" -Force | Out-Null
+        Write-Done "created: $($link.Src)"
     }
 }
 

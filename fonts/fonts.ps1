@@ -7,8 +7,6 @@ $ErrorActionPreference = 'Stop'
 
 . "$PSScriptRoot\..\lib\utils.ps1"
 
-Assert-Admin
-
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 $SYSTEM_FONTS = 'C:\Windows\Fonts'
@@ -25,7 +23,8 @@ $SCOOP_FONTS = @(
 
 function Test-ScoopFontInstalled {
     param([string]$Font)
-    return [bool](scoop list $Font 2>&1 | Select-String $Font)
+    $result = scoop info $Font 2>&1 | Out-String
+    return $result -match 'Installed'
 }
 
 function Install-FontFile {

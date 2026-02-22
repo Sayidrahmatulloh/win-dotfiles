@@ -2,19 +2,6 @@
 #  lib/utils.ps1 — Shared utilities for all scripts
 # ============================================================
 
-# ── Admin ──────────────────────────────────────────────────────────────────────
-
-function Assert-Admin {
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-        [Security.Principal.WindowsBuiltInRole]::Administrator
-    )
-    if (-not $isAdmin) {
-        Write-Fail 'This script must be run as Administrator!'
-        Write-Host '  Right-click PowerShell and select Run as Administrator.' -ForegroundColor Yellow
-        exit 1
-    }
-}
-
 # ── Output ─────────────────────────────────────────────────────────────────────
 
 function Write-Title   { param([string]$Msg) Write-Host "`n  ==> $Msg" -ForegroundColor Cyan    }
