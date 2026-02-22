@@ -38,7 +38,11 @@ function Install-FontFile {
         return
     }
 
-    Copy-Item -Path $FontPath -Destination $dest -Force
+    # 0x4   = FOF_SILENT        - no progress dialog
+    # 0x10  = FOF_NOCONFIRMATION - no replace prompt
+    # 0x400 = FOF_NOERRORUI     - no error dialogs
+    $shell = New-Object -ComObject Shell.Application
+    $shell.Namespace(0x14).CopyHere($FontPath, 0x4 -bor 0x10 -bor 0x400)
     Write-Done $name
 }
 
