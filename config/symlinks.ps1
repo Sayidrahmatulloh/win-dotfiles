@@ -11,6 +11,20 @@ if (-not $isAdmin) {
 
 $DOTFILES = Split-Path $PSScriptRoot -Parent
 
+# ── Create config dirs if not exists ─────────────────────────
+$dirs = @(
+    "$DOTFILES\config\powershell"
+    "$DOTFILES\config\nvim"
+    "$DOTFILES\config\glzr"
+)
+
+foreach ($dir in $dirs) {
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        Write-Host "  created: $dir" -ForegroundColor Cyan
+    }
+}
+
 # ── Symlink function ──────────────────────────────────────────
 function Link($src, $dst) {
     # Create parent dir if not exists
