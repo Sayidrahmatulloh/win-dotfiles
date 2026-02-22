@@ -33,13 +33,18 @@ function Link($src, $dst) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
 
-    # Remove existing file or folder
-    if (Test-Path $dst) {
+    # Get-Item -Force detects broken symlinks too (Test-Path misses them)
+    $existing = Get-Item $dst -Force -ErrorAction SilentlyContinue
+    if ($existing) {
+        if ($existing.LinkType -eq 'SymbolicLink' -and $existing.Target -eq $src) {
+            Write-Host "  [~] already: $dst" -ForegroundColor DarkGray
+            return
+        }
         Remove-Item $dst -Recurse -Force
     }
 
     New-Item -ItemType SymbolicLink -Path $dst -Target $src -Force | Out-Null
-    Write-Host "  linked: $dst" -ForegroundColor Green
+    Write-Host "  [+] linked: $dst" -ForegroundColor Green
 }
 
 # ── Symlinks ──────────────────────────────────────────────────
