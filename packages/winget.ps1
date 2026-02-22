@@ -15,7 +15,7 @@ $apps = @(
     "RamenSoftware.Windhawk",
     "Voidstar.FilePilot",
     "Microsoft.PowerToys",
-    "MartiCliment.UniGetUI",
+    "MartiCliment.UniGetUI"
 )
 
 
@@ -28,4 +28,3 @@ foreach ($app in $apps) {
         Write-Host "  failed: $app" -ForegroundColor Red
     }
 }
-
