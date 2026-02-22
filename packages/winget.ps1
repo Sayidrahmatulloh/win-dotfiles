@@ -29,8 +29,8 @@ foreach ($app in $apps) {
     Write-Host $app -NoNewline -ForegroundColor White
     Write-Host "..." -NoNewline -ForegroundColor DarkGray
 
-    $isInstalled = winget list --id $app --exact --accept-source-agreements 2>$null |
-                   Select-String --SimpleMatch $app
+    winget list --id $app --exact --accept-source-agreements *>$null
+    $isInstalled = $LASTEXITCODE -eq 0
 
     if ($isInstalled) {
         Write-Host " upgrading" -ForegroundColor DarkCyan
