@@ -33,7 +33,7 @@ foreach ($app in $apps) {
     $isInstalled = $LASTEXITCODE -eq 0
 
     if ($isInstalled) {
-        Write-Host " upgrading" -ForegroundColor DarkCyan
+        Write-Host " installed" -ForegroundColor DarkGray
         winget upgrade --id $app --silent --accept-package-agreements --accept-source-agreements *>$null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "  [^] upgraded: " -NoNewline -ForegroundColor Cyan
