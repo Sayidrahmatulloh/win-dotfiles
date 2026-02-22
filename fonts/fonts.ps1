@@ -30,23 +30,24 @@ function Test-ScoopFontInstalled {
 function Install-FontFile {
     param([string]$FontPath)
 
-    $name = Split-Path $FontPath -Leaf
-    $dest = "$SYSTEM_FONTS\$name"
+    $name    = Split-Path $FontPath -Leaf
+    $dest    = "$SYSTEM_FONTS\$name"
+    $regPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
+    $ext     = [System.IO.Path]::GetExtension($name).ToLower()
+    $regName = [System.IO.Path]::GetFileNameWithoutExtension($name)
 
     if (Test-Path $dest) {
         Write-Skip $name
         return
     }
 
-    # Remove existing font from registry if present (prevents replace dialog)
-    $regPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
-    $regKey  = Get-ItemProperty $regPath | Get-Member -Name "*$([System.IO.Path]::GetFileNameWithoutExtension($name))*" -ErrorAction SilentlyContinue
-    if ($regKey) {
-        Remove-ItemProperty -Path $regPath -Name $regKey.Name -ErrorAction SilentlyContinue
-    }
+    # Directly copy font file (admin required)
+    Copy-Item -Path $FontPath -Destination $dest -Force
 
-    $shell = New-Object -ComObject Shell.Application
-    $shell.Namespace(0x14).CopyHere($FontPath, 0x4 -bor 0x10 -bor 0x400)
+    # Register font in Windows registry
+    $fontType = if ($ext -eq '.otf') { 'OpenType' } else { 'TrueType' }
+    Set-ItemProperty -Path $regPath -Name "$regName ($fontType)" -Value $name
+
     Write-Done $name
 }
 
