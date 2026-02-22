@@ -9,9 +9,9 @@ function Assert-Admin {
         [Security.Principal.WindowsBuiltInRole]::Administrator
     )
     if (-not $isAdmin) {
-        Write-Warn 'Not admin — relaunching as Administrator...'
-        Start-Process pwsh -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-        exit
+        Write-Fail 'This script must be run as Administrator!'
+        Write-Host '  Right-click PowerShell and select Run as Administrator.' -ForegroundColor Yellow
+        exit 1
     }
 }
 

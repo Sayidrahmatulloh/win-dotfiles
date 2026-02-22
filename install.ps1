@@ -11,6 +11,17 @@ $ErrorActionPreference = 'Stop'
 $DOTFILES = "$HOME\.win-dotfiles"
 $REPO     = 'https://github.com/sayidrahmatulloh/win-dotfiles'
 
+# ── Admin check ───────────────────────────────────────────────────────────────
+
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+    [Security.Principal.WindowsBuiltInRole]::Administrator
+)
+if (-not $isAdmin) {
+    Write-Host '  Relaunching as Administrator...' -ForegroundColor Yellow
+    Start-Process pwsh -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    exit
+}
+
 # ── Output helpers (inline — lib not available before clone) ───────────────────
 
 function Write-Title   { param([string]$Msg) Write-Host "`n  ==> $Msg" -ForegroundColor Cyan   }
