@@ -9,91 +9,161 @@ $ErrorActionPreference = 'Stop'
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-$DOTFILES     = Split-Path $PSScriptRoot -Parent
+$DOTFILES = Split-Path $PSScriptRoot -Parent
 $PROFILE_PATH = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 $PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
 
 $SYMLINKS = @(
-    @{ Src = "$DOTFILES\config\powershell";       Dst = "$env:USERPROFILE\.config\powershell" },
-    @{ Src = "$DOTFILES\config\nvim";             Dst = "$env:LOCALAPPDATA\nvim"               },
-    @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm"       },
-    @{ Src = "$DOTFILES\config\glzr\zebar";   Dst = "$env:USERPROFILE\.zebar"               }
+  @{ Src = "$DOTFILES\config\powershell"; Dst = "$env:USERPROFILE\.config\powershell" }
+  @{ Src = "$DOTFILES\config\nvim"; Dst = "$env:LOCALAPPDATA\nvim" }
+  @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm" }
+  @{ Src = "$DOTFILES\config\glzr\zebar"; Dst = "$env:USERPROFILE\.glzr\zebar" }
 )
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-function Initialize-ConfigDirs {
-    param([array]$Links)
-    foreach ($link in $Links) {
-        if (Test-Path $link.Src) {
-            Write-Skip "exists: $($link.Src)"
-            continue
-        }
-        New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
-        # Add .gitkeep so git tracks the empty directory
-        New-Item -ItemType File -Path "$($link.Src)\.gitkeep" -Force | Out-Null
-        Write-Done "created: $($link.Src)"
-    }
+function Assert-Admin {
+  $principal = [Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+  $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+  if (-not $isAdmin) {
+    Write-Fail 'Symlink creation requires Administrator rights. Aborting.'
+    exit 1
+  }
 }
 
+# Ensure each Src directory exists in the dotfiles repo
+function Initialize-SourceDirs {
+  param([array]$Links)
+
+  foreach ($link in $Links) {
+    if (Test-Path $link.Src -PathType Leaf) {
+      Write-Fail "Source is a file, expected a directory: $($link.Src)"
+      continue
+    }
+
+    if (Test-Path $link.Src -PathType Container) {
+      Write-Skip "exists: $($link.Src)"
+      continue
+    }
+
+    New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
+    New-Item -ItemType File -Path "$($link.Src)\.gitkeep" -Force | Out-Null
+    Write-Done "created: $($link.Src)"
+  }
+}
+
+# Returns $true when $Dst is a symlink pointing exactly to $Src
 function Test-SymlinkValid {
-    param([string]$Src, [string]$Dst)
-    # Get-Item -Force detects broken symlinks that Test-Path misses
-    $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-    return $item -and $item.LinkType -eq 'SymbolicLink' -and $item.Target -eq $Src
+  param([string]$Src, [string]$Dst)
+
+  $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
+  if (-not $item -or $item.LinkType -ne 'SymbolicLink') { return $false }
+
+  # $item.Target can be [string[]] on Windows — normalise to scalar
+  return (@($item.Target)[0] -eq $Src)
 }
 
 function New-Symlink {
-    param([string]$Src, [string]$Dst)
+  param(
+    [string]$Src,
+    [string]$Dst,
+    [System.Collections.Generic.List[string]]$Linked,
+    [System.Collections.Generic.List[string]]$Failed
+  )
 
-    $parentDir = Split-Path $Dst -Parent
-    if (-not (Test-Path $parentDir)) {
-        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+  # Ensure parent directory exists
+  $parent = Split-Path $Dst -Parent
+  if (-not (Test-Path $parent)) {
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
+  }
+
+  # Already correct — nothing to do
+  if (Test-SymlinkValid -Src $Src -Dst $Dst) {
+    Write-Skip "already linked: $Dst"
+    return
+  }
+
+  $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
+
+  if ($existing) {
+    if ($existing.LinkType -eq 'SymbolicLink') {
+      # Stale symlink pointing somewhere else — safe to remove
+      Remove-Item $Dst -Force
     }
-
-    if (Test-SymlinkValid -Src $Src -Dst $Dst) {
-        Write-Skip $Dst
+    else {
+      # Real directory or file — only remove if empty to avoid data loss
+      $children = Get-ChildItem $Dst -Force -ErrorAction SilentlyContinue
+      if ($children) {
+        Write-Fail "non-empty directory exists, skipping to avoid data loss: $Dst"
+        $Failed.Add($Dst)
         return
+      }
+      Remove-Item $Dst -Recurse -Force
+      Write-Warn "removed empty directory: $Dst"
     }
+  }
 
-    $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-    if ($existing) { Remove-Item $Dst -Recurse -Force }
-
+  try {
     New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force | Out-Null
     Write-Done "linked: $Dst"
+    $Linked.Add($Dst)
+  }
+  catch {
+    Write-Fail "link failed: $Dst — $_"
+    $Failed.Add($Dst)
+  }
 }
 
+# Ensure the PowerShell profile sources our user_profile.ps1
 function Set-ProfileEntry {
-    param([string]$ProfilePath, [string]$Line)
+  param([string]$ProfilePath, [string]$Line)
 
-    $dir = Split-Path $ProfilePath -Parent
-    if (-not (Test-Path $dir))          { New-Item -ItemType Directory -Path $dir          -Force | Out-Null }
-    if (-not (Test-Path $ProfilePath))  { New-Item -ItemType File      -Path $ProfilePath  -Force | Out-Null }
+  $dir = Split-Path $ProfilePath -Parent
+  if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir         -Force | Out-Null }
+  if (-not (Test-Path $ProfilePath)) { New-Item -ItemType File      -Path $ProfilePath -Force | Out-Null }
 
-    $exists = Get-Content $ProfilePath -ErrorAction SilentlyContinue |
-              Select-String -SimpleMatch $Line
+  $content = Get-Content $ProfilePath -Raw -ErrorAction SilentlyContinue
 
-    if ($exists) {
-        Write-Skip $ProfilePath
-    } else {
-        Add-Content -Path $ProfilePath -Value $Line
-        Write-Done "profile: $ProfilePath"
-    }
+  $alreadyPresent = $content -and (
+    $content -split "`n" | Where-Object { $_.Trim() -eq $Line.Trim() }
+  )
+
+  if ($alreadyPresent) {
+    Write-Skip "profile entry already present: $ProfilePath"
+    return
+  }
+
+  Add-Content -Path $ProfilePath -Value $Line
+  Write-Done "profile entry added: $ProfilePath"
 }
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 function Main {
-    Write-Section 'Config dirs:'
-    Initialize-ConfigDirs $SYMLINKS
+  Assert-Admin
 
-    Write-Section 'Symlinks:'
-    foreach ($link in $SYMLINKS) {
-        New-Symlink -Src $link.Src -Dst $link.Dst
-    }
+  Write-Section 'Source dirs:'
+  Initialize-SourceDirs $SYMLINKS
 
-    Write-Section 'Profile:'
-    Set-ProfileEntry -ProfilePath $PROFILE_PATH -Line $PROFILE_LINE
+  Write-Section 'Symlinks:'
+  $linked = [System.Collections.Generic.List[string]]::new()
+  $failed = [System.Collections.Generic.List[string]]::new()
+
+  foreach ($link in $SYMLINKS) {
+    New-Symlink -Src $link.Src -Dst $link.Dst -Linked $linked -Failed $failed
+  }
+
+  Write-Section 'Profile:'
+  Set-ProfileEntry -ProfilePath $PROFILE_PATH -Line $PROFILE_LINE
+
+  Write-Summary 'Symlinks' @{
+    Installed = $linked
+    Upgraded  = [System.Collections.Generic.List[string]]::new()
+    Latest    = [System.Collections.Generic.List[string]]::new()
+    Failed    = $failed
+  }
 }
 
 Main
