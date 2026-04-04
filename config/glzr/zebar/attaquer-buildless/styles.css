@@ -108,46 +108,54 @@
   from {
     transform: scale(1);
   }
+
   50% {
     transform: scale(0.8);
   }
+
   to {
     transform: scale(1);
   }
 }
+
 @keyframes anticlockwise {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(-90deg);
   }
 }
+
 @keyframes clockwise {
   from {
     transform: rotate(-90deg);
   }
+
   to {
     transform: rotate(0deg);
   }
 }
+
 @keyframes hoverbutton {
-  from {
-  }
+  from {}
+
   to {
     background: #aeaeae50;
     box-shadow: 0 -1px 1px #9e9e9e44,
-                0 1px 1px #24242455;
+      0 1px 1px #24242455;
   }
 }
+
 @keyframes unhoverbutton {
   from {
     background: #aeaeae50;
     box-shadow: 0 -1px 1px #9e9e9e44,
-                0 1px 1px #24242455;
+      0 1px 1px #24242455;
   }
-  to {
-  }
+
+  to {}
 }
 
 
@@ -159,6 +167,7 @@ body {
   overflow: hidden;
   background: #1c1c1ccc;
 }
+
 html,
 body,
 #root {
@@ -176,6 +185,7 @@ span {
   align-items: center;
   user-select: none;
 }
+
 button {
   display: flex;
   align-items: center;
@@ -192,17 +202,20 @@ button {
   -moz-border-radius: 4px;
   -ms-border-radius: 4px;
   -o-border-radius: 4px;
+
   &:active {
     .content {
       animation: appear 0.2s ease;
       -webkit-animation: appear 0.2s ease;
-}
+    }
   }
 }
+
 button:hover {
   animation: hoverbutton 0.1s ease forwards;
   -webkit-animation: hoverbutton 0.1s ease forwards;
 }
+
 img {
   /* border: 1px solid white; */
   /* user-select: none; */
@@ -254,6 +267,7 @@ img {
   font-size: 16px;
   padding: 1px 0 0 5px;
 }
+
 .search {
   width: 24px;
   padding: 1px 2px 2px;
@@ -274,35 +288,45 @@ img {
   -ms-transition: background 0.5s ease, width 0.5s ease;
   -o-transition: background 0.5s ease, width 0.5s ease;
 }
+
 .workspace-icon {
   display: inline-block;
   pointer-events: none;
 }
+
 /* .workspace:active .workspace-content {
   # animation: appear 0.2s ease;
 } */
 .displayed {
   background: #aeaeae33;
   box-shadow: 0 -1px 1px #9e9e9e44,
-              0 1px 1px #24242455;
+    0 1px 1px #24242455;
 }
+
 .focused {
   span {
     animation: appear 0.2s ease;
     -webkit-animation: appear 0.2s ease;
   }
 }
-# { /* spotify */
-  span{
+
+# {
+
+  /* spotify */
+  span {
     text-indent: -4px;
   }
 }
-# { /* discord */
-  span{
+
+# {
+
+  /* discord */
+  span {
     text-indent: -7px;
     font-size: 12px;
   }
 }
+
 .i-brave {
   margin-top: 4px;
 }
@@ -311,15 +335,18 @@ img {
   width: 24px;
   justify-content: center;
 }
+
 .tiling-direction {
   text-indent: -3px;
   font-size: 13px;
 }
+
 .horizontal {
   span {
     animation: clockwise 0.2s ease-in-out forwards;
   }
 }
+
 .vertical {
   span {
     animation: anticlockwise 0.2s ease-in-out forwards;
@@ -342,6 +369,7 @@ img {
   width: 19px;
   height: 19px;
 }
+
 .element {
   display: flex;
   align-items: center;
@@ -352,9 +380,10 @@ img {
   height: 22px;
   border-radius: 4px;
 }
+
 .focus {
   background: #aeaeae33;
-  box-shadow:    0 -1px 1px #9e9e9e44,    0 1px 1px #24242455;
+  box-shadow: 0 -1px 1px #9e9e9e44, 0 1px 1px #24242455;
 }
 
 .spotify {
@@ -363,6 +392,7 @@ img {
   white-space: nowrap;
   overflow: hidden;
 }
+
 .spotify:hover {
   max-width: 400px;
 }
@@ -373,22 +403,28 @@ img {
 .low-usage {
   color: var(--green);
 }
+
 .medium-usage {
   color: var(--yellow);
 }
+
 .high-usage {
   color: var(--orange);
 }
+
 .extreme-usage {
   color: var(--b-red);
 }
+
 .cpu {
   width: 3.1rem;
 }
-.i-cpu{
+
+.i-cpu {
   font-size: 13px;
   width: 14px;
 }
+
 .cpu-bar {
   justify-content: center;
   align-items: center;
@@ -404,33 +440,38 @@ img {
   text-align: center;
   position: relative;
   padding-left: 2px;
+
   .i {
     width: 14px;
     font-size: 14px;
     margin-left: 2px;
   }
+
   .mem-content:active {
     animation: appear 0.2s ease;
     -webkit-animation: appear 0.2s ease;
-}
+  }
+
   &:hover {
     .mem-bar {
       transform: translateY(200%);
       opacity: 0;
-      -webkit-transform: translateY(200%)    ;
-      -moz-transform: translateY(200%)    ;
-      -ms-transform: translateY(200%)    ;
-      -o-transform: translateY(200%)    ;
+      -webkit-transform: translateY(200%);
+      -moz-transform: translateY(200%);
+      -ms-transform: translateY(200%);
+      -o-transform: translateY(200%);
     }
+
     .labels {
       transform: translateY(0%);
       opacity: 1;
-      -webkit-transform: translateY(0%)    ;
-      -moz-transform: translateY(0%)    ;
-      -ms-transform: translateY(0%)    ;
-      -o-transform: translateY(0%)    ;
+      -webkit-transform: translateY(0%);
+      -moz-transform: translateY(0%);
+      -ms-transform: translateY(0%);
+      -o-transform: translateY(0%);
     }
   }
+
   .mem-bar {
     /* border: 1px solid white; */
     display: flex;
@@ -451,7 +492,8 @@ img {
     -moz-transition: transform 0.3s ease, opacity 0.3s ease;
     -ms-transition: transform 0.3s ease, opacity 0.3s ease;
     -o-transition: transform 0.3s ease, opacity 0.3s ease;
-}
+  }
+
   .labels {
     /* border: 1px solid white; */
     position: absolute;
@@ -461,15 +503,16 @@ img {
     opacity: 0;
     transform: translateY(-100%);
     transition: transform 0.3s ease, opcity 0.3s ease;
-    -webkit-transform: translateY(-100%)  ;
-    -moz-transform: translateY(-100%)  ;
-    -ms-transform: translateY(-100%)  ;
-    -o-transform: translateY(-100%)  ;
+    -webkit-transform: translateY(-100%);
+    -moz-transform: translateY(-100%);
+    -ms-transform: translateY(-100%);
+    -o-transform: translateY(-100%);
     -webkit-transition: transform 0.3s ease, opcity 0.3s ease;
     -moz-transition: transform 0.3s ease, opcity 0.3s ease;
     -ms-transition: transform 0.3s ease, opcity 0.3s ease;
     -o-transition: transform 0.3s ease, opcity 0.3s ease;
   }
+
   .label {
     display: flex;
     gap: 3px;
@@ -480,6 +523,7 @@ img {
 
 .weather {
   color: var(--b-yellow);
+
   i {
     color: var(--b-yellow);
     font-size: 16px;
@@ -490,30 +534,35 @@ img {
   color: var(--blue);
   padding: 0 5px 0 5px;
 
-  .ii{
+  .ii {
     font-size: 7px;
     width: 0;
   }
+
   .labels {
     width: 3rem;
     display: flex;
     flex-direction: column;
   }
+
   .label {
     display: flex;
     gap: 3px;
     justify-content: space-between;
     font-size: 8px;
   }
+
   .net-line {
     width: 2.7rem;
     justify-content: end;
   }
 }
+
 .i-wifi {
   margin-bottom: 0px;
   margin-left: -4px;
 }
+
 .i-eth {
   margin: 0 1px 0px -3px;
 }
