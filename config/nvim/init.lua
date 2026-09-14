@@ -91,6 +91,11 @@ if vim.g.vscode then
     { "n", "<leader>tt",       "workbench.action.terminal.toggleTerminal" }, -- Toggle
     { "n", "<leader>tn",       "workbench.action.terminal.new" },            -- New terminal
     { "n", "<leader>tf",       "workbench.action.terminal.focus" },          -- Focus terminal
+    { "n", "<leader>tk",       "workbench.action.terminal.kill" },           -- Kill terminal
+    { "n", "<leader>tl",       "workbench.action.terminal.clear" },          -- Clear terminal
+    { "n", "<leader>ta",       "workbench.action.terminal.rename" },         -- Rename terminal
+    { "n", "<leader>ts",       "workbench.action.terminal.split" },          -- Split terminal
+    { "n", "<leader>ht",       "workbench.action.togglePanel" },             -- Toggle terminal
 
     -- Smart word navigation & windows
     { "n", "w",                "cursorWordPartRight" },               -- Word part right
