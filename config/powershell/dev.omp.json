@@ -2,81 +2,76 @@
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "blocks": [
     {
-      "segments": [
-        {
-          "foreground": "#ff8800",
-          "style": "diamond",
-          "template": "{{ round .PhysicalPercentUsed .Precision }}% ",
-          "type": "sysinfo"
-        },
-        {
-          "foreground": "#ff8800",
-          "style": "diamond",
-          "template": "{{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB ",
-          "type": "sysinfo"
-        }
-      ],
-      "type": "rprompt"
-    },
-    {
       "alignment": "left",
       "segments": [
         {
-          "foreground": "#ff8800",
-          "options": {
-            "macos": "mac"
-          },
+          "foreground": "#FFBD00",
           "style": "plain",
-          "template": "{{ if .WSL }}WSL at {{ end }}{{.Icon}} ",
-          "type": "os"
-        },
-        {
-          "foreground": "#ff8800",
-          "style": "plain",
-          "template": "$",
-          "type": "text"
-        },
-        {
-          "foreground": "#ff8800",
-          "style": "plain",
-          "template": "{{ .UserName }}:",
+          "template": "{{ .UserName }}'s ",
           "type": "session"
         },
         {
-          "foreground": "#62c0ff",
+          "foreground": "#00C6F7",
           "options": {
-            "folder_separator_icon": "/",
             "style": "folder"
           },
           "style": "plain",
+          "template": "{{ .Path }}/ ",
           "type": "path"
         },
         {
-          "foreground": "#62c0ff",
-          "foreground_templates": [
-            "{{ if or (.Working.Changed) (.Staging.Changed) }}#6287ff{{ end }}",
-            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#7f62ff{{ end }}",
-            "{{ if gt .Ahead 0 }}#9962ff{{ end }}",
-            "{{ if gt .Behind 0 }}#c062ff{{ end }}"
-          ],
-          "options": {
-            "branch_template": "{{ trunc 25 .Branch }}",
-            "fetch_status": true,
-            "fetch_upstream_icon": true
-          },
+          "foreground": "#F62F2E",
           "style": "plain",
-          "template": "<#ff8800>on</> {{.UpstreamIcon }}  {{ .HEAD }} {{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
+          "template": "<#ffffff>on</> {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }} ",
           "type": "git"
         },
         {
-          "foreground": "#ff8800",
+          "foreground": "#98C379",
           "style": "plain",
-          "template": "\u276f ",
+          "template": "<#ffffff>via</> \ue781 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} ",
+          "type": "node"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "right",
+      "segments": [
+        {
+          "foreground": "#85C980",
+          "style": "diamond",
+          "template": "RAM:{{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB ",
+          "trailing_diamond": " ",
+          "type": "sysinfo"
+        },
+        {
+          "foreground": "#ffffff",
+          "leading_diamond": "\u250b",
+          "options": {
+            "style": "roundrock",
+            "threshold": 0
+          },
+          "style": "diamond",
+          "template": " {{ .FormattedMs }} ",
+          "type": "executiontime"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "#FFBD00",
+          "style": "plain",
+          "template": "\u2b9e ",
           "type": "text"
         }
       ],
       "type": "prompt"
     }
   ],
+  "final_space": true,
   "version": 4
 }

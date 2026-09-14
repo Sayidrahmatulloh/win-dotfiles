@@ -8,7 +8,11 @@ $ErrorActionPreference = 'Stop'
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-$DOTFILES = "$HOME\win-dotfiles"
+$DOTFILES = if ($PSScriptRoot -and (Test-Path "$PSScriptRoot\lib\utils.ps1")) {
+  $PSScriptRoot
+} else {
+  "$HOME\win-dotfiles"
+}
 $REPO = 'https://github.com/sayidrahmatulloh/win-dotfiles'
 
 # ── Minimal inline helpers (lib not yet available) ────────────────────────────
@@ -37,7 +41,7 @@ function Assert-Admin {
   $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
   if (-not $isAdmin) {
-    _fail 'Run as Administrator (right-click → Run as Administrator).'
+    _warn 'Running without Administrator rights — some machine-wide apps may require elevation.'
   }
 }
 
@@ -120,6 +124,25 @@ function Main {
 
   Write-Stage '🔗' 'Symlinks'
   Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }
+
+  Write-Stage '🎨' 'Build Zebar Widgets'
+  Invoke-Step 'Build Zebar widget' {
+    $widgetDir = "$DOTFILES\config\glzr\zebar\attaquer-solid-ts"
+    if (Test-Path "$widgetDir\package.json") {
+      if (Get-Command bun -ErrorAction SilentlyContinue) {
+        bun --cwd $widgetDir install
+        bun --cwd $widgetDir run build
+      }
+      elseif (Get-Command pnpm -ErrorAction SilentlyContinue) {
+        pnpm --dir $widgetDir install
+        pnpm --dir $widgetDir run build
+      }
+      elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+        npm --prefix $widgetDir install
+        npm --prefix $widgetDir run build
+      }
+    }
+  }
 
   # ── Final banner ──────────────────────────────────────────────────────────
   Write-Host ''

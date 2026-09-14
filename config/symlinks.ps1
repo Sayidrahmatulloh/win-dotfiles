@@ -10,7 +10,13 @@ $ErrorActionPreference = 'Stop'
 # ── Constants ──────────────────────────────────────────────────────────────────
 
 $DOTFILES = Split-Path $PSScriptRoot -Parent
-$PROFILE_PATH = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+$PROFILE_PATH = if ($PROFILE -and (Test-Path (Split-Path $PROFILE -Parent))) {
+  $PROFILE
+} elseif ($PROFILE.CurrentUserCurrentHost) {
+  $PROFILE.CurrentUserCurrentHost
+} else {
+  "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+}
 $PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
 
 $SYMLINKS = @(
@@ -22,14 +28,13 @@ $SYMLINKS = @(
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-function Assert-Admin {
+function Check-Admin {
   $principal = [Security.Principal.WindowsPrincipal] `
     [Security.Principal.WindowsIdentity]::GetCurrent()
   $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
   if (-not $isAdmin) {
-    Write-Fail 'Symlink creation requires Administrator rights. Aborting.'
-    exit 1
+    Write-Warn 'Running without Administrator rights. Junctions will be used for directory links.'
   }
 }
 
@@ -54,15 +59,17 @@ function Initialize-SourceDirs {
   }
 }
 
-# Returns $true when $Dst is a symlink pointing exactly to $Src
+# Returns $true when $Dst is a symlink or junction pointing exactly to $Src
 function Test-SymlinkValid {
   param([string]$Src, [string]$Dst)
 
   $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-  if (-not $item -or $item.LinkType -ne 'SymbolicLink') { return $false }
+  if (-not $item -or ($item.LinkType -ne 'SymbolicLink' -and $item.LinkType -ne 'Junction')) { return $false }
 
   # $item.Target can be [string[]] on Windows — normalise to scalar
-  return (@($item.Target)[0] -eq $Src)
+  $target = (@($item.Target)[0]).TrimEnd('\')
+  $normalizedSrc = $Src.TrimEnd('\')
+  return ($target -eq $normalizedSrc)
 }
 
 function New-Symlink {
@@ -88,25 +95,34 @@ function New-Symlink {
   $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
 
   if ($existing) {
-    if ($existing.LinkType -eq 'SymbolicLink') {
-      # Stale symlink pointing somewhere else — safe to remove
+    if ($existing.LinkType -in @('SymbolicLink', 'Junction')) {
+      # Stale link pointing somewhere else — safe to remove
       Remove-Item $Dst -Force
     }
     else {
-      # Real directory or file — only remove if empty to avoid data loss
-      $children = Get-ChildItem $Dst -Force -ErrorAction SilentlyContinue
-      if ($children) {
-        Write-Fail "non-empty directory exists, skipping to avoid data loss: $Dst"
+      # Real directory or file — safely backup instead of skipping
+      $ts = (Get-Date).ToString('yyyyMMdd_HHmmss')
+      $bak = "${Dst}.bak_${ts}"
+      try {
+        Move-Item -Path $Dst -Destination $bak -Force
+        Write-Warn "backed up existing folder: $Dst -> $bak"
+      }
+      catch {
+        Write-Fail "could not backup existing folder: $Dst"
         $Failed.Add($Dst)
         return
       }
-      Remove-Item $Dst -Recurse -Force
-      Write-Warn "removed empty directory: $Dst"
     }
   }
 
   try {
-    New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force | Out-Null
+    # Try SymbolicLink first, fallback to Junction if unprivileged
+    try {
+      New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force -ErrorAction Stop | Out-Null
+    }
+    catch {
+      New-Item -ItemType Junction -Path $Dst -Target $Src -Force -ErrorAction Stop | Out-Null
+    }
     Write-Done "linked: $Dst"
     $Linked.Add($Dst)
   }
@@ -142,7 +158,7 @@ function Set-ProfileEntry {
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 function Main {
-  Assert-Admin
+  Check-Admin
 
   Write-Section 'Source dirs:'
   Initialize-SourceDirs $SYMLINKS

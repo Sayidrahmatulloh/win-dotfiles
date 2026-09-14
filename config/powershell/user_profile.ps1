@@ -27,7 +27,9 @@ Set-PSReadLineOption -EditMode Vi
 Set-PSReadLineOption -BellStyle None
 Set-PSReadLineOption -ViModeIndicator Cursor
 Set-PSReadLineKeyHandler -Chord 'Ctrl+d' -Function DeleteChar
-Set-PSReadLineOption -PredictionSource History
+if ($Host.UI.SupportsVirtualTerminal) {
+  try { Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue } catch {}
+}
 
 # Fzf
 Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+f' -PSReadlineChordReverseHistory 'Ctrl+r'
@@ -43,7 +45,7 @@ else {
 }
 
 $env:CC = 'gcc'
-$env:CXX = 'clang++'   # Fix: was 'clang', which is the C compiler — CXX must be the C++ compiler
+$env:CXX = 'g++'
 
 # ── Aliases ───────────────────────────────────────────────────
 
@@ -57,8 +59,17 @@ Set-Alias -Name cs    -Value Clear-System
 Set-Alias -Name su    -Value Update-Scoop
 
 # Dynamic git bin path (works on any machine)
-$gitBin = "$env:USERPROFILE\scoop\apps\git\current\usr\bin"
-if (Test-Path $gitBin) {
+$gitCmd = Get-Command 'git' -ErrorAction SilentlyContinue
+if ($gitCmd) {
+  $gitRoot = Split-Path (Split-Path $gitCmd.Source -Parent) -Parent
+  $gitBin = "$gitRoot\usr\bin"
+  if (Test-Path $gitBin) {
+    Set-Alias -Name tig  -Value "$gitBin\tig.exe"
+    Set-Alias -Name less -Value "$gitBin\less.exe"
+  }
+}
+elseif (Test-Path "$env:USERPROFILE\scoop\apps\git\current\usr\bin") {
+  $gitBin = "$env:USERPROFILE\scoop\apps\git\current\usr\bin"
   Set-Alias -Name tig  -Value "$gitBin\tig.exe"
   Set-Alias -Name less -Value "$gitBin\less.exe"
 }
