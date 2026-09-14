@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/glzr-io/glazewm/main/resources/config-schema.json
+
 general:
   # Commands to run when the WM has started. This is useful for running a
   # script or launching another application.
@@ -216,7 +218,7 @@ keybindings:
 
   # Change tiling direction. This determines where new tiling windows will
   # be inserted.
-  - command: ["toggle-tiling-direction"]
+  - commands: ["toggle-tiling-direction"]
     bindings: ["alt+v"]
 
   # Change focus from tiling windows -> floating -> fullscreen.
@@ -241,7 +243,7 @@ keybindings:
 
   # Close focused window.
   - commands: ["close"]
-    bindings: ["alt+shift+q"]
+    bindings: ["alt+q"]
 
   # Kill GlazeWM process safely.
   - commands: ["wm-exit"]
