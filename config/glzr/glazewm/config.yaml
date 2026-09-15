@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/glzr-io/glazewm/main/resources/config-schema.json
-
 general:
   # Commands to run when the WM has started. This is useful for running a
   # script or launching another application.
@@ -33,13 +31,13 @@ general:
   # - 'cloak': Recommended. Hides windows with no animation.
   # - 'hide': Legacy method (v3.5 and earlier) that has a brief animation,
   # but has stability issues with some apps.
-  hide_method: "cloak"
+  hide_method: "hide"
 
   # Affects which windows get shown in the native Windows taskbar. Has no
   # effect if `hide_method: 'hide'`.
   # - 'true': Show all windows (regardless of workspace).
   # - 'false': Only show windows from the currently shown workspaces.
-  show_all_in_taskbar: false
+  show_all_in_taskbar: true
 
 gaps:
   # Whether to scale the gaps with the DPI of the monitor.
@@ -92,7 +90,7 @@ window_effects:
       enabled: false
     corner_style:
       enabled: false
-      style: "square"
+      style: "rounded"
     transparency:
       enabled: false
       opacity: "0%"
@@ -119,7 +117,7 @@ window_behavior:
       maximized: true
 
       # Whether to show fullscreen windows as always on top.
-      shown_on_top: false
+      shown_on_top: true
 
 workspaces:
   - name: "1"
