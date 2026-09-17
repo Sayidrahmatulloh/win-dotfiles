@@ -140,6 +140,7 @@ if vim.g.vscode then
     { "n", "<leader>rf",       "editor.action.refactor" },               -- Refactor
     { "n", "<leader>qf",       "editor.action.quickFix" },               -- Quick fix
     { "n", "<leader>sg",       "editor.action.triggerSuggest" },         -- Suggestions
+    { "n", "<leader>rq",       "rest-client.request" },                  -- REST client request
 
     -- Line editing & code maintenance
     { "n", "<leader>lu",       "editor.action.copyLinesUpAction" },   -- Copy lines up
