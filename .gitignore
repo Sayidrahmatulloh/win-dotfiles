@@ -1,17 +1,48 @@
-# ── OS ────────────────────────────────────────────────────────
+# ── OS & System ────────────────────────────────────────────────
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
 
-# ── Secrets ───────────────────────────────────────────────────
+# ── Secrets & Credentials ──────────────────────────────────────
 *.env
+*.env.*
 secrets.*
 auth.json
+*.pem
+*.key
 
-# ── Editor ────────────────────────────────────────────────────
+# ── Node.js / JavaScript ──────────────────────────────────────
+node_modules/
+dist/
+build/
+.npm/
+.turbo/
+.cache/
+
+# Unused package manager lockfiles (Bun is preferred)
+package-lock.json
+pnpm-lock.yaml
+
+# ── Fonts & Heavy Binaries ─────────────────────────────────────
+# Heavy TTF fonts in web widgets (system fonts used instead)
+**/CaskaydiaMonoNerdFont-Regular.ttf
+
+# Proprietary / commercial fonts (prevent license/DMCA issues)
+fonts/files/monolisa.zip
+fonts/files/dankmono.zip
+fonts/files/dankmono-nf.zip
+
+# ── Editor & IDEs ──────────────────────────────────────────────
 .vscode/
-*.tmp
+.idea/
+.zed/
+*.swp
+*.swo
+*~
 
-# ── Logs ──────────────────────────────────────────────────────
+# ── Backups & Temporary ────────────────────────────────────────
+*.bak*
+*.backup*
+*.tmp
 *.log
