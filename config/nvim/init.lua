@@ -139,6 +139,7 @@ if vim.g.vscode then
     { "n", "<leader>re",       "editor.action.rename" },                 -- Rename
     { "n", "<leader>rf",       "editor.action.refactor" },               -- Refactor
     { "n", "<leader>qf",       "editor.action.quickFix" },               -- Quick fix
+    { "n", "<leader>af",       "editor.action.autoFix" },                -- Auto fix
     { "n", "<leader>sg",       "editor.action.triggerSuggest" },         -- Suggestions
     { "n", "<leader>rq",       "rest-client.request" },                  -- REST client request
 
