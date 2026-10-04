@@ -1,3 +1,5 @@
+import { durationText, numberText, percent } from './format';
+import { onCleanup } from 'solid-js';
 /* @refresh reload */
 import "./index.css";
 import { render } from "solid-js/web";
@@ -14,6 +16,7 @@ function App() {
   const [output, setOutput] = createStore(providers.outputMap);
 
   providers.onOutput((outputMap) => setOutput(outputMap));
+  onCleanup(() => { void providers.stopAll().catch(console.error); });
 
   const BatteryState = () => {
     if (output.battery?.state === 'discharging') {
@@ -30,35 +33,15 @@ function App() {
       </>);
     }
     else {
-      return ("Unknown");
+      return ("Battery unavailable");
     }
   }
-  const BatteryTime = () => {
-    let result = ' • ';
-    if (output.battery?.state === 'charging') {
-      const hours = Math.trunc(output.battery?.timeTillFull / 3600000);
-      if (hours) {
-        result += hours + " h ";
-      }
-      result += Math.trunc(output.battery?.timeTillFull % 3600000 / 60000) + " min left"
-    }
-    else if (output.battery?.state === 'discharging') {
-      const hours = Math.trunc(output.battery?.timeTillEmpty / 3600000);
-      if (hours) {
-        result += hours + " h ";
-      }
-      result += Math.trunc(output.battery?.timeTillEmpty % 3600000 / 60000) + " min left"
-    }
-    else {
-      result += "idle";
-    }
-    return result;
-  };
+  const BatteryTime = () => output.battery?.state === 'charging' ? ' • ' + durationText(output.battery.timeTillFull) : output.battery?.state === 'discharging' ? ' • ' + durationText(output.battery.timeTillEmpty) : '';
   const ProgressColor = () => {
     if (output.battery?.isCharging == true) return "charging";
-    if (output.battery?.chargePercent > 70) return "full"
-    if (output.battery?.chargePercent > 40) return "half";
-    if (output.battery?.chargePercent > 15) return "low";
+    if ((output.battery?.chargePercent ?? 0) > 70) return "full"
+    if ((output.battery?.chargePercent ?? 0) > 40) return "half";
+    if ((output.battery?.chargePercent ?? 0) > 15) return "low";
     return "very-low";
   };
   return (
@@ -67,10 +50,10 @@ function App() {
       <div class="charging-info">
         <span>{BatteryState()}</span>
         <span>
-          {Math.round(output.battery?.chargePercent)}%
+          {numberText(output.battery?.chargePercent)}%
           {BatteryTime()}
         </span>
-        <span><span class="health-icon"></span> • {Math.round(output.battery?.healthPercent)}%</span>
+        <span><span class="health-icon"></span> • {numberText(output.battery?.healthPercent)}%</span>
       </div>
       <div class="progress-labels">
         <span class="left">0</span>
@@ -78,7 +61,7 @@ function App() {
         <span class="right">100</span>
       </div>
       <div class="progress-bar">
-        <div class={`progress-fill ${ProgressColor()}`} style={{ width: `${output.battery?.chargePercent}%` }}></div>
+        <div class={`progress-fill ${ProgressColor()}`} style={{ width: `${percent(output.battery?.chargePercent)}%` }}></div>
       </div>
     </div>
     </div>

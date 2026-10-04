@@ -1,3 +1,4 @@
+import { numberText } from '../format';
 import "./style.css";
 import { WeatherOutput } from "zebar";
 import { Component } from "solid-js";
@@ -33,12 +34,13 @@ const WeatherStatus: Component<WeatherStatusProps> = (props) => {
               return <i class="nf nf-weather-day_lightning"></i>;
             case 'thunder_night':
               return <i class="nf nf-weather-night_alt_lightning"></i>;
+            default: return <span aria-label="Unknown weather">?</span>;
           }
     };
     return (
         <div class="template weather">
             {getWeatherIcon(props.weather?.status)}
-            {Math.round(props.weather?.celsiusTemp)}°C
+            {numberText(props.weather?.celsiusTemp)}°C
         </div>
     );
 };

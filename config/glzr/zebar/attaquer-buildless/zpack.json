@@ -9,26 +9,21 @@
   "widgets": [
     {
       "name": "top-bar",
-      "htmlPath": "./index.html",
+      "htmlPath": "./dist/index.html",
       "zOrder": "normal",
       "shownInTaskbar": false,
       "focused": false,
       "resizable": false,
       "transparent": true,
       "includeFiles": [
-        "**/**"
+        "dist/**"
       ],
       "caching": {
         "defaultDuration": 604800,
         "rules": []
       },
       "privileges": {
-        "shellCommands": [
-          {
-            "program": "curl",
-            "argsRegex": ".*"
-          }
-        ]
+        "shellCommands": []
       },
       "presets": [
         {
@@ -37,7 +32,7 @@
           "offsetX": "0px",
           "offsetY": "0px",
           "width": "100%",
-          "height": "26px",
+          "height": "40px",
           "monitorSelection": {
             "type": "all"
           },

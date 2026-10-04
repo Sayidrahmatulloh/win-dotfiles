@@ -61,8 +61,8 @@ const ActiveApp = ({ output }) => {
         <div className='active-app' style={style}>
             {output.glazewm && output.glazewm.focusedWorkspace && (
                 <div className="active-app-icons">
-                    {output.glazewm.focusedWorkspace.children.map((child) => (
-                        <span key={child.id} className="app-icon">
+                    {output.glazewm.allWindows.filter(window => window.hasFocus).map((child) => (
+                        <span key={child.id} className="app-icon" title={child.title} aria-label={child.title}>
                             {getAppIcon(child.processName)}
                         </span>
                     ))}

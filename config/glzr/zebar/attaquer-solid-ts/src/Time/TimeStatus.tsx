@@ -1,3 +1,5 @@
+import StatusIcon from '../StatusIcon';
+import { safely } from '../actions';
 import "./style.css";
 import { Component } from "solid-js";
 import { DateOutput } from "zebar";
@@ -5,7 +7,7 @@ import * as zebar from "zebar";
 import { useAnimatedClick } from "../hooks/useAnimatedClick";
 
 interface TimeStatusProps {
-  date: DateOutput;
+  date: DateOutput | null;
 }
 
 const TimeStatus: Component<TimeStatusProps> = (props) => {
@@ -13,21 +15,22 @@ const TimeStatus: Component<TimeStatusProps> = (props) => {
 
   const handleTimeClick = () => {
     handleClick();
-    zebar.shellExec("explorer.exe", "ms-actioncenter://");
+    void safely(() => zebar.shellExec("explorer.exe", ["ms-actioncenter://"]), "Notification center");
   };
 
   return (
-    <button
+    <button type="button" aria-label="Open notification center"
       class={`date ${isActive() ? "clicked-animated" : ""}`}
-      title={props.date?.formatted}
+      data-tooltip={props.date?.formatted}
       onClick={handleTimeClick}
     >
       <span class="content">
-        <img src="./assets/icons/icons8-time-32.png"></img>
-        <span class="time">{props.date?.formatted.substring(0, 5)}</span>
+        <StatusIcon name="clock"/>
+        <span class="time">{props.date?.formatted?.substring(0, 5)}</span>
       </span>
     </button>
   );
 };
 
 export default TimeStatus;
+

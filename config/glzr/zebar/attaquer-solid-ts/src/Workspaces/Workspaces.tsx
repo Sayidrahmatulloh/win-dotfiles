@@ -4,7 +4,7 @@ import { GlazeWmOutput } from "zebar";
 import Workspace from "./Workspace";
 
 interface WorkspacesProps {
-  glazewm: GlazeWmOutput; // Typ props
+  glazewm: GlazeWmOutput | null; // Typ props
 }
 
 const Workspaces: Component<WorkspacesProps> = (props) => {

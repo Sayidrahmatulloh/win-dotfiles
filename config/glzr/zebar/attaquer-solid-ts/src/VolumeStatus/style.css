@@ -86,3 +86,6 @@
   display: flex;
   justify-content: space-between;
 }
+
+.volume:focus-within .SliderRoot, .SliderRoot.expanded { width: 90px; opacity: 1; overflow: visible; }
+.SliderThumb { width: 10px; height: 14px; top: -3px; border-radius: 4px; background: #fff; }

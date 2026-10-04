@@ -1,3 +1,5 @@
+import StatusIcon from '../StatusIcon';
+import { runWm } from '../actions';
 import "./style.css";
 import { Component } from "solid-js";
 import { NetworkOutput } from "zebar";
@@ -5,8 +7,8 @@ import { GlazeWmOutput } from "zebar";
 import { useAnimatedClick } from "../hooks/useAnimatedClick";
 
 interface NetworkStatusProps {
-  network: NetworkOutput;
-  glazewm: GlazeWmOutput;
+  network: NetworkOutput | null;
+  glazewm: GlazeWmOutput | null;
 }
 
 const NetworkStatus: Component<NetworkStatusProps> = (props) => {
@@ -14,73 +16,13 @@ const NetworkStatus: Component<NetworkStatusProps> = (props) => {
 
   const handleOpenActionCenterClick = () => {
     handleClick();
-    props.glazewm.runCommand(
-      "shell-exec %userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/OpenActionCenter.ahk",
-      // "shell-exec %userprofile%/AppData/Roaming/zebar/downloads/iattaquer.attaquer@1.0.1/dist/assets/scripts/OpenActionCenter.ahk",
+    runWm(props.glazewm, 
+      "shell-exec %userprofile%/scoop/apps/autohotkey/current/v2/AutoHotkey64.exe %userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/OpenActionCenter.ahk",
     );
   };
-  const getNetworkIcon = () => {
-    switch (props.network?.defaultInterface.type) {
-      case "ethernet":
-        return (
-          <img
-            src="./assets/icons/icons8-wired-network-32.png"
-            class="i-eth"
-            width="20"
-            height="20"
-          ></img>
-        );
-      case "wifi":
-        if (props.network.defaultGateway?.signalStrength >= 75) {
-          return (
-            <img
-              src="./assets/icons/icons8-wifi-3-32.png"
-              class="i-wifi"
-              width="20"
-              height="20"
-            ></img>
-          );
-        } else if (props.network.defaultGateway?.signalStrength >= 45) {
-          return (
-            <img
-              src="./assets/icons/icons8-wifi-2-32.png"
-              class="i-wifi"
-              width="20"
-              height="20"
-            ></img>
-          );
-        } else if (props.network.defaultGateway?.signalStrength >= 5) {
-          return (
-            <img
-              src="./assets/icons/icons8-wifi-1-32.png"
-              class="i-wifi"
-              width="20"
-              height="20"
-            ></img>
-          );
-        } else {
-          return (
-            <img
-              src="./assets/icons/icons8-no-network-32.png"
-              class="i-eth"
-              width="20"
-              height="20"
-            ></img>
-          );
-        }
-      default:
-        return (
-          <img
-            src="./assets/icons/icons8-no-network-32.png"
-            class="i-eth"
-            width="20"
-            height="20"
-          ></img>
-        );
-    }
-  };
+  const getNetworkIcon = () => <StatusIcon name={props.network?.defaultInterface?.type === 'ethernet' ? 'ethernet' : props.network?.defaultInterface?.type === 'wifi' ? 'wifi' : 'offline'}/>;
   return (
-    <button
+    <button data-tooltip={props.network?.defaultInterface ? 'Download: ' + (props.network.traffic?.received.siValue ?? '—') + ' ' + (props.network.traffic?.received.siUnit ?? '') + ' · Upload: ' + (props.network.traffic?.transmitted.siValue ?? '—') + ' ' + (props.network.traffic?.transmitted.siUnit ?? '') : 'Offline / no interface'} type="button" aria-label="Network quick settings"
       class={`network ${isActive() ? "clicked-animated" : ""}`}
       onClick={handleOpenActionCenterClick}
     >
@@ -90,15 +32,15 @@ const NetworkStatus: Component<NetworkStatusProps> = (props) => {
           <span class="label">
             <span class="ii"></span>
             <span class="net-line">
-              {props.network?.traffic.received.siValue}{" "}
-              {props.network?.traffic.received.siUnit}
+              {props.network?.traffic?.received.siValue ?? '—'}{" "}
+              {props.network?.traffic?.received.siUnit}
             </span>
           </span>
           <span class="label">
             <span class="ii"></span>
             <span class="net-line">
-              {props.network?.traffic.transmitted.siValue}{" "}
-              {props.network?.traffic.transmitted.siUnit}
+              {props.network?.traffic?.transmitted.siValue ?? '—'}{" "}
+              {props.network?.traffic?.transmitted.siUnit}
             </span>
           </span>
         </div>
@@ -108,3 +50,4 @@ const NetworkStatus: Component<NetworkStatusProps> = (props) => {
 };
 
 export default NetworkStatus;
+

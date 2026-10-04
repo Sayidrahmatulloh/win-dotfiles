@@ -1,3 +1,7 @@
+import StatusIcon from '../StatusIcon';
+import {useUsageTone} from '../hooks/useUsageTone';
+import { safely } from '../actions';
+import { numberText } from '../format';
 import "./style.css";
 import { Component } from "solid-js";
 import { CpuOutput } from "zebar";
@@ -6,44 +10,36 @@ import * as zebar from "zebar";
 import { useAnimatedClick } from "../hooks/useAnimatedClick";
 
 interface CpuStatusProps {
-  cpu: CpuOutput;
-  glazewm: GlazeWmOutput;
+  cpu: CpuOutput | null;
+  glazewm: GlazeWmOutput | null;
 }
 
 const CpuStatus: Component<CpuStatusProps> = (props) => {
-  const getCpuUsageRate = (usage: number) => {
-    if (usage > 90) return "extreme-usage";
-    else if (usage > 65) return "high-usage";
-    else if (usage > 30) return "medium-usage";
-    else return "low-usage";
-  };
+  const tone = useUsageTone(() => props.cpu?.usage);
 
   const { isActive, handleClick } = useAnimatedClick();
 
-  const handleCpuClick = (e: MouseEvent) => {
+  const handleCpuClick = () => {
     handleClick();
-    // zebar.shellExec("taskmgr"); // open task manager
-    zebar.shellExec("C:\\Program Files\\SystemInformer\\SystemInformer.exe");
-    // old one:
-    // props.glazewm.runCommand(
-    //   "shell-exec %ProgramFiles%/SystemInformer/SystemInformer.exe",
-    // );
+    void safely(() => zebar.shellExec("taskmgr"), "Task Manager");
   };
 
   return (
-    <div
+    <button type="button" aria-label="Open Task Manager: CPU"
+      data-tooltip={"CPU usage: " + numberText(props.cpu?.usage) + "% — open Task Manager"}
       classList={{
         cpu: true,
-        [getCpuUsageRate(Math.round(props.cpu?.usage))]: true,
+        "usage-warning": tone() === "warning",
+        "usage-critical": tone() === "critical",
         "clicked-animated": isActive(),
       }}
       onClick={handleCpuClick}
     >
       <span class="content">
-        <span class="i-cpu"></span>
-        <span class="cpu-bar">{Math.round(props.cpu?.usage)}%</span>
+        <StatusIcon name="cpu"/>
+        <span class="cpu-bar">{numberText(props.cpu?.usage)}%</span>
       </span>
-    </div>
+    </button>
   );
 };
 

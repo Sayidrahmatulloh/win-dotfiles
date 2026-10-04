@@ -1,13 +1,15 @@
+import { safely } from '../actions';
+import { progressPercent } from '../format';
 import "./style.css";
-import { Component, createSignal, onCleanup } from "solid-js";
+import { Component, createSignal, createEffect, onCleanup } from "solid-js";
 import { MediaOutput } from "zebar";
 
 interface MediaStatusProps {
-  media: MediaOutput;
+  media: MediaOutput | null;
 }
 
 const MediaStatus: Component<MediaStatusProps> = (props) => {
-  let mediaTextRef: HTMLDivElement | undefined;
+  let mediaTextRef: HTMLSpanElement | undefined;
   let animationFrameId: number | undefined;
   let startTimeoutId: number | undefined;
 
@@ -20,24 +22,24 @@ const MediaStatus: Component<MediaStatusProps> = (props) => {
   }>({ direction: "forward", isPaused: false, startTime: 0 });
   const [scrollDistance, setScrollDistance] = createSignal(0);
 
-  const MediaIcons = {
+  const MediaIcons: Record<string, import("solid-js").JSX.Element> = {
     media: (
-      <img
+      <img alt=""
         src="./assets/icons/icons8-musical-note-32.png"
         height={23}
         width={23}
       />
     ),
     Brave: (
-      <img src="./assets/icons/icons8-brave-32.png" height={23} width={23} />
+      <img alt="" src="./assets/icons/icons8-brave-32.png" height={23} width={23} />
     ),
     "Spotify.exe": (
-      <img src="./assets/icons/icons8-spotify-32.png" height={23} width={23} />
+      <img alt="" src="./assets/icons/icons8-spotify-32.png" height={23} width={23} />
     ),
   };
 
   const startScrolling = () => {
-    if (!mediaTextRef) return;
+    if (!mediaTextRef || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const textWidth = mediaTextRef.scrollWidth;
     const containerWidth = mediaTextRef.clientWidth;
@@ -129,6 +131,8 @@ const MediaStatus: Component<MediaStatusProps> = (props) => {
     resetAnimation();
   };
 
+  createEffect(() => { props.media?.currentSession?.title; handleMouseLeave(); });
+
   onCleanup(() => {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
@@ -142,24 +146,26 @@ const MediaStatus: Component<MediaStatusProps> = (props) => {
     <>
       {props.media?.currentSession && (
         <div
-          class={`template media`}
+          class={`template media`} title={[props.media?.currentSession?.title, props.media?.currentSession?.artist].filter(Boolean).join(" — ")}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          onFocusIn={handleMouseEnter}
+          onFocusOut={handleMouseLeave}
         >
           {MediaIcons[props.media?.currentSession.sessionId] ??
             MediaIcons["media"]}
           <button
-            class="prev"
+            type="button" aria-label="Previous track" class="prev"
             onClick={() => {
-              props.media?.previous();
+              void safely(() => props.media?.previous(), "Previous track");
             }}
           >
             <span class="content">󰒮</span>
           </button>
           <button
-            class="play-pause"
+            type="button" aria-label="Play or pause" class="play-pause"
             onClick={() => {
-              props.media?.togglePlayPause();
+              void safely(() => props.media?.togglePlayPause(), "Play or pause");
             }}
           >
             <span class="content">
@@ -167,9 +173,9 @@ const MediaStatus: Component<MediaStatusProps> = (props) => {
             </span>
           </button>
           <button
-            class="next"
+            type="button" aria-label="Next track" class="next"
             onClick={() => {
-              props.media?.next();
+              void safely(() => props.media?.next(), "Next track");
             }}
           >
             <span class="content">󰒭</span>
@@ -185,7 +191,7 @@ const MediaStatus: Component<MediaStatusProps> = (props) => {
           </div>
           <div
             class="progress-play"
-            style={`width: ${(props.media?.currentSession?.position / props.media?.currentSession?.endTime) * 100}%`}
+            style={`width: ${progressPercent(props.media?.currentSession?.position, props.media?.currentSession?.endTime)}%`}
           ></div>
         </div>
       )}

@@ -1,3 +1,5 @@
+import { progressPercent } from './format';
+import { onCleanup } from 'solid-js';
 /* @refresh reload */
 import "./index.css";
 import { render } from "solid-js/web";
@@ -16,15 +18,14 @@ function App() {
   const [output, setOutput] = createStore(providers.outputMap);
 
   providers.onOutput((outputMap) => setOutput(outputMap));
+  onCleanup(() => { void providers.stopAll().catch(console.error); });
 
-  console.log(output.disk?.disks[0]);
-  console.log(output.disk?.disks[1]);
 
   const DiskInfo = (disk: DiskOutput["disks"][0]) => {
     const DiskIcon = () => {
       if (disk.driveType === "HDD") {
         return (
-          <img
+          <img alt=""
             src="./assets/icons/icons8-hdd-32.png"
             width="20"
             height="20"
@@ -32,7 +33,7 @@ function App() {
         );
       } else {
         return (
-          <img
+          <img alt=""
             src="./assets/icons/icons8-ssd-32.png"
             width="20"
             height="20"
@@ -58,7 +59,7 @@ function App() {
         </span>
         <div class="progress-bar">
           <div class={`progress-fill`} style={{ width: `
-            ${(disk.totalSpace.bytes - disk.availableSpace.bytes)/disk.totalSpace.bytes*100}%` }}></div>
+            ${progressPercent(disk.totalSpace.bytes - disk.availableSpace.bytes, disk.totalSpace.bytes)}%` }}></div>
         </div>
       </div>
     );
@@ -67,7 +68,7 @@ function App() {
     <div class="app">
       <div class="widget">
         <div class="disks-info">
-          <For each={output.disk?.disks}>{(disk) => DiskInfo(disk)}</For>
+          <For each={output.disk?.disks} fallback={<span>No disk data available</span>}>{(disk) => DiskInfo(disk)}</For>
         </div>
       </div>
     </div>

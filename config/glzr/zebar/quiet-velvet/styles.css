@@ -2,7 +2,7 @@
  * Import the Nerdfonts icon font.
  * Ref https://www.nerdfonts.com/cheat-sheet for a cheatsheet of available Nerdfonts icons.
  */
-@import "https://www.nerdfonts.com/assets/css/webfont.css";
+
 
 :root {
     --main-color: rgba(122, 80, 229, 0.95);
@@ -215,3 +215,70 @@ body,
         transform: scale(0.9);
     }
 }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+button:focus-visible, input:focus-visible { outline: 2px solid #67e8f9; outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.media-widget, .settings-group, .widget-settings { display: flex; align-items: center; gap: 6px; }
+.media-title { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app { height: 100%; padding: 2px 6px; }
+.left,.center,.right { min-width: 0; }
+input { min-width: 0; background: transparent; color: inherit; border: 0; }
+@media(max-width:1100px){.media-title{max-width:85px}.shortcut span{display:none}.active-app{display:none}}
+
+@font-face { font-family: 'LocalIcons'; src: url('./fonts/CaskaydiaMonoNerdFont-Regular.ttf') format('truetype'); font-display: swap; }
+.nf { font-family: 'LocalIcons', monospace; font-style: normal; }
+.nf-custom-windows::before { content: "\e70f"; }
+.nf-cod-settings_gear::before { content: "\eb51"; }
+.nf-md-web::before { content: "\f059f"; }
+.nf-cod-terminal_powershell::before { content: "\ebc7"; }
+.nf-md-calendar_month::before { content: "\f0e17"; }
+.nf-md-swap_horizontal::before { content: "\f04e1"; }
+.nf-md-swap_vertical::before { content: "\f04e2"; }
+.nf-fae-chip::before { content: "\e26f"; }
+.nf-oct-cpu::before { content: "\f4bc"; }
+.nf-md-power_plug::before { content: "\f06a5"; }
+.nf-fa-battery_0::before { content: "\f244"; }
+.nf-fa-battery_1::before { content: "\f243"; }
+.nf-fa-battery_2::before { content: "\f242"; }
+.nf-fa-battery_3::before { content: "\f241"; }
+.nf-fa-battery_4::before { content: "\f240"; }
+.nf-weather-day_sunny::before { content: "\e30d"; }
+.nf-weather-night_clear::before { content: "\e32b"; }
+.nf-weather-day_cloudy::before { content: "\e302"; }
+.nf-weather-night_alt_cloudy::before { content: "\e37e"; }
+.nf-weather-day_sprinkle::before { content: "\e309"; }
+.nf-weather-night_alt_sprinkle::before { content: "\e37b"; }
+.nf-weather-day_rain::before { content: "\e308"; }
+.nf-weather-night_alt_rain::before { content: "\e375"; }
+.nf-weather-day_snow::before { content: "\e30a"; }
+.nf-weather-night_alt_snow::before { content: "\e377"; }
+.nf-weather-day_lightning::before { content: "\e305"; }
+.nf-weather-night_alt_lightning::before { content: "\e373"; }
+.nf-md-application::before { content: "\f08c6"; }
+.nf-fa-spotify::before { content: "\f1bc"; }
+.nf-md-spotify::before { content: "\f04c7"; }
+.nf-dev-visualstudio::before { content: "\e70c"; }
+.nf-fa-video_camera::before { content: "\f03d"; }
+.nf-md-video::before { content: "\f0567"; }
+.nf-md-telegram::before { content: "\f0501"; }
+.nf-md-whatsapp::before { content: "\f05a3"; }
+.nf-md-steam::before { content: "\f04d3"; }
+.nf-fa-cube::before { content: "\f1b2"; }
+.nf-oct-terminal::before { content: "\f489"; }
+.nf-fa-folder_open::before { content: "\f07c"; }
+.nf-fa-chrome::before { content: "\f268"; }
+.nf-fa-firefox::before { content: "\f269"; }
+.nf-md-discord::before { content: "\f066f"; }
+.nf-md-note_text::before { content: "\f039e"; }
+.nf-dev-photoshop::before { content: "\e7b8"; }
+.nf-dev-illustrator::before { content: "\e7b4"; }
+.nf-md-microsoft_excel::before { content: "\f138f"; }
+.nf-md-microsoft_word::before { content: "\f1392"; }
+.nf-md-microsoft_powerpoint::before { content: "\f1390"; }
+.app { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; }
+.left,.center,.right { max-width: 100%; }
+.right { justify-self: end; }
+.logo input { width: min(130px, 12vw); }
+@media(max-width:800px){.app{display:flex;overflow-x:auto;scrollbar-width:none}.left,.center,.right{flex-shrink:0;max-width:none}}

@@ -5,6 +5,7 @@ export function useAnimatedClick(animationDuration: number = 200) {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   const handleClick = () => {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
     setIsActive(true);
     timeoutId = setTimeout(() => {
       setIsActive(false);

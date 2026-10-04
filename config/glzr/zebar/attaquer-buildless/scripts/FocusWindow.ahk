@@ -1,8 +1,9 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
-
-windowID := A_Args[1]
-if WinExist("ahk_id " windowID) {
-    WinActivate("ahk_id " windowID)
+if A_Args.Length < 1 || !RegExMatch(A_Args[1], "^\d+$")
+    ExitApp
+try {
+    if WinExist("ahk_id " A_Args[1])
+        WinActivate("ahk_id " A_Args[1])
 }
-ExitApp()
+ExitApp

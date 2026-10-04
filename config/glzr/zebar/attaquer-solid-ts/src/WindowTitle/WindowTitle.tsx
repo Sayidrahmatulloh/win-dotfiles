@@ -3,13 +3,13 @@ import { Component } from "solid-js";
 import { GlazeWmOutput } from "zebar";
 
 interface WindowTitleProps {
-  glazewm: GlazeWmOutput;
+  glazewm: GlazeWmOutput | null;
 }
 
 const WindowTitle: Component<WindowTitleProps> = (props) => {
   return (
     <>
-      {props.glazewm?.focusedWorkspace.children.map(
+      {props.glazewm?.allWindows.map(
         (item) =>
           "title" in item &&
           item.hasFocus && (

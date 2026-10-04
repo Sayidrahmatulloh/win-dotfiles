@@ -1,20 +1,21 @@
+import { runWm } from '../actions';
 import "./style.css";
 import { Component } from "solid-js";
 import { GlazeWmOutput } from "zebar";
 
 interface TilingBindingProps {
-  glazewm: GlazeWmOutput;
+  glazewm: GlazeWmOutput | null;
 }
 
 const TilingBinding: Component<TilingBindingProps> = (props) => {
   return (
     <>
       <div class="template">
-        <button
+        <button type="button" aria-label="Toggle tiling direction"
           class={`toggle-tiling-direction 
                     ${props.glazewm?.tilingDirection === "horizontal" ? "horizontal" : "vertical"}`}
           onClick={() => {
-            props.glazewm?.runCommand("toggle-tiling-direction");
+            runWm(props.glazewm, "toggle-tiling-direction");
           }}
         >
           <span class="tiling-direction"></span>

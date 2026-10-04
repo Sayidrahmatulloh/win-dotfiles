@@ -1,3 +1,4 @@
+import {safeAction} from './utils';
 import React, { Children, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as zebar from 'zebar';
@@ -7,10 +8,10 @@ import Settings from "./components/Settings.jsx";
 import Shortcut from "./components/Shortcut";
 import ActiveApp from './components/ActiveApp.jsx';
 import config from "./config.js";
-import moment from "moment";
+
 
 const providers = zebar.createProviderGroup({
-    keyboard: { type: 'keyboard' },
+    media: { type: 'media' },
     glazewm: { type: 'glazewm' },
     cpu: { type: 'cpu' },
     date: { type: 'date', formatting: 'EEE d MMM t' },
@@ -23,6 +24,8 @@ const providers = zebar.createProviderGroup({
 createRoot(document.getElementById('root')).render(<App/>);
 
 function App() {
+  const [actionError,setActionError] = useState('');
+  useEffect(() => { const listener = event => setActionError(event.detail); window.addEventListener('widget-action-error',listener); return () => window.removeEventListener('widget-action-error',listener); }, []);
     const [output, setOutput] = useState(providers.outputMap);
     const [showSpotifyWidget, setShowSpotifyWidget] = useState(true);
     const [showGoogleSearch, setShowGoogleSearch] = useState(true);
@@ -31,7 +34,9 @@ function App() {
     const [dateFormat, setDateFormat] = useState('HH:mm');
 
     useEffect(() => {
-        providers.onOutput(() => setOutput(providers.outputMap));
+        let active = true;
+        providers.onOutput(() => { if (active) setOutput(providers.outputMap); });
+        return () => { active = false; void providers.stopAll().catch(console.error); };
     }, []);
 
     function getBatteryIcon(batteryOutput) {
@@ -76,10 +81,10 @@ function App() {
     }
 
     // debug
-    console.log(output.glazewm)
+
 
     return (
-        <div className="app">
+        <div className="app">{actionError && <button type="button" role="status" title={actionError} aria-label={actionError + " Click to dismiss."} onClick={() => setActionError("")} style={{position:"fixed",right:0,top:0,zIndex:10,background:"#462323",color:"white"}}>!</button>}
             <div className="left">
                 <div className="box">
                     <div className="logo">
@@ -93,9 +98,7 @@ function App() {
                                 <button
                                     className={`workspace ${workspace.hasFocus && 'focused'} ${workspace.isDisplayed && 'displayed'}`}
                                     onClick={() =>
-                                        output.glazewm.runCommand(
-                                            `focus --workspace ${workspace.name}`,
-                                        )
+                                        safeAction(() => output.glazewm.runCommand(`focus --workspace "${workspace.name}"`))
                                     }
                                     key={workspace.name}
                                 >
@@ -109,13 +112,13 @@ function App() {
                 {showShortcuts && output.glazewm ? <div className="workspaces">
                     <Shortcut commandRunner={output.glazewm.runCommand}
                               commands={[
-                                  `shell-exec ${config.edgePath}`
+                                  `shell-exec "${config.edgePath}"`
                               ]}
                               iconClass="nf-md-web" name="edge"
                     />
                     <Shortcut commandRunner={output.glazewm.runCommand}
                               commands={[
-                                  `shell-exec ${config.powershellPath} -nologo`
+                                  `shell-exec "${config.powershellPath}" -nologo`
                               ]}
                               iconClass="nf-cod-terminal_powershell" name="Powershell"
                     />
@@ -124,14 +127,12 @@ function App() {
 
             <div className="center">
                 <div className="box">
-                    {showSpotifyWidget ? <SpotifyWidget/> : null}
+                    {showSpotifyWidget ? <SpotifyWidget media={output.media}/> : null}
                     <i className="nf nf-md-calendar_month"></i>
                     <button className="clean-button" onMouseEnter={() => {
                         setDateFormat('ddd DD MMM HH:mm')
-                    }} onMouseLeave={() => {
-                        setDateFormat('HH:mm')
-                    }}>
-                        {moment(output.date?.now).format(dateFormat)}
+                    }} onMouseLeave={() => { setDateFormat('HH:mm') }} onFocus={() => setDateFormat('ddd DD MMM HH:mm')} onBlur={() => setDateFormat('HH:mm')}> 
+                        {output.date?.now ? new Date(output.date.now).toLocaleString('en-GB', dateFormat === 'HH:mm' ? {hour:'2-digit',minute:'2-digit'} : {weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}
                     </button>
                     {ShowActiveApp && output.glazewm ? <ActiveApp output={output} /> : null}
                 </div>
@@ -153,9 +154,9 @@ function App() {
                             ))}
 
                             <button
-                                className={`tiling-direction nf ${output.glazewm.tilingDirection === 'horizontal' ? 'nf-md-swap_horizontal' : 'nf-md-swap_vertical'}`}
+                                aria-label="Toggle tiling direction" className={`tiling-direction nf ${output.glazewm.tilingDirection === 'horizontal' ? 'nf-md-swap_horizontal' : 'nf-md-swap_vertical'}`}
                                 onClick={() =>
-                                    output.glazewm.runCommand('toggle-tiling-direction')
+                                    safeAction(() => output.glazewm.runCommand('toggle-tiling-direction'))
                                 }
                             ></button>
                         </>
@@ -163,7 +164,7 @@ function App() {
 
                     <Settings
                         widgetObj={[
-                            { name: 'Spotify', changeState: setShowSpotifyWidget },
+                            { name: 'Media', changeState: setShowSpotifyWidget },
                             { name: 'Google', changeState: setShowGoogleSearch },
                             { name: 'Shortcuts', changeState: setShowShortcuts },
                             { name: 'App', changeState: setShowActiveApp }
@@ -174,7 +175,7 @@ function App() {
                                 {/* memory */}
                                 {output.memory && (
                                     <button className="memory clean-button" onClick={
-                                        () => output.glazewm.runCommand('shell-exec taskmgr')
+                                        () => safeAction(() => zebar.shellExec('taskmgr'))
                                     }>
                                     <i className="nf nf-fae-chip"></i>
                                     {Math.round(output.memory.usage)}%

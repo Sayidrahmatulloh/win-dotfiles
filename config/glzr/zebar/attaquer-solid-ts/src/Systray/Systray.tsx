@@ -1,11 +1,12 @@
+import { safely } from '../actions';
 import "./style.css"
 import { Component, For, createSignal } from "solid-js"
 import { SystrayOutput, GlazeWmOutput } from "zebar"
 import { useAnimatedClick } from "../hooks/useAnimatedClick"
 
 interface SystrayProps {
-  systray: SystrayOutput
-  glazewm: GlazeWmOutput
+  systray: SystrayOutput | null
+  glazewm: GlazeWmOutput | null
 }
 
 const Systray: Component<SystrayProps> = (props) => {
@@ -21,31 +22,31 @@ const Systray: Component<SystrayProps> = (props) => {
                 const { isActive: isIconActive, handleClick: handleIconClick } =
                   useAnimatedClick()
                 return (
-                  <div
+                  <button type="button" aria-label={icon.tooltip || "Tray application"} tabIndex={expanded() ? 0 : -1}
                     class="systray-icon-container"
                     title={icon.tooltip}
                     onClick={(e) => {
                       e.preventDefault()
                       handleIconClick()
-                      props.systray.onLeftClick(icon.id)
+                      void safely(() => props.systray?.onLeftClick(icon.id), "Tray click")
                     }}
                     onContextMenu={(e) => {
                       e.preventDefault()
                       handleIconClick()
-                      props.systray.onRightClick(icon.id)
+                      void safely(() => props.systray?.onRightClick(icon.id), "Tray menu")
                     }}
                   >
-                    <img
+                    <img alt=""
                       class={`systray-icon ${isIconActive() ? "clicked-animated" : ""}`}
                       src={icon.iconUrl}
                     />
-                  </div>
+                  </button>
                 )
               }}
             </For>
           </div>
         )}
-        <button
+        <button type="button" aria-label="Show or hide tray icons" aria-expanded={expanded()}
           class={`systray-toggle ${expanded() == true ? "expanded" : "tucked"}`}
           onClick={() => setExpanded(!expanded())}
         >

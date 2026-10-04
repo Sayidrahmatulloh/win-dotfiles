@@ -1,3 +1,7 @@
+import StatusIcon from '../StatusIcon';
+import {useUsageTone} from '../hooks/useUsageTone';
+import { safely } from '../actions';
+import { numberText } from '../format';
 import "./style.css";
 import { Component } from "solid-js";
 import { MemoryOutput } from "zebar";
@@ -5,48 +9,35 @@ import * as zebar from "zebar";
 import { useAnimatedClick } from "../hooks/useAnimatedClick";
 
 interface MemoryStatusProps {
-  memory: MemoryOutput;
+  memory: MemoryOutput | null;
 }
 
 const MemoryStatus: Component<MemoryStatusProps> = (props) => {
-  const getMemoryUsageRate = (usage: number) => {
-    if (usage > 90) return "extreme-usage";
-    else if (usage > 65) return "high-usage";
-    else if (usage > 45) return "medium-usage";
-    else return "low-usage";
-  };
+  const tone = useUsageTone(() => props.memory?.usage);
 
   const { isActive, handleClick } = useAnimatedClick();
 
-  const handleMemoryClick = (e: MouseEvent) => {
+  const handleMemoryClick = () => {
     handleClick();
-    zebar.shellExec("C:\\Program Files\\Mem Reduct\\memreduct.exe");
+    void safely(() => zebar.shellExec("taskmgr"), "Task Manager");
   };
   return (
-    <button
+    <button data-tooltip={"Memory usage: " + numberText(props.memory?.usage) + "% — open Task Manager"} type="button" aria-label="Open Task Manager: memory"
       classList={{
         memory: true,
-        [getMemoryUsageRate(props.memory?.usage)]: true,
+        "usage-warning": tone() === "warning",
+        "usage-critical": tone() === "critical",
         "clicked-animated": isActive(),
       }}
       onClick={handleMemoryClick}
     >
       <span class="content">
-        <span class="i"></span>
-        <div class="labels">
-          <span class="label total">
-            <span>USED</span>
-            {Math.round(props.memory?.usedMemory / 1024 / 1024 / 1024)}G
-          </span>
-          <span class="label total">
-            <span>TOT</span>
-            {Math.round(props.memory?.totalMemory / 1024 / 1024 / 1024)}G
-          </span>
-        </div>
-        <span class="mem-bar">{Math.round(props.memory?.usage)}%</span>
+        <StatusIcon name="memory"/>
+        <span class="ram-summary">{numberText((props.memory?.usedMemory ?? NaN) / 1024 ** 3)}/{numberText((props.memory?.totalMemory ?? NaN) / 1024 ** 3)} GB</span>
       </span>
     </button>
   );
 };
 
 export default MemoryStatus;
+

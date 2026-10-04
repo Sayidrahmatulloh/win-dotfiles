@@ -7,7 +7,7 @@
     animation: appear 0.2s ease;
   }
 }
-img {
+.date img {
   width: 17px;
   height: 17px;
 }

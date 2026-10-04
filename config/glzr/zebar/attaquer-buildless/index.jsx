@@ -1,24 +1,29 @@
-import React, { useState, useEffect } from "https://esm.sh/react@18?dev";
-import { createRoot } from "https://esm.sh/react-dom@18/client?dev";
-import * as zebar from "https://esm.sh/zebar@2";
+import { runCommand } from './src/actions';
+import React, { useState, useEffect } from "react";
+import { createRoot } from "react-dom/client";
+import * as zebar from "zebar";
 
 const providers = zebar.createProviderGroup({
   glazewm: { type: "glazewm" },
-  cpu: { type: "cpu", refreshInterval: "2000" },
-  memory: { type: "memory", refreshInterval: "4000" },
+  cpu: { type: "cpu", refreshInterval: 2000 },
+  memory: { type: "memory", refreshInterval: 4000 },
   weather: { type: "weather" },
-  network: { type: "network", refreshInterval: "2000" },
-  battery: { type: "battery", refreshInterval: "10000" },
+  network: { type: "network", refreshInterval: 2000 },
+  battery: { type: "battery", refreshInterval: 10000 },
   date: { type: "date", formatting: "HH:mm" },
 });
 
 createRoot(document.getElementById("root")).render(<App />);
 
 function App() {
+  const [actionError,setActionError] = useState('');
+  useEffect(() => { const listener = event => setActionError(event.detail); window.addEventListener('widget-action-error',listener); return () => window.removeEventListener('widget-action-error',listener); }, []);
   const [output, setOutput] = useState(providers.outputMap);
 
   useEffect(() => {
-    providers.onOutput(() => setOutput(providers.outputMap));
+    let active = true;
+    providers.onOutput(() => { if (active) setOutput(providers.outputMap); });
+    return () => { active = false; void providers.stopAll().catch(console.error); };
   }, []);
 
   // Change the color of the CPU bar based on usage.
@@ -42,7 +47,7 @@ function App() {
     switch (networkOutput.defaultInterface?.type) {
       case "ethernet":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-wired-network-32.png"
             className="i-eth"
             width="20"
@@ -52,7 +57,7 @@ function App() {
       case "wifi":
         if (networkOutput.defaultGateway?.signalStrength >= 75) {
           return (
-            <img
+            <img alt=""
               src="./icons/icons8-wifi-3-32.png"
               className="i-wifi"
               width="20"
@@ -61,7 +66,7 @@ function App() {
           );
         } else if (networkOutput.defaultGateway?.signalStrength >= 45) {
           return (
-            <img
+            <img alt=""
               src="./icons/icons8-wifi-2-32.png"
               className="i-wifi"
               width="20"
@@ -70,7 +75,7 @@ function App() {
           );
         } else if (networkOutput.defaultGateway?.signalStrength >= 5) {
           return (
-            <img
+            <img alt=""
               src="./icons/icons8-wifi-1-32.png"
               className="i-wifi"
               width="20"
@@ -79,7 +84,7 @@ function App() {
           );
         } else {
           return (
-            <img
+            <img alt=""
               src="./icons/icons8-no-network-32.png"
               className="i-eth"
               width="20"
@@ -89,7 +94,7 @@ function App() {
         }
       default:
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-no-network-32.png"
             className="i-eth"
             width="20"
@@ -103,7 +108,7 @@ function App() {
   function getBatteryIcon(batteryOutput) {
     if (batteryOutput.state === "full") {
       return (
-        <img
+        <img alt=""
           src="./icons/icons8-battery-max-charged-32.png"
           width="20"
           height="20"
@@ -111,7 +116,7 @@ function App() {
       );
     } else if (batteryOutput.state === "charging") {
       return (
-        <img
+        <img alt=""
           src="./icons/icons8-battery-charging-32.png"
           width="20"
           height="20"
@@ -120,7 +125,7 @@ function App() {
     } else if (batteryOutput.state === "discharging") {
       if (batteryOutput.chargePercent > 90)
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-battery-4-32.png"
             width="20"
             height="20"
@@ -128,7 +133,7 @@ function App() {
         );
       if (batteryOutput.chargePercent > 70)
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-battery-3-32.png"
             width="20"
             height="20"
@@ -136,7 +141,7 @@ function App() {
         );
       if (batteryOutput.chargePercent > 45)
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-battery-2-32.png"
             width="20"
             height="20"
@@ -144,14 +149,14 @@ function App() {
         );
       if (batteryOutput.chargePercent > 15)
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-battery-1-32.png"
             width="20"
             height="20"
           ></img>
         );
       return (
-        <img src="./icons/icons8-battery-32.png" width="20" height="20"></img>
+        <img alt="" src="./icons/icons8-battery-32.png" width="20" height="20"></img>
       );
     }
   }
@@ -197,178 +202,112 @@ function App() {
     switch (appName) {
       case "brave":
         return (
-          <img src="./icons/icons8-brave-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-brave-32.png" className="app-icon"></img>
         );
       case "Discord":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-discord-new-32.png"
             className="app-icon"
           ></img>
         );
       case "explorer":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-file-explorer-new-32.png"
             className="app-icon"
           ></img>
         );
       case "WindowsTerminal":
         return (
-          <img src="./icons/icons8-terminal-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-terminal-32.png" className="app-icon"></img>
         );
       case "Code":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-visual-studio-code-insides-32.png"
             className="app-icon"
           ></img>
         );
       case "devenv":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-visual-studio-32.png"
             className="app-icon"
           ></img>
         );
       case "ApplicationFrameHost":
         return (
-          <img src="./icons/icons8-settings-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-settings-32.png" className="app-icon"></img>
         );
       case "Spotify":
         return (
-          <img src="./icons/icons8-spotify-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-spotify-32.png" className="app-icon"></img>
         );
       case "msedgewebview2":
         return (
-          <img src="./icons/icons8-edge-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-edge-32.png" className="app-icon"></img>
         );
       case "steamwebhelper":
         return (
-          <img src="./icons/icons8-steam-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-steam-32.png" className="app-icon"></img>
         );
       case "Messenger":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-facebook-messenger-32.png"
             className="app-icon"
           ></img>
         );
       case "SystemInformer":
         return (
-          <img
+          <img alt=""
             src="./icons/systeminformer-32x32.png"
             className="app-icon"
           ></img>
         );
       case "MediBangPaintPro":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-medibang-paint-32.png"
             className="app-icon"
           ></img>
         );
       case "Docker Desktop":
         return (
-          <img src="./icons/icons8-docker-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-docker-32.png" className="app-icon"></img>
         );
       case "obs64":
-        return <img src="./icons/icons8-obs-32.png" className="app-icon"></img>;
+        return <img alt="" src="./icons/icons8-obs-32.png" className="app-icon"></img>;
       case "sublime_text":
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-sublime-text-32.png"
             className="app-icon"
           ></img>
         );
       case "FanSpeedSetting":
-        return <img src="./icons/icons8-fan-32.png" className="app-icon"></img>;
+        return <img alt="" src="./icons/icons8-fan-32.png" className="app-icon"></img>;
       case "7zFM":
         return (
-          <img src="./icons/icons8-7zip-32.png" className="app-icon"></img>
+          <img alt="" src="./icons/icons8-7zip-32.png" className="app-icon"></img>
         );
       default:
         return (
-          <img
+          <img alt=""
             src="./icons/icons8-application-32.png"
             className="app-icon"
           ></img>
         );
     }
   }
-  const IconApps = {
-    process: (
-      <img src="./icons/icons8-application-32.png" className="app-icon"></img>
-    ),
-    brave: <img src="./icons/icons8-brave-32.png" className="app-icon"></img>,
-    Discord: (
-      <img src="./icons/icons8-discord-new-32.png" className="app-icon"></img>
-    ),
-    explorer: (
-      <img
-        src="./icons/icons8-file-explorer-new-32.png"
-        className="app-icon"
-      ></img>
-    ),
-    WindowsTerminal: (
-      <img src="./icons/icons8-terminal-32.png" className="app-icon"></img>
-    ),
-    Code: (
-      <img
-        src="./icons/icons8-visual-studio-code-insides-32.png"
-        className="app-icon"
-      ></img>
-    ),
-    devenv: (
-      <img src="./icons/icons8-visual-studio-32.png" className="app-icon"></img>
-    ),
-    ApplicationFrameHost: (
-      <img src="./icons/icons8-settings-32.png" className="app-icon"></img>
-    ),
-    Spotify: (
-      <img src="./icons/icons8-spotify-32.png" className="app-icon"></img>
-    ),
-    msedgewebview2: (
-      <img src="./icons/icons8-edge-32.png" className="app-icon"></img>
-    ),
-    steamwebhelper: (
-      <img src="./icons/icons8-steam-32.png" className="app-icon"></img>
-    ),
-    Messenger: (
-      <img
-        src="./icons/icons8-facebook-messenger-32.png"
-        className="app-icon"
-      ></img>
-    ),
-    SystemInformer: (
-      <img src="./icons/systeminformer-32x32.png" className="app-icon"></img>
-    ),
-    MediBangPaintPro: (
-      <img
-        src="./icons/icons8-medibang-paint-32.png"
-        className="app-icon"
-      ></img>
-    ),
-    "Docker Desktop": (
-      <img src="./icons/icons8-docker-32.png" className="app-icon"></img>
-    ),
-    obs64: <img src="./icons/icons8-obs-32.png" className="app-icon"></img>,
-    sublime_text: (
-      <img src="./icons/icons8-sublime-text-32.png" className="app-icon"></img>
-    ),
-    FanSpeedSetting: (
-      <img src="./icons/icons8-fan-32.png" className="app-icon"></img>
-    ),
-    "7zFM": <img src="./icons/icons8-7zip-32.png" className="app-icon"></img>,
-  };
-
   function renderChilds(child, index) {
     if (child.type === "window") {
       return (
         <button className={`element ${child.hasFocus ? "focus" : ""}`}
-        key={index}
+        key={child.id} title={child.title} aria-label={"Focus " + child.title}
         onClick={() => {
-          output.glazewm.runCommand(`shell-exec %userprofile%/.glzr/zebar/attaquer-buildless/scripts/FocusWindow.ahk ${child.handle}`);
+          runCommand(output.glazewm, `shell-exec '%userprofile%/.glzr/zebar/attaquer-buildless/scripts/FocusWindow.ahk' ${child.handle}`);
         }}
         >
           {getAppIcon(child.processName)}
@@ -376,7 +315,7 @@ function App() {
       );
     } else if (child.type === "split") {
       return (
-        <div className="template" key={`split-${index}`}>
+        <div className="template" key={child.id}>
           {child.children.map((subChild, subIndex) =>
             renderChilds(subChild, subIndex)
           )}
@@ -387,28 +326,28 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app">{actionError && <button type="button" role="status" title={actionError} aria-label={actionError + " Click to dismiss."} onClick={() => setActionError("")} style={{position:"fixed",right:0,top:0,zIndex:10,background:"#462323",color:"white"}}>!</button>}
       <div className="left">
         <button
-          className="logo"
+          type="button" aria-label="Start menu" className="logo"
           onClick={() => {
-            output.glazewm.runCommand(
-              "shell-exec %userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenStartMenu.vbs"
+            runCommand(output.glazewm, 
+              "shell-exec '%userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenStartMenu.vbs'"
             );
           }}
         >
           <span className="content"></span>
         </button>
         <button
-          className="search"
+          type="button" aria-label="Windows search" className="search"
           onClick={() => {
-            output.glazewm.runCommand(
-              "shell-exec %userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenWindowsSearch.ahk"
+            runCommand(output.glazewm, 
+              "shell-exec '%userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenWindowsSearch.ahk'"
             );
           }}
         >
           <span className="content">
-            <img
+            <img alt=""
               src="./icons/icons8-search-32.png"
               width="19"
               height="19"
@@ -424,7 +363,7 @@ function App() {
                     workspace.isDisplayed && "displayed"
                   }`}
                   onClick={() =>
-                    output.glazewm.runCommand(
+                    runCommand(output.glazewm, 
                       `focus --workspace ${workspace.name}`
                     )
                   }
@@ -449,13 +388,13 @@ function App() {
             </div>
             <div className="template">
               <button
-                className={`toggle-tiling-direction ${
+                aria-label="Toggle tiling direction" className={`toggle-tiling-direction ${
                   output.glazewm.tilingDirection === "horizontal"
                     ? "horizontal"
                     : "vertical"
                 }`}
                 onClick={() =>
-                  output.glazewm.runCommand("toggle-tiling-direction")
+                  runCommand(output.glazewm, "toggle-tiling-direction")
                 }
               >
                 <span className="tiling-direction"></span>
@@ -490,7 +429,7 @@ function App() {
           </>
         )} */}
         {output.glazewm &&
-          output.glazewm.allWorkspaces.map(
+          output.glazewm.currentWorkspaces.map(
             (workspace) =>
               workspace.isDisplayed && (
                 <div className="template" key={workspace.name}>
@@ -503,31 +442,13 @@ function App() {
       </div>
 
       <div className="right">
-        {output.glazewm &&
-          output.glazewm.allWorkspaces.map((workspace) => (
-            <div className="template" key={workspace.name}>
-              {workspace.children.map(
-                (child) =>
-                  child.type === "window" &&
-                  child.processName === "Spotify" && (
-                    <div class="template spotify" key={child.id}>
-                      <img
-                        src="./icons/icons8-spotify-32.png"
-                        height="18"
-                        width="18"
-                      ></img>
-                      {child.title}
-                    </div>
-                  )
-              )}
-            </div>
-          ))}
+        {output.glazewm?.allWindows.filter(window => window.processName.toLowerCase() === 'spotify').map(window => <div className="template spotify" key={window.id} title={window.title}><img src="./icons/icons8-spotify-32.png" width="18" height="18" alt=""/>{window.title}</div>)}
         {output.cpu && (
           <button
-            className={`cpu ${getCpuUsageRate(output.cpu)}`}
+            aria-label="Open Task Manager: CPU" className={`cpu ${getCpuUsageRate(output.cpu)}`}
             onClick={() => {
-              output.glazewm.runCommand(
-                "shell-exec %ProgramFiles%/SystemInformer/SystemInformer.exe"
+              runCommand(output.glazewm, 
+                "shell-exec taskmgr"
               );
             }}
           >
@@ -539,10 +460,10 @@ function App() {
         )}
         {output.memory && (
           <button
-            className={`memory ${getMemoryUsageRate(output.memory)}`}
+            aria-label="Open Task Manager: memory" className={`memory ${getMemoryUsageRate(output.memory)}`}
             onClick={() => {
-              output.glazewm.runCommand(
-                "shell-exec %ProgramFiles%/Mem Reduct/memreduct.exe"
+              runCommand(output.glazewm, 
+                "shell-exec taskmgr"
               );
             }}
           >
@@ -573,10 +494,10 @@ function App() {
         )}
         {output.network && (
           <button
-            className="network"
+            type="button" aria-label="Network quick settings" className="network"
             onClick={() => {
-              output.glazewm.runCommand(
-                "shell-exec %userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenActionCenter.ahk"
+              runCommand(output.glazewm, 
+                "shell-exec '%userprofile%/.glzr/zebar/attaquer-buildless/scripts/OpenActionCenter.ahk'"
               );
             }}
           >
@@ -586,15 +507,15 @@ function App() {
                 <span className="label">
                   <span className="ii"></span>
                   <span className="net-line">
-                    {output.network.traffic.received.siValue}{" "}
-                    {output.network.traffic.received.siUnit}
+                    {output.network.traffic?.received.siValue ?? '—'}{" "}
+                    {output.network.traffic?.received.siUnit}
                   </span>
                 </span>
                 <span className="label">
                   <span className="ii"></span>
                   <span className="net-line">
-                    {output.network.traffic.transmitted.siValue}{" "}
-                    {output.network.traffic.transmitted.siUnit}
+                    {output.network.traffic?.transmitted.siValue ?? '—'}{" "}
+                    {output.network.traffic?.transmitted.siUnit}
                   </span>
                 </span>
               </div>
@@ -615,15 +536,15 @@ function App() {
 
         {output.date && (
           <button
-            className="date"
+            type="button" aria-label="Notification center" className="date"
             onClick={() => {
-              output.glazewm.runCommand(
+              runCommand(output.glazewm, 
                 "shell-exec explorer.exe ms-actioncenter://"
               );
             }}
           >
             <span className="content">
-              <img
+              <img alt=""
                 src="./icons/icons8-time-32.png"
                 className="i-time"
                 width="17"

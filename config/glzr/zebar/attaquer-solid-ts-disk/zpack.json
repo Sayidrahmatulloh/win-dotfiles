@@ -28,9 +28,9 @@
       "presets": [
         {
           "name": "default",
-          "anchor": "top_left",
-          "offsetX": "1300px",
-          "offsetY": "500px",
+          "anchor": "bottom_right",
+          "offsetX": "0px",
+          "offsetY": "0px",
           "width": "200px",
           "height": "270px",
           "monitorSelection": {
