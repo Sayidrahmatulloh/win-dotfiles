@@ -1,13 +1,10 @@
-param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-$tokens=$null; $errors=$null
-$ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $RepoRoot 'doctor.ps1'),[ref]$tokens,[ref]$errors)
-if ($errors.Count) { throw ($errors | Out-String) }
-foreach ($statement in $ast.EndBlock.Statements) {
-    if ($statement -is [Management.Automation.Language.FunctionDefinitionAst]) { Invoke-Expression $statement.Extent.Text }
-}
-function Assert-That([bool]$Condition,[string]$Message) { if (-not $Condition) { throw $Message } }
+. "$PSScriptRoot\helpers.ps1"
+. "$RepoRoot\lib\files.ps1"
+. "$RepoRoot\lib\settings.ps1"
+Invoke-Expression (Read-Functions 'lib/diagnostics.ps1')
 $result=Invoke-DoctorCheck 'broken' { throw 'fixture error' }
 Assert-That ($result.Status -eq 'FAIL' -and $result.Detail -eq 'fixture error') 'Check exception was not reported.'
 $result=Invoke-DoctorCheck 'next' { New-DoctorResult 'next' OK 'continued' }
@@ -35,6 +32,15 @@ Assert-That ($doctorExit -eq 1) 'Broken setup did not return exit 1.'
 Assert-That (@($parsed | Where-Object Status -eq FAIL).Count -gt 0) 'JSON output lost failures.'
 Assert-That (@($parsed | Where-Object Name -eq Scope).Count -eq 1) 'A failed check prevented later checks.'
 Assert-That (-not (Test-Path (Join-Path $fixture 'config'))) 'Doctor modified the fixture checkout.'
+# A different checkout must use its own requiredCommands, not the runner's manifest.
+$configuration = Get-SetupConfig $RepoRoot
+$configuration.requiredCommands = @('dotfiles-fixture-command-does-not-exist')
+$configuration | ConvertTo-Json -Depth 10 | Set-Content (Join-Path $fixture 'setup.json')
+$jsonOutput = & pwsh -NoProfile -File (Join-Path $RepoRoot 'doctor.ps1') -DotfilesPath $fixture -Json
+$parsed = @($jsonOutput | ConvertFrom-Json)
+Assert-That (@($parsed | Where-Object Name -eq 'Command: dotfiles-fixture-command-does-not-exist').Count -eq 1) 'Doctor ignored the selected checkout manifest.'
+Assert-That (@($parsed | Where-Object Name -eq 'Command: pwsh').Count -eq 0) 'Doctor used the runner checkout manifest.'
+
 # Mock link metadata: no real user links are modified.
 function Get-Item { param($LiteralPath,[switch]$Force,$ErrorAction) [pscustomobject]@{LinkType='Junction';Target=$script:target} }
 $script:target=$fixture

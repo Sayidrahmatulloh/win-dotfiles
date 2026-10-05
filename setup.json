@@ -1,0 +1,107 @@
+{
+  "scoop": {
+    "buckets": [
+      "main",
+      "extras",
+      "nerd-fonts"
+    ],
+    "packages": [
+      "bun",
+      "cacert",
+      "curl",
+      "dark",
+      "fd",
+      "ffmpeg",
+      "fzf",
+      "gcc",
+      "gh",
+      "7zip",
+      "go",
+      "helix",
+      "innounp",
+      "jq",
+      "llvm",
+      "lua",
+      "luajit",
+      "luarocks",
+      "make",
+      "neovim",
+      "nodejs",
+      "oh-my-posh",
+      "python",
+      "ripgrep",
+      "rust",
+      "stylua",
+      "tree-sitter",
+      "autohotkey",
+      "keyviz",
+      "lazygit",
+      "posh-git",
+      "psfzf",
+      "terminal-icons"
+    ],
+    "fonts": [
+      "JetBrainsMono-NF",
+      "CascadiaCode-NF",
+      "CascadiaMono-NF",
+      "FiraCode-NF"
+    ]
+  },
+  "winget": [
+    "Zen-Team.Zen-Browser",
+    "Google.Chrome.EXE",
+    "glzr-io.glazewm",
+    "RamenSoftware.Windhawk",
+    "Microsoft.VisualStudioCode",
+    "Microsoft.VisualStudio.2022.BuildTools",
+    "Microsoft.PowerShell",
+    "Microsoft.WindowsTerminal",
+    "Microsoft.WSL",
+    "HaiNguyen.Mechvibes",
+    "Voidstar.FilePilot",
+    "Microsoft.PowerToys",
+    "Devolutions.UniGetUI"
+  ],
+  "links": [
+    {
+      "source": "config/powershell",
+      "root": "USERPROFILE",
+      "destination": ".config/powershell"
+    },
+    {
+      "source": "config/nvim",
+      "root": "LOCALAPPDATA",
+      "destination": "nvim"
+    },
+    {
+      "source": "config/glzr/glazewm",
+      "root": "USERPROFILE",
+      "destination": ".glzr/glazewm"
+    },
+    {
+      "source": "config/glzr/zebar",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar"
+    }
+  ],
+  "requiredCommands": [
+    "pwsh",
+    "winget",
+    "scoop",
+    "git",
+    "bun",
+    "nvim",
+    "oh-my-posh",
+    "fzf",
+    "rg",
+    "gcc",
+    "node",
+    "python",
+    "code"
+  ],
+  "zebar": {
+    "widget": "config/glzr/zebar/attaquer-solid-ts",
+    "fontPackage": "CascadiaMono-NF",
+    "fontFile": "CaskaydiaMonoNerdFont-Regular.ttf"
+  }
+}

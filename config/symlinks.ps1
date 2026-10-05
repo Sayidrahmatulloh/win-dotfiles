@@ -17,14 +17,8 @@ $PROFILE_PATH = if ($PROFILE -and (Test-Path (Split-Path $PROFILE -Parent))) {
 } else {
   "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 }
-$PROFILE_LINE = '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
-
-$SYMLINKS = @(
-  @{ Src = "$DOTFILES\config\powershell"; Dst = "$env:USERPROFILE\.config\powershell" }
-  @{ Src = "$DOTFILES\config\nvim"; Dst = "$env:LOCALAPPDATA\nvim" }
-  @{ Src = "$DOTFILES\config\glzr\glazewm"; Dst = "$env:USERPROFILE\.glzr\glazewm" }
-  @{ Src = "$DOTFILES\config\glzr\zebar"; Dst = "$env:USERPROFILE\.glzr\zebar" }
-)
+$PROFILE_LINE = Get-PowerShellProfileLine
+$SYMLINKS = @(Get-ConfigLinks -RepoRoot $DOTFILES -Configuration (Get-SetupConfig -RepoRoot $DOTFILES))
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -56,77 +50,52 @@ function Initialize-SourceDirs {
   }
 }
 
-# Returns $true when $Dst is a symlink or junction pointing exactly to $Src
-function Test-SymlinkValid {
-  param([string]$Src, [string]$Dst)
-
-  $item = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-  if (-not $item -or ($item.LinkType -ne 'SymbolicLink' -and $item.LinkType -ne 'Junction')) { return $false }
-
-  # $item.Target can be [string[]] on Windows — normalise to scalar
-  $target = (@($item.Target)[0]).TrimEnd('\')
-  $normalizedSrc = $Src.TrimEnd('\')
-  return ($target -eq $normalizedSrc)
-}
-
 function New-Symlink {
-  param(
-    [string]$Src,
-    [string]$Dst,
-    [System.Collections.Generic.List[string]]$Linked,
-    [System.Collections.Generic.List[string]]$Failed
-  )
-
-  # Ensure parent directory exists
-  $parent = Split-Path $Dst -Parent
-  if (-not (Test-Path $parent)) {
-    New-Item -ItemType Directory -Path $parent -Force | Out-Null
-  }
-
-  # Already correct — nothing to do
-  if (Test-SymlinkValid -Src $Src -Dst $Dst) {
-    Write-Skip "already linked: $Dst"
-    return
-  }
-
-  $existing = Get-Item $Dst -Force -ErrorAction SilentlyContinue
-
-  if ($existing) {
-    if ($existing.LinkType -in @('SymbolicLink', 'Junction')) {
-      # Stale link pointing somewhere else — safe to remove
-      Remove-Item $Dst -Force
-    }
-    else {
-      # Real directory or file — safely backup instead of skipping
-      $ts = (Get-Date).ToString('yyyyMMdd_HHmmss')
-      $bak = "${Dst}.bak_${ts}"
-      try {
-        Move-Item -Path $Dst -Destination $bak -Force
-        Write-Warn "backed up existing folder: $Dst -> $bak"
-      }
-      catch {
-        Write-Fail "could not backup existing folder: $Dst"
-        $Failed.Add($Dst)
-        return
-      }
-    }
-  }
-
-  try {
-    # Try SymbolicLink first, fallback to Junction if unprivileged
+    param(
+        [string]$Src,
+        [string]$Dst,
+        [System.Collections.Generic.List[string]]$Linked,
+        [System.Collections.Generic.List[string]]$Failed
+    )
+    $backup = $null
     try {
-      New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -Force -ErrorAction Stop | Out-Null
+        if (-not (Test-Path -LiteralPath $Src -PathType Container)) { throw "Source folder is missing: $Src" }
+        if (Test-ConfigLink -Source $Src -Destination $Dst) { Write-Skip "already linked: $Dst"; return }
+        New-Item -ItemType Directory -Path (Split-Path $Dst -Parent) -Force | Out-Null
+        $existing = Get-Item -LiteralPath $Dst -Force -ErrorAction SilentlyContinue
+        if ($existing) {
+            # Moving a directory entry preserves both real folders and old link targets.
+            $backup = $Dst + '.bak_' + [guid]::NewGuid().ToString('N')
+            Move-Item -LiteralPath $Dst -Destination $backup -ErrorAction Stop
+            Write-Warn "backed up: $Dst -> $backup"
+        }
+        try { New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -ErrorAction Stop | Out-Null }
+        catch {
+            $partial = Get-Item -LiteralPath $Dst -Force -ErrorAction SilentlyContinue
+            if ($partial) {
+                if ($partial.LinkType -notin @('Junction','SymbolicLink')) { throw 'Unexpected real folder appeared at the destination.' }
+                Remove-Item -LiteralPath $Dst -Force -ErrorAction Stop
+            }
+            New-Item -ItemType Junction -Path $Dst -Target $Src -ErrorAction Stop | Out-Null
+        }
+        if (-not (Test-ConfigLink -Source $Src -Destination $Dst)) { throw 'New link target could not be verified.' }
+        Write-Done "linked: $Dst"
+        $Linked.Add($Dst)
+    } catch {
+        Write-Fail "link failed: $Dst : $($_.Exception.Message)"
+        $Failed.Add($Dst)
+        if ($backup -and (Get-Item -LiteralPath $backup -Force -ErrorAction SilentlyContinue)) {
+            try {
+                $partial = Get-Item -LiteralPath $Dst -Force -ErrorAction SilentlyContinue
+                if ($partial) {
+                    if ($partial.LinkType -notin @('Junction','SymbolicLink')) { throw "Destination contains a real folder; backup kept at $backup" }
+                    Remove-Item -LiteralPath $Dst -Force -ErrorAction Stop
+                }
+                Move-Item -LiteralPath $backup -Destination $Dst -ErrorAction Stop
+                Write-Warn "restored original configuration: $Dst"
+            } catch { Write-Fail "Rollback failed; recover from $backup : $($_.Exception.Message)" }
+        }
     }
-    catch {
-      New-Item -ItemType Junction -Path $Dst -Target $Src -Force -ErrorAction Stop | Out-Null
-    }
-    Write-Done "linked: $Dst"
-    $Linked.Add($Dst)
-  }
-  catch {
-    Write-Fail "link failed: $Dst — $_"
-    $Failed.Add($Dst)
-  }
 }
 
 # Ensure the PowerShell profile sources our user_profile.ps1

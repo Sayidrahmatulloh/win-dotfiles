@@ -1,13 +1,10 @@
-param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+$ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-$ErrorActionPreference='Stop'
-$tokens=$null; $errors=$null
-$ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $RepoRoot 'config\git\git.ps1'),[ref]$tokens,[ref]$errors)
-if ($errors.Count) { throw ($errors | Out-String) }
-foreach ($statement in $ast.EndBlock.Statements) {
-    if ($statement -is [Management.Automation.Language.FunctionDefinitionAst]) { Invoke-Expression $statement.Extent.Text }
-}
-function Assert-That([bool]$Condition,[string]$Message) { if (-not $Condition) { throw $Message } }
+. "$PSScriptRoot\helpers.ps1"
+. "$RepoRoot\lib\files.ps1"
+. "$RepoRoot\lib\settings.ps1"
+Invoke-Expression (Read-Functions 'config/git/git.ps1')
 $fixture=Join-Path ([IO.Path]::GetTempPath()) ('git config test '+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 $source=Join-Path $fixture 'shared config'; $destination=Join-Path $fixture '.gitconfig'

@@ -15,12 +15,8 @@ $SYSTEM_FONTS = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 $FILES_DIR = "$PSScriptRoot\files"
 $TEMP_DIR = "$env:TEMP\dotfiles-fonts"
 
-$SCOOP_FONTS = @(
-  'JetBrainsMono-NF'
-  'CascadiaCode-NF'
-  'CascadiaMono-NF'
-  'FiraCode-NF'
-)
+$configuration = Get-SetupConfig -RepoRoot (Split-Path $PSScriptRoot -Parent)
+$SCOOP_FONTS = $configuration.scoop.fonts
 
 # ── Bootstrap ──────────────────────────────────────────────────────────────────
 
@@ -38,65 +34,51 @@ function Test-ScoopFontInstalled {
 }
 
 function Ensure-NerdFontsBucket {
-  if (Test-Path "$SCOOP_ROOT\buckets\nerd-fonts") { return }
-  Write-Step '  ' 'nerd-fonts' 'adding bucket'
-  $null = scoop bucket add nerd-fonts *>&1
-  if ($LASTEXITCODE -eq 0) {
-    Write-Done 'bucket added: nerd-fonts'
-    $null = scoop update *>&1
-  }
-  else {
-    throw 'Failed to add nerd-fonts bucket.'
-  }
+    if (Test-BucketAdded 'nerd-fonts') { return }
+    $null = Add-Bucket 'nerd-fonts'
+    $null = Invoke-PackageCommand scoop @('update')
 }
 
-function Update-ScoopFont {
-  param([string]$Name)
-  $out = scoop update $Name *>&1
-  if ($LASTEXITCODE -ne 0) { return 'failed' }
-  if ($out -match 'Latest versions for all apps are installed' -or
-    $out -match 'is already the newest version') { return 'latest' }
-  return 'upgraded'
+# Check both the file and registry: retry repairs a partial font installation.
+function Get-FontRegistration {
+    param([string]$FontName)
+    @{
+        Path = 'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
+        Name = [IO.Path]::GetFileNameWithoutExtension($FontName) + ' (TrueType)'
+    }
 }
 
-# ── File font helpers ─────────────────────────────────────────────────────────
+function Test-FontRegistered {
+    param([string]$FontPath)
+    $registration = Get-FontRegistration -FontName (Split-Path $FontPath -Leaf)
+    $value = Get-ItemPropertyValue -LiteralPath $registration.Path -Name $registration.Name -ErrorAction SilentlyContinue
+    return (Test-Path -LiteralPath $FontPath -PathType Leaf) -and ($value -eq $FontPath)
+}
 
 function Install-FontFile {
-  param(
-    [string]$FontPath,
-    [System.Collections.Generic.List[string]]$Installed,
-    [System.Collections.Generic.List[string]]$Failed
-  )
-
-  $name = Split-Path $FontPath -Leaf
-  $dest = "$SYSTEM_FONTS\$name"
-
-  if (Test-Path $dest) {
-    Write-Skip "already installed: $name"
-    return
-  }
-
-  try {
-    # Register ZIP fonts for the current user; no elevated shell is needed.
-    New-Item -ItemType Directory -Path $SYSTEM_FONTS -Force | Out-Null
-    Copy-Item -LiteralPath $FontPath -Destination $dest -ErrorAction Stop
-    $fontRegistry = 'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
-    if (-not (Test-Path -LiteralPath $fontRegistry)) { New-Item -Path $fontRegistry | Out-Null }
-    $registrationName = [IO.Path]::GetFileNameWithoutExtension($name) + ' (TrueType)'
-    New-ItemProperty -Path $fontRegistry -Name $registrationName -Value $dest -PropertyType String -Force -ErrorAction Stop | Out-Null
-    if (Test-Path $dest) {
-      Write-Done "installed: $name"
-      $Installed.Add($name)
+    param(
+        [string]$FontPath,
+        [System.Collections.Generic.List[string]]$Installed,
+        [System.Collections.Generic.List[string]]$Failed
+    )
+    $name = Split-Path $FontPath -Leaf
+    $destination = Join-Path $SYSTEM_FONTS $name
+    try {
+        if (Test-FontRegistered $destination) { Write-Skip "already installed: $name"; return }
+        New-Item -ItemType Directory -Path $SYSTEM_FONTS -Force | Out-Null
+        if (-not (Test-Path -LiteralPath $destination -PathType Leaf)) {
+            Copy-Item -LiteralPath $FontPath -Destination $destination -ErrorAction Stop
+        }
+        $registration = Get-FontRegistration $name
+        if (-not (Test-Path -LiteralPath $registration.Path)) { New-Item -Path $registration.Path -Force | Out-Null }
+        New-ItemProperty -LiteralPath $registration.Path -Name $registration.Name -Value $destination -PropertyType String -Force -ErrorAction Stop | Out-Null
+        if (-not (Test-FontRegistered $destination)) { throw 'Font registration could not be verified.' }
+        Write-Done "installed or repaired: $name"
+        $Installed.Add($name)
+    } catch {
+        Write-Fail "$name : $($_.Exception.Message)"
+        $Failed.Add($name)
     }
-    else {
-      Write-Fail "timed out: $name"
-      $Failed.Add($name)
-    }
-  }
-  catch {
-    Write-Fail "failed: $name — $($_.Exception.Message)"
-    $Failed.Add($name)
-  }
 }
 
 # ── Core logic ────────────────────────────────────────────────────────────────
@@ -105,42 +87,10 @@ function Install-ScoopFonts {
   param([string[]]$Fonts)
   Write-Section 'Scoop fonts:'
   Ensure-NerdFontsBucket
-
-  $r = New-Results
-  $i = 0
-
-  foreach ($font in $Fonts) {
-    $i++
-    $pfx = "  [$i/$($Fonts.Count)]"
-
-    if (Test-ScoopFontInstalled $font) {
-      if (-not $Update) {
-        Write-Skip "already installed: $font"
-        $r.Latest.Add($font)
-        continue
-      }
-      Write-Step $pfx $font 'upgrading'
-      switch (Update-ScoopFont $font) {
-        'upgraded' { Write-Done "upgraded: $font"; $r.Upgraded.Add($font) }
-        'latest' { Write-Skip "up to date: $font"; $r.Latest.Add($font) }
-        'failed' { Write-Fail "upgrade failed: $font"; $r.Failed.Add($font) }
-      }
-    }
-    else {
-      Write-Step $pfx $font 'installing'
-      $null = scoop install $font *>&1
-      if ($LASTEXITCODE -eq 0) {
-        Write-Done "installed: $font"
-        $r.Installed.Add($font)
-      }
-      else {
-        Write-Fail "failed: $font"
-        $r.Failed.Add($font)
-      }
-    }
-  }
-
-  return $r
+  Sync-Packages -Names $Fonts -Update:$Update `
+    -IsInstalled { param($name) Test-ScoopFontInstalled $name } `
+    -Install { param($name) Install-Tool $name } `
+    -Upgrade { param($name) Update-Tool $name }
 }
 
 function Install-ZipFonts {
@@ -155,13 +105,14 @@ function Install-ZipFonts {
     return $r
   }
 
-  if (Test-Path $TempDir) { Remove-Item $TempDir -Recurse -Force }
-  $null = New-Item -ItemType Directory -Path $TempDir
+  $tempRoot = [IO.Path]::GetFullPath($TempDir).TrimEnd('\')
+  $workDir = Join-Path $tempRoot ('fonts-' + [guid]::NewGuid().ToString('N'))
+  $null = New-Item -ItemType Directory -Path $workDir -Force
 
   try {
     foreach ($zip in $zips) {
       Write-Step '  ' $zip.Name 'extracting'
-      $dest = "$TempDir\$($zip.BaseName)"
+      $dest = "$workDir\$($zip.BaseName)"
       Expand-Archive -Path $zip.FullName -DestinationPath $dest -Force
       Write-Host ''   # newline after inline Write-Step
 
@@ -178,7 +129,12 @@ function Install-ZipFonts {
     }
   }
   finally {
-    if (Test-Path $TempDir) { Remove-Item $TempDir -Recurse -Force }
+    # Delete only this run's checked private directory, never the shared temp root.
+    $resolvedWorkDir = [IO.Path]::GetFullPath($workDir)
+    if (-not $resolvedWorkDir.StartsWith($tempRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
+      throw 'Font extraction directory is outside its temporary root.'
+    }
+    if (Test-Path -LiteralPath $resolvedWorkDir) { Remove-Item -LiteralPath $resolvedWorkDir -Recurse -Force }
   }
 
   return $r

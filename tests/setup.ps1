@@ -1,16 +1,10 @@
-param([string]$RepoRoot = 'D:/win-dotfiles')
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-function Read-Functions([string]$RelativePath) {
-    $tokens=$null; $errors=$null
-    $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $RepoRoot $RelativePath),[ref]$tokens,[ref]$errors)
-    if ($errors.Count) { throw ($errors | Out-String) }
-    return ($ast.EndBlock.Statements | Where-Object { $_ -is [Management.Automation.Language.FunctionDefinitionAst] } | ForEach-Object { $_.Extent.Text }) -join "`n"
-}
-function Assert-That([bool]$Condition,[string]$Message) { if (-not $Condition) { throw $Message } }
+. "$PSScriptRoot\helpers.ps1"
 
 # Load functions, never entrypoints: no installs, registry changes or real links.
-Invoke-Expression (Read-Functions 'lib/utils.ps1')
+. "$RepoRoot\lib\utils.ps1"
 function Write-Stage {}
 function Write-Fail {}
 function Write-Skip {}
@@ -58,6 +52,7 @@ try { Main } catch { $threw=$true }
 Assert-That $threw 'Winget package failure did not reach installer.'
 
 Invoke-Expression (Read-Functions 'install.ps1')
+Invoke-Expression (Read-Functions 'lib/setup.ps1')
 $DOTFILES=$RepoRoot
 $script:bunCalls=0
 function bun { $script:bunCalls++; $global:LASTEXITCODE=1 }

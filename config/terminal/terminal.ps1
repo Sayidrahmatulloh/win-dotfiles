@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [ValidateSet('Restore', 'Export')][string]$Mode = 'Restore',
     [string]$SettingsPath
@@ -6,14 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Get-TerminalSettingsPath {
-    param([string]$LocalAppData)
-    $packaged = Join-Path $LocalAppData 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-    $unpackaged = Join-Path $LocalAppData 'Microsoft\Windows Terminal\settings.json'
-    if (Test-Path -LiteralPath $packaged) { return $packaged }
-    if (Test-Path -LiteralPath $unpackaged) { return $unpackaged }
-    return $packaged
-}
+. "$PSScriptRoot\..\..\lib\files.ps1"
 
 function Copy-TerminalSettings {
     param([string]$Source, [string]$Destination)
@@ -25,8 +18,7 @@ function Copy-TerminalSettings {
             Write-Host "Terminal settings already match: $Destination"
             return
         }
-        $backup = $Destination + '.bak_' + [guid]::NewGuid().ToString('N')
-        Copy-Item -LiteralPath $Destination -Destination $backup -ErrorAction Stop
+        $backup = New-ConfigBackup -Path $Destination
         Write-Host "Terminal settings backup: $backup"
     }
     New-Item -ItemType Directory -Path (Split-Path $Destination -Parent) -Force | Out-Null

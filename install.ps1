@@ -1,3 +1,4 @@
+﻿# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
 [CmdletBinding()]
 param([string]$DotfilesPath)
 Set-StrictMode -Version Latest
@@ -35,44 +36,6 @@ function Sync-Repo {
     }
     if (-not (Test-Path -LiteralPath "$DOTFILES\lib\utils.ps1")) { throw 'The checkout is missing lib/utils.ps1.' }
 }
-function Install-PSModules {
-    $failed = [Collections.Generic.List[string]]::new()
-    foreach ($module in @('posh-git', 'Terminal-Icons', 'PSFzf', 'Microsoft.WinGet.CommandNotFound')) {
-        if (Get-Module -ListAvailable -Name $module) { Write-Skip "$module already installed"; continue }
-        try {
-            Install-Module -Name $module -Repository PSGallery -Scope CurrentUser -Force -ErrorAction Stop
-            if (-not (Get-Module -ListAvailable -Name $module)) { throw 'Module not found after installation.' }
-            Write-Done "installed: $module"
-        } catch { $failed.Add($module); Write-Fail "$module : $($_.Exception.Message)" }
-    }
-    if ($failed.Count) { throw "Modules not installed: $($failed -join ', ')" }
-}
-function Ensure-ZebarFont {
-    param([string]$WidgetDir)
-    $fontName = 'CaskaydiaMonoNerdFont-Regular.ttf'
-    $target = Join-Path $WidgetDir "src\fonts\$fontName"
-    if (Test-Path -LiteralPath $target -PathType Leaf) { return }
-    $scoopRoot = Get-ScoopRoot
-    if (-not $scoopRoot) { throw 'Cannot locate Scoop to restore the Zebar font.' }
-    $fontDir = Join-Path $scoopRoot 'apps\CascadiaMono-NF\current'
-    $source = if (Test-Path -LiteralPath $fontDir) {
-        Get-ChildItem -LiteralPath $fontDir -Filter $fontName -File -Recurse | Select-Object -First 1
-    }
-    if (-not $source) { throw 'Zebar font is missing. Install CascadiaMono-NF through the Fonts stage and retry.' }
-    New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force | Out-Null
-    Copy-Item -LiteralPath $source.FullName -Destination $target
-}
-function Build-Zebar {
-    $widgetDir = Join-Path $DOTFILES 'config\glzr\zebar\attaquer-solid-ts'
-    if (-not (Test-Path -LiteralPath "$widgetDir\package.json")) { throw 'Zebar package.json is missing.' }
-    if (-not (Get-Command bun -ErrorAction SilentlyContinue)) { throw 'Bun is missing. Retry the Scoop packages stage.' }
-    Ensure-ZebarFont -WidgetDir $widgetDir
-    & bun install --cwd $widgetDir --frozen-lockfile
-    if ($LASTEXITCODE -ne 0) { throw "Zebar dependencies failed (exit $LASTEXITCODE)." }
-    & bun run --cwd $widgetDir build
-    if ($LASTEXITCODE -ne 0) { throw "Zebar build failed (exit $LASTEXITCODE)." }
-    if (-not (Test-Path -LiteralPath "$widgetDir\dist\index.html")) { throw 'Zebar build did not produce dist/index.html.' }
-}
 function Main {
     if ($PSVersionTable.PSVersion.Major -lt 7 -or -not $IsWindows) { throw 'Use bootstrap.ps1 from Windows PowerShell to install PowerShell 7 first.' }
     $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
@@ -86,6 +49,10 @@ function Main {
         Install-Scoop | Out-Host
         Sync-Repo | Out-Host
         . "$DOTFILES\lib\utils.ps1"
+        . "$DOTFILES\lib\setup.ps1"
+        # Validate all input data before any package/configuration stage runs.
+        $null = Get-SetupConfig -RepoRoot $DOTFILES
+        $null = Get-PowerShellModules -RepoRoot $DOTFILES
         Write-Banner
         $results = [Collections.Generic.List[object]]::new()
         $results.Add((Invoke-Step 'Scoop packages' { & "$DOTFILES\packages\scoop.ps1" }))

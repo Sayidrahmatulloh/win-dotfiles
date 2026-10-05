@@ -1,7 +1,9 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param([string]$GlobalConfigPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+. "$PSScriptRoot\..\..\lib\files.ps1"
 
 function Install-GitConfig {
     param([string]$Source, [string]$Destination)
@@ -22,8 +24,7 @@ function Install-GitConfig {
                 return
             }
         }
-        $backup = $Destination + '.bak_' + [guid]::NewGuid().ToString('N')
-        Copy-Item -LiteralPath $Destination -Destination $backup -ErrorAction Stop
+        $backup = New-ConfigBackup -Path $Destination
         Write-Host "Git config backup: $backup"
     }
     New-Item -ItemType Directory -Path (Split-Path $Destination -Parent) -Force | Out-Null

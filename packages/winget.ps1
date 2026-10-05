@@ -1,6 +1,4 @@
-# ============================================================
-#  packages/winget.ps1 — Install and upgrade apps via Winget
-# ============================================================
+﻿# packages/winget.ps1 — Install and upgrade apps via Winget
 
 param([switch]$Update)
 
@@ -9,27 +7,9 @@ $ErrorActionPreference = 'Stop'
 
 . "$PSScriptRoot\..\lib\utils.ps1"
 
-# ── App list ───────────────────────────────────────────────────────────────────
-
-$APPS = @(
-  # Browsers
-  'Zen-Team.Zen-Browser'
-  'Google.Chrome.EXE'
-  # Window management
-  'glzr-io.glazewm'
-  'RamenSoftware.Windhawk'
-  # Development
-  'Microsoft.VisualStudioCode'
-  'Microsoft.VisualStudio.2022.BuildTools'
-  'Microsoft.PowerShell'
-  'Microsoft.WindowsTerminal'
-  'Microsoft.WSL'
-  # Utilities
-  'HaiNguyen.Mechvibes'
-  'Voidstar.FilePilot'
-  'Microsoft.PowerToys'
-  'Devolutions.UniGetUI'
-)
+# Package IDs live in setup.json; this file only knows Winget commands.
+$configuration = Get-SetupConfig -RepoRoot (Split-Path $PSScriptRoot -Parent)
+$APPS = $configuration.winget
 
 $WINGET_FLAGS = @(
   '--silent'
@@ -37,7 +17,7 @@ $WINGET_FLAGS = @(
   '--accept-source-agreements'
 )
 
-# ── Guards ─────────────────────────────────────────────────────────────────────
+# Guards
 
 function Assert-WingetAvailable {
   if (-not (Get-Command 'winget' -ErrorAction SilentlyContinue)) {
@@ -46,76 +26,43 @@ function Assert-WingetAvailable {
   }
 }
 
-# ── App helpers ────────────────────────────────────────────────────────────────
+# App helpers
 
 function Test-AppInstalled {
-  param([string]$AppId)
-  $out = winget list --id $AppId --exact --accept-source-agreements 2>&1
-  # Check both exit code and that the AppId actually appears in output
-  return ($LASTEXITCODE -eq 0) -and ($out -match [regex]::Escape($AppId))
+    param([string]$AppId)
+    # 0x8A150014 = no applications found. Every other failure is an inventory error.
+    $result = Invoke-PackageCommand winget @('list','--id',$AppId,'--exact','--accept-source-agreements') -AllowedExitCodes @(0,-1978335212)
+    if ($result.ExitCode -eq -1978335212) { return $false }
+    if (($result.Output | Out-String) -notmatch [regex]::Escape($AppId)) { throw "Winget inventory did not identify $AppId." }
+    return $true
 }
 
 function Install-App {
-  param([string]$AppId)
-  $null = winget install --id $AppId --exact @WINGET_FLAGS 2>&1
-  return $LASTEXITCODE -eq 0
+    param([string]$AppId)
+    $null = Invoke-PackageCommand winget (@('install','--id',$AppId,'--exact','--source','winget') + $WINGET_FLAGS)
+    return $true
 }
 
 function Update-App {
-  param([string]$AppId)
-  $out = winget upgrade --id $AppId --exact @WINGET_FLAGS 2>&1
-  # Exit code 0  = upgraded successfully
-  # Exit code -1978335189 (0x8A150015) = no upgrade available — treat as latest
-  if ($LASTEXITCODE -eq 0) { return 'upgraded' }
-  if ($out -match 'No applicable upgrade found' -or
-    $out -match 'No available upgrade found' -or
-    $LASTEXITCODE -eq -1978335189) { return 'latest' }
-  return 'failed'
+    param([string]$AppId)
+    # 0x8A15002B = update not applicable; source/installer errors must remain failures.
+    $result = Invoke-PackageCommand winget (@('upgrade','--id',$AppId,'--exact') + $WINGET_FLAGS) -AllowedExitCodes @(0,-1978335189)
+    if ($result.ExitCode -eq -1978335189) { return 'latest' }
+    return 'upgraded'
 }
 
-# ── Core logic ─────────────────────────────────────────────────────────────────
+# Core logic
 
 function Sync-Apps {
-  param([string[]]$Apps)
-  Write-Section 'Apps:'
-
-  $r = New-Results
-  $i = 0
-
-  foreach ($app in $Apps) {
-    $i++
-    $pfx = "  [$i/$($Apps.Count)]"
-
-    if (Test-AppInstalled $app) {
-      if (-not $Update) {
-        Write-Skip "already installed: $app"
-        $r.Latest.Add($app)
-        continue
-      }
-      Write-Step $pfx $app 'upgrading'
-      switch (Update-App $app) {
-        'upgraded' { Write-Done "upgraded: $app"; $r.Upgraded.Add($app) }
-        'latest' { Write-Skip "up to date: $app"; $r.Latest.Add($app) }
-        'failed' { Write-Fail "upgrade failed: $app"; $r.Failed.Add($app) }
-      }
-    }
-    else {
-      Write-Step $pfx $app 'installing'
-      if (Install-App $app) {
-        Write-Done "installed: $app"
-        $r.Installed.Add($app)
-      }
-      else {
-        Write-Fail "install failed: $app"
-        $r.Failed.Add($app)
-      }
-    }
-  }
-
-  return $r
+    param([string[]]$Apps)
+    Write-Section 'Apps:'
+    Sync-Packages -Names $Apps -Update:$Update `
+        -IsInstalled { param($name) Test-AppInstalled $name } `
+        -Install { param($name) Install-App $name } `
+        -Upgrade { param($name) Update-App $name }
 }
 
-# ── Entry point ────────────────────────────────────────────────────────────────
+# Entry point
 
 function Main {
   Assert-WingetAvailable

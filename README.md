@@ -2,6 +2,8 @@
 
 Windows 10/11 uchun mukammal sozlangan, tezkor va zamonaviy dasturchi muhiti konfiguratsiyalari.
 
+Loyihani birinchi marta ko'rayotgan bo'lsangiz, [kodni o'qish yo'riqnomasi](docs/code-guide.md)dan boshlang. Paket va yo'llar `setup.json` ichida; bajariladigan amallar PowerShell fayllarida saqlanadi.
+
 ---
 
 ## ✨ Xususiyatlar
@@ -60,25 +62,22 @@ Zebar Bun va uning lockfile'i orqali yig'iladi. Build muvaffaqiyatsiz tugasa, es
 
 ```text
 win-dotfiles/
-├── bootstrap.ps1               # Windows PowerShell -> PowerShell 7
-├── install.ps1                 # Asosiy o'rnatish va natija hisoboti
-├── config/
-│   ├── powershell/             # PowerShell profili va Oh My Posh mavzusi
-│   │   ├── user_profile.ps1    # Profil sozlamalari, aliaslar, yordamchi funksiyalar
-│   │   └── dev.omp.json        # Oh My Posh mavzusi
-│   ├── glzr/
-│   │   ├── glazewm/            # GlazeWM konfiguratsiyasi (config.yaml)
-│   │   └── zebar/              # Zebar status bari va widgetlar
-│   ├── nvim/                   # Neovim va VSCode Neovim konfiguratsiyasi
-│   └── symlinks.ps1            # Konfiguratsiyalarni tizim yo'llariga bog'lash skripti
-├── packages/
-│   ├── scoop.ps1               # CLI vositalari (git, fzf, ripgrep, node, go, rust va b.)
-│   └── winget.ps1              # GUI ilovalar (VS Code, Chrome, GlazeWM, Windows Terminal)
-├── fonts/
-│   ├── fonts.ps1               # Tizimga shriftlarni o'rnatish skripti
-│   └── files/                  # Maxsus shriftlar arxivi
-└── lib/
-    └── utils.ps1               # Skriptlar uchun umumiy yordamchi funksiyalar
+├── bootstrap.ps1       # Windows PowerShell -> PowerShell 7
+├── install.ps1         # Setup bosqichlari, log va natija
+├── doctor.ps1          # O'zgartirmasdan tekshirish
+├── setup.json          # Paketlar, shriftlar va konfiguratsiya yo'llari
+├── config/             # Dasturlarning o'z konfiguratsiyalari
+│   ├── git/            # Umumiy Git sozlamalari va ulash skripti
+│   ├── terminal/       # Terminal sozlamalari va saqlash/tiklash skripti
+│   ├── powershell/     # Profil, mavzu va modules.json
+│   ├── nvim/           # Neovim / VS Code Neovim
+│   ├── glzr/           # GlazeWM va Zebar
+│   └── symlinks.ps1    # Konfiguratsiya papkalarini ulash
+├── packages/           # Scoop va Winget bosqichlari
+├── fonts/              # Shrift o'rnatish va ZIP arxivlar
+├── lib/                # Vazifasi bo'yicha ajratilgan umumiy funksiyalar
+├── docs/code-guide.md  # Kodni o'qish va kengaytirish yo'riqnomasi
+└── tests/run.ps1       # Barcha regression testlarni ishga tushirish
 ```
 
 ---
@@ -186,3 +185,26 @@ current branch and line-ending settings. Authentication must be set up separatel
 The global include follows the checkout path. After moving the repo, rerun this
 step and remove the old include if necessary. Repository-local settings take
 precedence; later entries in a config can override earlier entries.
+
+
+## Kodni tekshirish
+
+PowerShell 7 dan barcha testlar:
+
+```powershell
+.\tests\run.ps1
+```
+
+Paket qo'shish uchun `setup.json`, modul qo'shish uchun
+`config/powershell/modules.json` ni tahrirlang. Batafsil tartib
+[kodni o'qish yo'riqnomasida](docs/code-guide.md).
+
+
+## Setup xatolaridan tiklanish
+
+Setup paket bosqichlaridan oldin konfiguratsiya tuzilmasini tekshiradi. Inventar
+xatosi paket yo'qligi deb qabul qilinmaydi; buyruqning exit code va xato chiqishi
+logda saqlanadi. Link yaratish muvaffaqiyatsiz bo'lsa oldingi konfiguratsiya
+qaytariladi. ZIP shriftlarning registry yozuvi ham tekshiriladi va qayta setup
+yarim qolgan ro'yxatdan o'tkazishni tuzatadi. Batafsil xatti-harakat va testlar
+[kodni o'qish yo'riqnomasida](docs/code-guide.md).

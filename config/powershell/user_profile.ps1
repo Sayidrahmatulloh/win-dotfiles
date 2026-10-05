@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 #  config/powershell/user_profile.ps1
 # ============================================================
 
@@ -8,18 +8,21 @@
 # ── Module imports ────────────────────────────────────────────
 # Wrapped individually so a missing module doesn't break the entire profile
 
-foreach ($module in @('posh-git', 'Terminal-Icons', 'Microsoft.WinGet.CommandNotFound', 'PSFzf')) {
+$modules = @()
+try { $modules = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'modules.json') -Raw | ConvertFrom-Json -ErrorAction Stop }
+catch { Write-Warning "Module list could not be read: $($_.Exception.Message)" }
+foreach ($module in $modules) {
   try { Import-Module -Name $module -ErrorAction Stop }
   catch { Write-Warning "Module '$module' not found. Run the packages script to install it." }
 }
 
 # Oh My Posh
 $omp_config = Join-Path $PSScriptRoot "dev.omp.json"
-if (Test-Path $omp_config) {
+if ((Test-Path $omp_config) -and (Get-Command oh-my-posh -ErrorAction SilentlyContinue)) {
   oh-my-posh --init --shell pwsh --config $omp_config | Invoke-Expression
 }
 else {
-  Write-Warning "Oh My Posh config not found: $omp_config"
+  Write-Warning "Oh My Posh command or config is unavailable: $omp_config"
 }
 
 # PSReadLine
@@ -32,11 +35,13 @@ if ($Host.UI.SupportsVirtualTerminal) {
 }
 
 # Fzf
-Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+f' -PSReadlineChordReverseHistory 'Ctrl+r'
+if (Get-Command Set-PsFzfOption -ErrorAction SilentlyContinue) {
+  Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+f' -PSReadlineChordReverseHistory 'Ctrl+r'
+}
 
 # ── Env ───────────────────────────────────────────────────────
 
-$gitSsh = 'C:\Windows\system32\OpenSSH\ssh.exe'
+$gitSsh = Join-Path $env:SystemRoot 'System32\OpenSSH\ssh.exe'
 if (Test-Path $gitSsh) {
   $env:GIT_SSH = $gitSsh
 }
@@ -84,29 +89,44 @@ function which {
 
 function Start-Neovide { neovide --frame none @args }
 
+function New-TempBuildDirectory {
+  $path = Join-Path ([IO.Path]::GetTempPath()) ('dotfiles-build-' + [guid]::NewGuid().ToString('N'))
+  New-Item -ItemType Directory -Path $path | Out-Null
+  return $path
+}
+
+function Remove-TempBuildDirectory {
+  param([string]$Path)
+  $resolved = [IO.Path]::GetFullPath($Path)
+  $root = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
+  if (-not $resolved.StartsWith($root + '\', [StringComparison]::OrdinalIgnoreCase) -or (Split-Path $resolved -Leaf) -notlike 'dotfiles-build-*') {
+    throw 'Build directory is outside the expected temporary location.'
+  }
+  if (Test-Path -LiteralPath $resolved) { Remove-Item -LiteralPath $resolved -Recurse -Force }
+}
+
 function Invoke-Cpp {
   param([Parameter(Mandatory)] [string] $cppFilePath)
-  if (-not (Test-Path $cppFilePath)) { Write-Error "Error: '$cppFilePath' not found."; return }
-  $exe = [IO.Path]::ChangeExtension($cppFilePath, '.exe')
-  $out = & g++ "$cppFilePath" -o "$exe" 2>&1
-  if ($LASTEXITCODE -ne 0) { Write-Error "Compilation failed:`n$out"; return }
-  Write-Host "Compilation successful. Running '$exe'..."
-  & $exe
-  Remove-Item $exe -Force -ErrorAction SilentlyContinue
+  $source = (Resolve-Path -LiteralPath $cppFilePath -ErrorAction Stop).Path
+  $directory = New-TempBuildDirectory
+  $exe = Join-Path $directory 'program.exe'
+  try {
+    $out = & g++ $source -o $exe 2>&1
+    if ($LASTEXITCODE -ne 0) { Write-Error "Compilation failed:`n$out"; return }
+    & $exe
+  } finally { Remove-TempBuildDirectory $directory }
 }
 
 function Invoke-Zig {
   param([Parameter(Mandatory)] [string] $zigFilePath)
-  if (-not (Test-Path $zigFilePath)) { Write-Error "Error: '$zigFilePath' not found."; return }
-  $exe = [IO.Path]::ChangeExtension($zigFilePath, '.exe')
-  $exeObj = [IO.Path]::ChangeExtension($zigFilePath, '.exe.obj')
-  $pdb = [IO.Path]::ChangeExtension($zigFilePath, '.pdb')
-  $out = & zig build-exe "$zigFilePath" 2>&1
-  if ($LASTEXITCODE -ne 0) { Write-Error "Compilation failed:`n$out"; return }
-  Write-Host "Compilation successful. Running '$exe'..."
-  & $exe
-  # -ErrorAction SilentlyContinue: .pdb and .exe.obj may not always be generated
-  Remove-Item $exe, $exeObj, $pdb -Force -ErrorAction SilentlyContinue
+  $source = (Resolve-Path -LiteralPath $zigFilePath -ErrorAction Stop).Path
+  $directory = New-TempBuildDirectory
+  $exe = Join-Path $directory 'program.exe'
+  try {
+    $out = & zig build-exe $source "-femit-bin=$exe" 2>&1
+    if ($LASTEXITCODE -ne 0) { Write-Error "Compilation failed:`n$out"; return }
+    & $exe
+  } finally { Remove-TempBuildDirectory $directory }
 }
 
 function Invoke-Swift {
@@ -164,22 +184,22 @@ function Clear-System {
 function Connect-Bandit {
   param([Parameter(Mandatory)] [int] $Level)
   $user = "bandit$Level"
-  $host = 'bandit.labs.overthewire.org'
+  $server = 'bandit.labs.overthewire.org'
   $port = 2220
   Write-Host "Connecting to Bandit Level $Level..." -ForegroundColor Cyan
-  Write-Host "ssh $user@$host -p $port" -ForegroundColor Yellow
+  Write-Host "ssh $user@$server -p $port" -ForegroundColor Yellow
   # Direct call instead of Invoke-Expression — avoids injection risk
-  & ssh "$user@$host" -p $port
+  & ssh "$user@$server" -p $port
 }
 
 function Update-Scoop {
   try {
-    Write-Host "`nUpdating packages..."     -ForegroundColor Yellow; scoop update *
-    Write-Host "`nCleaning old versions..." -ForegroundColor Yellow; scoop cleanup *
-    Write-Host "`nClearing cache..."        -ForegroundColor Yellow; scoop cache rm *
-    Write-Host "`nDone!" -ForegroundColor Green
-  }
-  catch {
-    Write-Host "`nError: $($_.Exception.Message)" -ForegroundColor Red
-  }
+    $PSNativeCommandUseErrorActionPreference = $false
+    foreach ($arguments in @(@('update','*'), @('cleanup','*'), @('cache','rm','*'))) {
+      $global:LASTEXITCODE = 0
+      & scoop @arguments
+      if ($LASTEXITCODE -ne 0) { throw "scoop $($arguments -join ' ') failed (exit $LASTEXITCODE). Later cleanup steps were skipped." }
+    }
+    Write-Host 'Scoop update and cleanup completed.' -ForegroundColor Green
+  } catch { Write-Error $_ -ErrorAction Continue }
 }
