@@ -108,3 +108,81 @@ Faqatgina simvolik havolalarni (symlink/junction) yangilash yoki qayta tekshiris
 ```
 
 Ushbu skript mavjud konfiguratsiyalarni xavfsiz ravishda `.bak` nusxasini saqlab oladi va yangi fayllarni bog'laydi.
+
+## Windows Terminal
+
+`config/terminal/settings.json` stores profiles, font preferences, keybindings,
+color schemes and appearance. Fonts are installed separately by the Fonts stage.
+Setup restores this file after installing Terminal; a differing existing file is
+backed up beside it before replacement. Running setup again does not overwrite
+an identical file. Stable packaged and unpackaged Terminal paths are detected.
+Preview can be selected explicitly with `-SettingsPath`.
+
+After changing Terminal settings, save the current configuration into the repo:
+
+```powershell
+.\config\terminal\terminal.ps1 -Mode Export
+```
+
+Restore just Terminal settings:
+
+```powershell
+.\config\terminal\terminal.ps1
+```
+
+Review exported settings before committing: custom profiles can contain personal
+paths or command arguments. Use `%USERPROFILE%` for portable user paths. Built-in
+color schemes and default font sizes do not need to be duplicated in the file.
+
+## Setup diagnostics
+
+```powershell
+.\doctor.ps1
+.\doctor.ps1 -Json
+```
+
+Doctor performs read-only checks for core commands, GlazeWM/Zebar executables,
+PowerShell modules and profile entry, config link targets, prompt JSON, Terminal
+settings, Zebar root lockfile dependencies, build entrypoint, font asset and
+wallpaper files. It reports `OK`, `WARN`, or `FAIL`, with suggested repair commands.
+It does not install packages, load your profile, rebuild widgets or change files.
+Exit code is 1 for failures and 0 otherwise; warnings alone do not fail the run.
+Use PowerShell 7. `-DotfilesPath` can check a different checkout. These are static
+checks, not a complete package inventory, running-app health check or dependency
+graph validation.
+
+## Shared Git configuration
+
+`config/git/gitconfig` stores common Git settings and aliases. Setup adds an
+include to your local `~/.gitconfig`, backing up that file first. Existing name,
+email and credential settings stay local. A rerun does not duplicate the include.
+Run only this step with:
+
+```powershell
+.\config\git\git.ps1
+```
+
+On a new computer, set your identity once (or use a repo-local identity):
+
+```powershell
+git config --global user.name "Your Name"
+git config --global user.email "your-address@example.com"
+```
+
+Shared defaults: `main` for new repositories, `nvim` as the editor, and pruning
+obsolete remote-tracking branches during fetch. Existing repositories keep their
+current branch and line-ending settings. Authentication must be set up separately.
+
+| Alias | Action |
+| --- | --- |
+| `git st` | Short status and branch |
+| `git br` | Local branches with tracking details |
+| `git co <branch>` | Switch to an existing branch |
+| `git lg` | Graph of commit history for all branches |
+| `git last` | Latest commit with file statistics |
+| `git staged` | Show staged changes |
+| `git unstage <file>` | Unstage a file while keeping its edits |
+
+The global include follows the checkout path. After moving the repo, rerun this
+step and remove the old include if necessary. Repository-local settings take
+precedence; later entries in a config can override earlier entries.

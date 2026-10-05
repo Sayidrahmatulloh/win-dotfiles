@@ -95,6 +95,8 @@ function Main {
         $results.Add((Invoke-Step 'Fonts' { & "$DOTFILES\fonts\fonts.ps1" }))
         $results.Add((Invoke-Step 'PS modules' { Install-PSModules }))
         $results.Add((Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }))
+        $results.Add((Invoke-Step 'Git config' { & "$DOTFILES\config\git\git.ps1" }))
+        $results.Add((Invoke-Step 'Windows Terminal' { & "$DOTFILES\config\terminal\terminal.ps1" }))
         $results.Add((Invoke-Step 'Build Zebar widget' { Build-Zebar }))
         Write-Host "`nSetup results:"
         $results | Format-Table Name, Success, Message -Wrap | Out-Host

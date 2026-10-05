@@ -1,0 +1,15 @@
+# Shared settings only. Keep identity and credentials in your local ~/.gitconfig.
+[init]
+    defaultBranch = main
+[core]
+    editor = nvim
+[fetch]
+    prune = true
+[alias]
+    st = status --short --branch
+    br = branch -vv
+    co = switch
+    lg = log --graph --oneline --decorate --all
+    last = log -1 --stat
+    staged = diff --cached
+    unstage = restore --staged --

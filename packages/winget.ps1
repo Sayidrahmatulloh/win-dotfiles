@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 #  packages/winget.ps1 — Install and upgrade apps via Winget
 # ============================================================
 
@@ -28,7 +28,7 @@ $APPS = @(
   'HaiNguyen.Mechvibes'
   'Voidstar.FilePilot'
   'Microsoft.PowerToys'
-  'MartiCliment.UniGetUI'
+  'Devolutions.UniGetUI'
 )
 
 $WINGET_FLAGS = @(

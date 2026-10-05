@@ -47,3 +47,6 @@ lazy-lock.json
 *.backup*
 *.tmp
 *.log
+
+# Local Terminal export backups
+config/terminal/*.bak_*
