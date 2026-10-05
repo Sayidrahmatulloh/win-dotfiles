@@ -1,4 +1,4 @@
-import { onCleanup } from 'solid-js';
+import { createSignal, onCleanup } from 'solid-js';
 import { actionError, setActionError } from './actions';
 /* @refresh reload */
 import "./index.css"
@@ -38,15 +38,49 @@ render(() => <App />, document.getElementById("root")!)
 function App() {
   const [output, setOutput] = createStore(providers.outputMap)
 
+  const [providerError, setProviderError] = createSignal('');
+  const isBatteryDeviceMissing = (error: unknown) => /\bos error 433\b/i.test(String(error));
+  let batteryRetry: ReturnType<typeof setTimeout> | undefined;
+  let batteryRetries = 0;
+  const recoverBattery = () => {
+    if (!isBatteryDeviceMissing(providers.errorMap.battery) || batteryRetry || batteryRetries >= 3) return;
+    batteryRetry = setTimeout(async () => {
+      batteryRetry = undefined;
+      if (disposed || !isBatteryDeviceMissing(providers.errorMap.battery)) return;
+      batteryRetries++;
+      try { await providers.raw.battery.restart(); }
+      catch (error) { console.error('Battery reconnect', error); }
+      if (!disposed) { updateProviderError(); recoverBattery(); }
+    }, 10000);
+  };
+  const updateProviderError = () => {
+    const failures = Object.entries(providers.errorMap)
+      .filter(([name, error]) => error != null && !(name === "battery" && isBatteryDeviceMissing(error) && batteryRetries < 3))
+      .map(([name, error]) => `${name}: ${String(error)}`);
+    setProviderError(failures.length ? `Data source unavailable — ${failures.join('; ')}` : '');
+  };
+  const visibleError = () => [actionError(), providerError()].filter(Boolean).join(' | ');
   let disposed = false;
-  providers.onOutput(outputMap => { if (!disposed) setOutput(outputMap); });
-  providers.onError(error => { if (!disposed) { console.error('Provider', error); setActionError('A data source is unavailable. Check Zebar logs.'); } });
-  onCleanup(() => { disposed = true; void providers.stopAll().catch(console.error); });
+  providers.onOutput(outputMap => {
+    if (!disposed) {
+      setOutput({ ...outputMap, battery: providers.errorMap.battery ? null : outputMap.battery });
+      if (outputMap.battery && !providers.errorMap.battery) {
+        batteryRetries = 0;
+        clearTimeout(batteryRetry);
+        batteryRetry = undefined;
+      }
+      updateProviderError();
+    }
+  });
+  providers.onError(errors => {
+    if (!disposed) { console.error('Provider', errors); if (errors.battery) setOutput('battery', null); recoverBattery(); updateProviderError(); }
+  });
+  onCleanup(() => { disposed = true; clearTimeout(batteryRetry); void providers.stopAll().catch(console.error); });
 
   return (
     <div class="app">
       <Tooltip />
-      {actionError() && <button type="button" class="action-error" role="status" title={actionError()} aria-label={actionError() + " Click to dismiss."} onClick={() => setActionError("")}>!</button>}
+      {visibleError() && <button type="button" class="action-error" role="status" data-tooltip={visibleError()} aria-label={visibleError() + " Click to dismiss."} onClick={() => { setActionError(""); setProviderError(""); }}>!</button>}
       <div class="left">
         <WindowsButton glazewm={output.glazewm} />
         <SearchButton glazewm={output.glazewm} />

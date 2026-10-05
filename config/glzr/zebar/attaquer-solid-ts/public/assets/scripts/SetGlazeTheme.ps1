@@ -4,6 +4,7 @@ param(
     [string]$ConfigPath = (Join-Path $env:USERPROFILE '.glzr/glazewm/config.yaml')
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'SetDesktopWallpaper.ps1')
 $colors = @{green='#a6e22e';blue='#96c5ff';purple='#c4a7e7'}
 function Reload-GlazeConfig {
     $socket = [Net.WebSockets.ClientWebSocket]::new()
@@ -43,7 +44,7 @@ try {
     if ($matches.Count -ne 1) { throw 'Could not locate the focused window border color safely.' }
     $color = $colors[$Theme]
     $updated = [regex]::Replace($original, $pattern, {param($match) $match.Groups[1].Value + '"' + $color + '"'})
-    if ($updated -ceq $original) { exit 0 }
+    if ($updated -ceq $original) { Set-ThemeWallpaper -Theme $Theme; exit 0 }
     $backup = $config + '.bak-theme'
     if (-not (Test-Path -LiteralPath $backup)) { Copy-Item -LiteralPath $config -Destination $backup }
     [IO.File]::WriteAllText($config, $updated, (New-Object System.Text.UTF8Encoding($false)))
@@ -54,6 +55,7 @@ try {
         try { Reload-GlazeConfig } catch { }
         throw
     }
+    Set-ThemeWallpaper -Theme $Theme
 } catch {
     [Console]::Error.WriteLine($_.Exception.Message)
     exit 1

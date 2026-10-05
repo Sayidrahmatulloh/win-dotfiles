@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 #  config/symlinks.ps1 — Link configs to their correct paths
 # ============================================================
 
@@ -44,8 +44,7 @@ function Initialize-SourceDirs {
 
   foreach ($link in $Links) {
     if (Test-Path $link.Src -PathType Leaf) {
-      Write-Fail "Source is a file, expected a directory: $($link.Src)"
-      continue
+      throw "Source is a file, expected a directory: $($link.Src)"
     }
 
     if (Test-Path $link.Src -PathType Container) {
@@ -53,9 +52,7 @@ function Initialize-SourceDirs {
       continue
     }
 
-    New-Item -ItemType Directory -Path $link.Src -Force | Out-Null
-    New-Item -ItemType File -Path "$($link.Src)\.gitkeep" -Force | Out-Null
-    Write-Done "created: $($link.Src)"
+    throw "Configuration source is missing: $($link.Src)"
   }
 }
 
@@ -180,6 +177,7 @@ function Main {
     Latest    = [System.Collections.Generic.List[string]]::new()
     Failed    = $failed
   }
+  if ($failed.Count) { throw "Links failed: $($failed -join ', ')" }
 }
 
 Main

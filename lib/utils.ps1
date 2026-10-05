@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 #  lib/utils.ps1 — Shared helpers for all dotfiles scripts
 # ============================================================
 
@@ -180,10 +180,15 @@ function Merge-Results {
 
 function Invoke-Step {
   param([string]$Name, [scriptblock]$Block)
-  try { & $Block }
+  Write-Stage '*' $Name
+  try {
+    & $Block | Out-Host
+    return [pscustomobject]@{ Name = $Name; Success = $true; Message = 'Completed' }
+  }
   catch {
-    Write-Fail "$Name failed: $($_.Exception.Message)"
-    $script:anyFailed = $true
+    $message = $_.Exception.Message
+    Write-Fail "$Name failed: $message"
+    return [pscustomobject]@{ Name = $Name; Success = $false; Message = $message }
   }
 }
 

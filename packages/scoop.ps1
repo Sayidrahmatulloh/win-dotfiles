@@ -1,6 +1,8 @@
-# ============================================================
+﻿# ============================================================
 #  packages/scoop.ps1 — Install and upgrade packages via Scoop
 # ============================================================
+
+param([switch]$Update)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -27,7 +29,7 @@ $TOOLS = @(
 function Assert-ScoopAvailable {
   if (-not (Get-Command 'scoop' -ErrorAction SilentlyContinue)) {
     Write-Fail 'scoop not found. Run install.ps1 first.'
-    exit 1
+    throw 'Required package manager is not available.'
   }
 }
 
@@ -75,6 +77,7 @@ function Sync-Buckets {
   Write-Section 'Buckets:'
 
   $anyAdded = $false
+  $failedBuckets = [Collections.Generic.List[string]]::new()
   $i = 0
 
   foreach ($bucket in $Buckets) {
@@ -94,14 +97,17 @@ function Sync-Buckets {
     }
     else {
       Write-Fail "bucket failed: $bucket"
+      $failedBuckets.Add($bucket)
     }
   }
 
   if ($anyAdded) {
     Write-Step '  ' 'scoop' 'updating index'
     $null = scoop update 2>&1
+    if ($LASTEXITCODE -ne 0) { throw 'Scoop bucket index update failed.' }
     Write-Done 'index updated'
   }
+  if ($failedBuckets.Count) { throw "Scoop buckets failed: $($failedBuckets -join ', ')" }
 }
 
 function Sync-Tools {
@@ -116,6 +122,11 @@ function Sync-Tools {
     $pfx = "  [$i/$($Tools.Count)]"
 
     if (Test-ToolInstalled $tool) {
+      if (-not $Update) {
+        Write-Skip "already installed: $tool"
+        $r.Latest.Add($tool)
+        continue
+      }
       Write-Step $pfx $tool 'upgrading'
       switch (Update-Tool $tool) {
         'upgraded' { Write-Done "upgraded: $tool"; $r.Upgraded.Add($tool) }
@@ -146,6 +157,7 @@ function Main {
   Sync-Buckets $BUCKETS
   $results = Sync-Tools $TOOLS
   Write-Summary 'Scoop' $results
+  if ($results.Failed.Count) { throw "Scoop packages failed: $($results.Failed -join ', ')" }
 }
 
 Main

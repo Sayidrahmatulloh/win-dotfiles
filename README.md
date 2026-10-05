@@ -15,31 +15,44 @@ Windows 10/11 uchun mukammal sozlangan, tezkor va zamonaviy dasturchi muhiti kon
 
 ---
 
-## 📋 Tizim Talablari
+## 📋 Tizim talablari
 
-- **OS:** Windows 10 (21H2+) yoki Windows 11
-- **Shell:** PowerShell 7.0+ (`pwsh`)
-- **Huquqlar:** Administrator yoki "Developer Mode" (Dasturchi rejimi) yoqilgan bo'lishi tavsiya etiladi (symlink/junction uchun)
-
----
+- Windows 10/11 va internet.
+- WinGet (Microsoft Store'dagi App Installer). Topilmasa bootstrap aniq ko'rsatma bilan to'xtaydi.
+- Oddiy Windows PowerShell terminali; **Run as administrator ishlatmang**.
+- Bootstrap PowerShell 7'ni WinGet orqali o'rnatadi. Ayrim ilova installer'lari zarur bo'lsa UAC chiqaradi.
 
 ## 🚀 O'rnatish
 
-### 1-usul: Bir qatorli avtomatik o'rnatish
-PowerShell 7 ni Administrator sifatida oching va quyidagi buyruqni bajaring:
+Repo mavjud bo'lsa, oddiy terminaldan:
 
 ```powershell
-irm https://raw.githubusercontent.com/sayidrahmatulloh/win-dotfiles/main/install.ps1 | iex
+.\bootstrap.ps1
 ```
 
-### 2-usul: Repozitoriyani yuklab o'rnatish
+Yangi kompyuterda repo fayllari GitHub'ga push qilinganidan so'ng:
+
 ```powershell
-git clone https://github.com/sayidrahmatulloh/win-dotfiles.git $HOME/win-dotfiles
-cd $HOME/win-dotfiles
-.\install.ps1
+irm https://raw.githubusercontent.com/Sayidrahmatulloh/win-dotfiles/main/bootstrap.ps1 | iex
 ```
 
-*(Eslatma: Agar repozitoriya boshqa papkada, masalan `D:\win-dotfiles` da joylashgan bo'lsa, skript uni avtomatik taniydi).*
+Repo boshqa joyda saqlanishi kerak bo'lsa:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\bootstrap.ps1 -DotfilesPath 'D:\win-dotfiles'
+```
+
+Bootstrap mavjud PowerShell 7'ni qayta o'rnatmaydi. Installer mavjud checkoutni saqlaydi, mavjud paketlarni o'tkazib yuboradi va yetishmaganlarini o'rnatadi. Paketlarni yangilash alohida, ixtiyoriy:
+
+```powershell
+.\packages\scoop.ps1 -Update
+.\packages\winget.ps1 -Update
+.\fonts\fonts.ps1 -Update
+```
+
+Har bosqichning natijasi oxirida ko'rsatiladi. Xato bo'lsa jarayon 1, hammasi muvaffaqiyatli bo'lsa 0 kodi bilan tugaydi. Loglar `%LOCALAPPDATA%\win-dotfiles\logs` ichida saqlanadi. Muammoni tuzatib, bootstrap'ni qayta bajaring; konfiguratsiyalar uchun mavjud backup mexanizmi saqlanadi.
+
+Zebar Bun va uning lockfile'i orqali yig'iladi. Build muvaffaqiyatsiz tugasa, eski `dist` borligi muvaffaqiyat deb hisoblanmaydi. Zebar uchun CaskaydiaMono Nerd Font asseti toza clone'da o'rnatilgan CascadiaMono-NF paketidan avtomatik tiklanadi.
 
 ---
 
@@ -47,7 +60,8 @@ cd $HOME/win-dotfiles
 
 ```text
 win-dotfiles/
-├── install.ps1                 # Asosiy bootstrap / o'rnatish skripti
+├── bootstrap.ps1               # Windows PowerShell -> PowerShell 7
+├── install.ps1                 # Asosiy o'rnatish va natija hisoboti
 ├── config/
 │   ├── powershell/             # PowerShell profili va Oh My Posh mavzusi
 │   │   ├── user_profile.ps1    # Profil sozlamalari, aliaslar, yordamchi funksiyalar

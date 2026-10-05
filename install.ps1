@@ -1,177 +1,109 @@
-# ============================================================
-#  install.ps1 — Dotfiles bootstrap
-#  Usage: irm https://raw.githubusercontent.com/sayidrahmatulloh/win-dotfiles/main/install.ps1 | iex
-# ============================================================
-
+[CmdletBinding()]
+param([string]$DotfilesPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$DOTFILES = if ($DotfilesPath) { [IO.Path]::GetFullPath($DotfilesPath) }
+elseif ($PSScriptRoot -and (Test-Path "$PSScriptRoot\lib\utils.ps1")) { $PSScriptRoot }
+else { Join-Path $env:USERPROFILE 'win-dotfiles' }
+$REPO = 'https://github.com/Sayidrahmatulloh/win-dotfiles.git'
 
-# ── Constants ──────────────────────────────────────────────────────────────────
-
-$DOTFILES = if ($PSScriptRoot -and (Test-Path "$PSScriptRoot\lib\utils.ps1")) {
-  $PSScriptRoot
-} else {
-  "$HOME\win-dotfiles"
+function Refresh-SetupEnvironment {
+    $paths = @([Environment]::GetEnvironmentVariable('Path', 'Machine'), [Environment]::GetEnvironmentVariable('Path', 'User'), $env:PATH)
+    $env:PATH = (($paths -join ';') -split ';' | Where-Object { $_ } | Select-Object -Unique) -join ';'
 }
-$REPO = 'https://github.com/sayidrahmatulloh/win-dotfiles'
-
-# ── Minimal inline helpers (lib not yet available) ────────────────────────────
-
-$ESC = [char]27
-$RESET = "$ESC[0m"; $BOLD = "$ESC[1m"
-$GRAY = "$ESC[90m"; $RED = "$ESC[91m"
-$GREEN = "$ESC[92m"; $CYAN = "$ESC[96m"
-
-function _done { param([string]$M) Write-Host "  ${GREEN}[+]${RESET}  $M" }
-function _skip { param([string]$M) Write-Host "  ${GRAY}[~]${RESET}  ${GRAY}$M${RESET}" }
-function _warn { param([string]$M) Write-Host "  ${GRAY}[!]${RESET}  ${GRAY}$M${RESET}" }
-function _fail { param([string]$M) Write-Host "  ${RED}[x]${RESET}  ${RED}$M${RESET}"; exit 1 }
-
-# ── Guards ─────────────────────────────────────────────────────────────────────
-
-function Assert-OS {
-  if ($PSVersionTable.PSVersion.Major -lt 7) {
-    _fail "PowerShell 7+ required. Current: $($PSVersionTable.PSVersion)"
-  }
-}
-
-function Assert-Admin {
-  $principal = [Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()
-  $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-  if (-not $isAdmin) {
-    _warn 'Running without Administrator rights — some machine-wide apps may require elevation.'
-  }
-}
-
-# ── Bootstrap steps ───────────────────────────────────────────────────────────
-
 function Install-Scoop {
-  Write-Host "`n  ${BOLD}${CYAN}==>  Scoop${RESET}"
-
-  if (Get-Command scoop -ErrorAction SilentlyContinue) {
-    _skip 'Scoop already installed'
-    $null = scoop update *>&1
-  }
-  else {
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-    Invoke-RestMethod 'https://get.scoop.sh' | Invoke-Expression
-    _done 'Scoop installed'
-  }
-
-  if (Get-Command git -ErrorAction SilentlyContinue) {
-    _skip 'git already installed'
-  }
-  else {
-    $null = scoop install git *>&1
-    # Inject git into PATH for the rest of this session
-    $scoopCmd = Get-Command 'scoop' -ErrorAction SilentlyContinue
-    if ($scoopCmd) {
-      $gitBin = "$(Split-Path (Split-Path $scoopCmd.Source -Parent) -Parent)\apps\git\current\cmd"
-      if (Test-Path $gitBin) { $env:PATH = "$gitBin;$env:PATH" }
-    }
-    _done 'git installed'
-  }
-}
-
-function Sync-Repo {
-  Write-Host "`n  ${BOLD}${CYAN}==>  Dotfiles${RESET}"
-
-  if (Test-Path "$DOTFILES\.git") {
-    _skip "Already cloned at $DOTFILES"
-  }
-  elseif (Test-Path $DOTFILES) {
-    _fail "'$DOTFILES' exists but is not a git repo. Remove it and re-run."
-  }
-  else {
-    $out = git clone --depth=1 $REPO $DOTFILES 2>&1
-    if ($LASTEXITCODE -ne 0) {
-      Write-Host ($out | Out-String).Trim() -ForegroundColor DarkGray
-      _fail 'git clone failed.'
-    }
-    _done "Repo cloned: $DOTFILES"
-  }
-}
-
-# ── Entry point ────────────────────────────────────────────────────────────────
-
-function Main {
-  Assert-OS
-  Assert-Admin
-
-  Install-Scoop
-  Sync-Repo
-
-  # Load shared helpers now that repo is on disk
-  . "$DOTFILES\lib\utils.ps1"
-
-  Write-Banner
-
-  $script:anyFailed = $false
-
-  Write-Stage '📦' 'Scoop Packages'
-  Invoke-Step 'Scoop packages' { & "$DOTFILES\packages\scoop.ps1" }
-
-  Write-Stage '🪟' 'Winget Apps'
-  Invoke-Step 'Winget apps' { & "$DOTFILES\packages\winget.ps1" }
-
-  Write-Stage '🔤' 'Fonts'
-  Invoke-Step 'Fonts' { & "$DOTFILES\fonts\fonts.ps1" }
-
-  Write-Stage '📦' 'PowerShell Modules'
-  Invoke-Step 'PS modules' { Install-PSModules }
-
-  Write-Stage '🔗' 'Symlinks'
-  Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }
-
-  Write-Stage '🎨' 'Build Zebar Widgets'
-  Invoke-Step 'Build Zebar widget' {
-    $widgetDir = "$DOTFILES\config\glzr\zebar\attaquer-solid-ts"
-    if (Test-Path "$widgetDir\package.json") {
-      if (Get-Command bun -ErrorAction SilentlyContinue) {
-        bun --cwd $widgetDir install
-        bun --cwd $widgetDir run build
-      }
-      elseif (Get-Command pnpm -ErrorAction SilentlyContinue) {
-        pnpm --dir $widgetDir install
-        pnpm --dir $widgetDir run build
-      }
-      elseif (Get-Command npm -ErrorAction SilentlyContinue) {
-        npm --prefix $widgetDir install
-        npm --prefix $widgetDir run build
-      }
-    }
-  }
-
-  # ── Final banner ──────────────────────────────────────────────────────────
-  Write-Host ''
-  if ($script:anyFailed) {
-    Write-Host "  ${LYELLOW}${BOLD}⚠  Done with errors — review output above and re-run.${RESET}"
-  }
-  else {
-    Write-Host "  ${LGREEN}${BOLD}✔  All done! Restart your terminal.${RESET}"
-  }
-  Write-Host ''
-}
-
-function Install-PSModules {
-  $modules = @('Microsoft.WinGet.CommandNotFound')
-
-  foreach ($m in $modules) {
-    if (Get-Module -ListAvailable -Name $m -ErrorAction SilentlyContinue) {
-      Write-Skip "$m already installed"
-    }
+    if (Get-Command scoop -ErrorAction SilentlyContinue) { Write-Host 'Scoop already installed.' }
     else {
-      Install-Module $m -Repository PSGallery -Force -Scope CurrentUser -ErrorAction SilentlyContinue
-      if (Get-Module -ListAvailable -Name $m -ErrorAction SilentlyContinue) {
-        Write-Done "installed: $m"
-      }
-      else {
-        Write-Warn "could not install: $m"
-      }
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        Invoke-RestMethod 'https://get.scoop.sh' | Invoke-Expression
+        Refresh-SetupEnvironment
+        if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) { throw 'Scoop installation did not complete.' }
     }
-  }
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        & scoop install git
+        if ($LASTEXITCODE -ne 0) { throw "Git installation failed (exit $LASTEXITCODE)." }
+        Refresh-SetupEnvironment
+        if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git is not available after installation.' }
+    }
 }
-
-Main
+function Sync-Repo {
+    if (Test-Path -LiteralPath "$DOTFILES\.git") { Write-Host "Using existing checkout: $DOTFILES" }
+    elseif (Test-Path -LiteralPath $DOTFILES) { throw "'$DOTFILES' exists but is not a Git checkout. Choose another -DotfilesPath." }
+    else {
+        & git clone --depth=1 $REPO $DOTFILES
+        if ($LASTEXITCODE -ne 0) { throw "Git clone failed (exit $LASTEXITCODE)." }
+    }
+    if (-not (Test-Path -LiteralPath "$DOTFILES\lib\utils.ps1")) { throw 'The checkout is missing lib/utils.ps1.' }
+}
+function Install-PSModules {
+    $failed = [Collections.Generic.List[string]]::new()
+    foreach ($module in @('posh-git', 'Terminal-Icons', 'PSFzf', 'Microsoft.WinGet.CommandNotFound')) {
+        if (Get-Module -ListAvailable -Name $module) { Write-Skip "$module already installed"; continue }
+        try {
+            Install-Module -Name $module -Repository PSGallery -Scope CurrentUser -Force -ErrorAction Stop
+            if (-not (Get-Module -ListAvailable -Name $module)) { throw 'Module not found after installation.' }
+            Write-Done "installed: $module"
+        } catch { $failed.Add($module); Write-Fail "$module : $($_.Exception.Message)" }
+    }
+    if ($failed.Count) { throw "Modules not installed: $($failed -join ', ')" }
+}
+function Ensure-ZebarFont {
+    param([string]$WidgetDir)
+    $fontName = 'CaskaydiaMonoNerdFont-Regular.ttf'
+    $target = Join-Path $WidgetDir "src\fonts\$fontName"
+    if (Test-Path -LiteralPath $target -PathType Leaf) { return }
+    $scoopRoot = Get-ScoopRoot
+    if (-not $scoopRoot) { throw 'Cannot locate Scoop to restore the Zebar font.' }
+    $fontDir = Join-Path $scoopRoot 'apps\CascadiaMono-NF\current'
+    $source = if (Test-Path -LiteralPath $fontDir) {
+        Get-ChildItem -LiteralPath $fontDir -Filter $fontName -File -Recurse | Select-Object -First 1
+    }
+    if (-not $source) { throw 'Zebar font is missing. Install CascadiaMono-NF through the Fonts stage and retry.' }
+    New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force | Out-Null
+    Copy-Item -LiteralPath $source.FullName -Destination $target
+}
+function Build-Zebar {
+    $widgetDir = Join-Path $DOTFILES 'config\glzr\zebar\attaquer-solid-ts'
+    if (-not (Test-Path -LiteralPath "$widgetDir\package.json")) { throw 'Zebar package.json is missing.' }
+    if (-not (Get-Command bun -ErrorAction SilentlyContinue)) { throw 'Bun is missing. Retry the Scoop packages stage.' }
+    Ensure-ZebarFont -WidgetDir $widgetDir
+    & bun install --cwd $widgetDir --frozen-lockfile
+    if ($LASTEXITCODE -ne 0) { throw "Zebar dependencies failed (exit $LASTEXITCODE)." }
+    & bun run --cwd $widgetDir build
+    if ($LASTEXITCODE -ne 0) { throw "Zebar build failed (exit $LASTEXITCODE)." }
+    if (-not (Test-Path -LiteralPath "$widgetDir\dist\index.html")) { throw 'Zebar build did not produce dist/index.html.' }
+}
+function Main {
+    if ($PSVersionTable.PSVersion.Major -lt 7 -or -not $IsWindows) { throw 'Use bootstrap.ps1 from Windows PowerShell to install PowerShell 7 first.' }
+    $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run setup in a normal user terminal. App installers request elevation when needed.' }
+    $logDir = Join-Path $env:LOCALAPPDATA 'win-dotfiles\logs'
+    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+    $logPath = Join-Path $logDir ('setup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '.log')
+    Start-Transcript -Path $logPath | Out-Null
+    Write-Host "Log: $logPath"
+    try {
+        Install-Scoop | Out-Host
+        Sync-Repo | Out-Host
+        . "$DOTFILES\lib\utils.ps1"
+        Write-Banner
+        $results = [Collections.Generic.List[object]]::new()
+        $results.Add((Invoke-Step 'Scoop packages' { & "$DOTFILES\packages\scoop.ps1" }))
+        Refresh-SetupEnvironment
+        $results.Add((Invoke-Step 'Winget apps' { & "$DOTFILES\packages\winget.ps1" }))
+        Refresh-SetupEnvironment
+        $results.Add((Invoke-Step 'Fonts' { & "$DOTFILES\fonts\fonts.ps1" }))
+        $results.Add((Invoke-Step 'PS modules' { Install-PSModules }))
+        $results.Add((Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }))
+        $results.Add((Invoke-Step 'Build Zebar widget' { Build-Zebar }))
+        Write-Host "`nSetup results:"
+        $results | Format-Table Name, Success, Message -Wrap | Out-Host
+        Write-Host "Log: $logPath"
+        $failed = @($results | Where-Object { -not $_.Success })
+        if ($failed.Count) { Write-Host 'Some steps failed. Fix the reported problems and run bootstrap.ps1 again.'; return 1 }
+        Write-Host 'Setup completed. Restart your terminal.'
+        return 0
+    } finally { Stop-Transcript | Out-Null }
+}
+try { $setupExitCode = Main; exit $setupExitCode }
+catch { Write-Error $_ -ErrorAction Continue; exit 1 }

@@ -45,9 +45,5 @@ return {
       desc = "Cancel cursors",
     })
 
-    keymap("n", "<C-d>", "mciw*:nohl<CR>", {
-      remap = true,
-      desc = "Multi cursor word",
-    })
   end,
 }

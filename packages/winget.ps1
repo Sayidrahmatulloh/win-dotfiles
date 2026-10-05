@@ -1,6 +1,8 @@
-# ============================================================
+﻿# ============================================================
 #  packages/winget.ps1 — Install and upgrade apps via Winget
 # ============================================================
+
+param([switch]$Update)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -40,7 +42,7 @@ $WINGET_FLAGS = @(
 function Assert-WingetAvailable {
   if (-not (Get-Command 'winget' -ErrorAction SilentlyContinue)) {
     Write-Fail 'winget not found. Install App Installer from the Microsoft Store.'
-    exit 1
+    throw 'Required package manager is not available.'
   }
 }
 
@@ -85,6 +87,11 @@ function Sync-Apps {
     $pfx = "  [$i/$($Apps.Count)]"
 
     if (Test-AppInstalled $app) {
+      if (-not $Update) {
+        Write-Skip "already installed: $app"
+        $r.Latest.Add($app)
+        continue
+      }
       Write-Step $pfx $app 'upgrading'
       switch (Update-App $app) {
         'upgraded' { Write-Done "upgraded: $app"; $r.Upgraded.Add($app) }
@@ -114,6 +121,7 @@ function Main {
   Assert-WingetAvailable
   $results = Sync-Apps $APPS
   Write-Summary 'Winget' $results
+  if ($results.Failed.Count) { throw "Winget packages failed: $($results.Failed -join ', ')" }
 }
 
 Main

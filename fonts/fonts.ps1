@@ -1,6 +1,8 @@
-# ============================================================
+﻿# ============================================================
 #  fonts/fonts.ps1 — Install system fonts via Scoop and zip files
 # ============================================================
+
+param([switch]$Update)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -9,13 +11,14 @@ $ErrorActionPreference = 'Stop'
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-$SYSTEM_FONTS = 'C:\Windows\Fonts'
+$SYSTEM_FONTS = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts'
 $FILES_DIR = "$PSScriptRoot\files"
 $TEMP_DIR = "$env:TEMP\dotfiles-fonts"
 
 $SCOOP_FONTS = @(
   'JetBrainsMono-NF'
   'CascadiaCode-NF'
+  'CascadiaMono-NF'
   'FiraCode-NF'
 )
 
@@ -24,7 +27,7 @@ $SCOOP_FONTS = @(
 $SCOOP_ROOT = Get-ScoopRoot
 if (-not $SCOOP_ROOT) {
   Write-Fail 'Cannot locate Scoop root directory. Run install.ps1 first.'
-  exit 1
+  throw 'Scoop root was not found.'
 }
 
 # ── Scoop font helpers ────────────────────────────────────────────────────────
@@ -43,7 +46,7 @@ function Ensure-NerdFontsBucket {
     $null = scoop update *>&1
   }
   else {
-    Write-Fail 'failed to add nerd-fonts bucket'
+    throw 'Failed to add nerd-fonts bucket.'
   }
 }
 
@@ -74,20 +77,13 @@ function Install-FontFile {
   }
 
   try {
-    # WHY Shell.Application:
-    # C:\Windows\Fonts is a Shell namespace folder. Direct Copy-Item is blocked
-    # by the kernel even for admins. CopyHere() goes through the correct Shell
-    # API, handles registry registration automatically.
-    $shell = New-Object -ComObject Shell.Application
-    $shell.Namespace(0x14).CopyHere($FontPath, 0x414)
-    # 0x04 = no progress | 0x10 = no UI | 0x400 = no error UI
-
-    # CopyHere is async — poll until the file appears (max 10 s)
-    $deadline = (Get-Date).AddSeconds(10)
-    while (-not (Test-Path $dest) -and (Get-Date) -lt $deadline) {
-      Start-Sleep -Milliseconds 200
-    }
-
+    # Register ZIP fonts for the current user; no elevated shell is needed.
+    New-Item -ItemType Directory -Path $SYSTEM_FONTS -Force | Out-Null
+    Copy-Item -LiteralPath $FontPath -Destination $dest -ErrorAction Stop
+    $fontRegistry = 'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
+    if (-not (Test-Path -LiteralPath $fontRegistry)) { New-Item -Path $fontRegistry | Out-Null }
+    $registrationName = [IO.Path]::GetFileNameWithoutExtension($name) + ' (TrueType)'
+    New-ItemProperty -Path $fontRegistry -Name $registrationName -Value $dest -PropertyType String -Force -ErrorAction Stop | Out-Null
     if (Test-Path $dest) {
       Write-Done "installed: $name"
       $Installed.Add($name)
@@ -118,6 +114,11 @@ function Install-ScoopFonts {
     $pfx = "  [$i/$($Fonts.Count)]"
 
     if (Test-ScoopFontInstalled $font) {
+      if (-not $Update) {
+        Write-Skip "already installed: $font"
+        $r.Latest.Add($font)
+        continue
+      }
       Write-Step $pfx $font 'upgrading'
       switch (Update-ScoopFont $font) {
         'upgraded' { Write-Done "upgraded: $font"; $r.Upgraded.Add($font) }
@@ -187,3 +188,5 @@ function Install-ZipFonts {
 
 $combined = Merge-Results (Install-ScoopFonts $SCOOP_FONTS) (Install-ZipFonts $FILES_DIR $TEMP_DIR)
 Write-Summary 'Fonts' $combined
+
+if ($combined.Failed.Count) { throw "Fonts failed: $($combined.Failed -join ', ')" }
