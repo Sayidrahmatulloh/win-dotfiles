@@ -8,6 +8,8 @@ export default function Tooltip(){
  const [left,setLeft]=createSignal(8);
  const [inline,setInline]=createSignal(false);
  let active:HTMLElement|null=null, timer:ReturnType<typeof setTimeout>|undefined;
+ let blocked:HTMLElement|null=null;
+ const hoverDelay=700;
  let box:HTMLDivElement|undefined, revision=0, disposed=false;
  let queue:Promise<unknown>=Promise.resolve();
  let expanded=false;
@@ -40,25 +42,37 @@ export default function Tooltip(){
  function enter(event:Event){
   const target=(event.target as Element)?.closest<HTMLElement>('[data-tooltip]');
   if(!target||!target.closest('.app')||!target.dataset.tooltip){hide();return}
+  if(target===blocked)return;
+  if(event instanceof PointerEvent&&(event.pointerType!=='mouse'||event.buttons!==0)){hide();return}
   if(target===active)return;
   hide();active=target;
   const version=revision;
-  timer=setTimeout(()=>{void show(target,version)},250);
+  timer=setTimeout(()=>{void show(target,version)},hoverDelay);
  }
  function leave(event:Event){
-  if(!active)return;
   const related=(event as MouseEvent|FocusEvent).relatedTarget as Node|null;
+  if(event.type==='pointerout'&&blocked&&(!related||!blocked.contains(related)))blocked=null;
+  if(!active)return;
   if(!related||!active.contains(related))hide();
  }
+ function dismiss(event:Event){
+  blocked=(event.target as Element)?.closest<HTMLElement>('[data-tooltip]')??null;
+  hide();
+ }
  function move(event:PointerEvent){if(event.clientY>=40)hide()}
- function keyboard(event:KeyboardEvent){if(event.key==='Escape')hide()}
+ function keyboard(event:KeyboardEvent){
+  if(event.key==='Tab')blocked=null;
+  if(event.key==='Escape')hide();
+  if(event.key==='Enter'||event.key===' ')dismiss(event);
+ }
  let observer:MutationObserver|undefined;
  onMount(()=>{
   document.addEventListener('pointerover',enter);
   document.addEventListener('pointerout',leave);
   document.addEventListener('focusin',enter);
   document.addEventListener('focusout',leave);
-  document.addEventListener('pointerdown',hide);
+  document.addEventListener('pointerdown',dismiss);
+  document.addEventListener('click',dismiss);
   document.addEventListener('pointermove',move);
   document.addEventListener('keydown',keyboard);
   window.addEventListener('blur',hide);
@@ -75,7 +89,8 @@ export default function Tooltip(){
   document.removeEventListener('pointerout',leave);
   document.removeEventListener('focusin',enter);
   document.removeEventListener('focusout',leave);
-  document.removeEventListener('pointerdown',hide);
+  document.removeEventListener('pointerdown',dismiss);
+  document.removeEventListener('click',dismiss);
   document.removeEventListener('pointermove',move);
   document.removeEventListener('keydown',keyboard);
   window.removeEventListener('blur',hide);

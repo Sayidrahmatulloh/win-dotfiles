@@ -40,7 +40,7 @@ fonts/files/dankmono-nf.zip
 *.swp
 *.swo
 *~
-lazy-lock.json
+# Keep Neovim plugin revisions reproducible across machines.
 
 # ── Backups & Temporary ────────────────────────────────────────
 *.bak*
@@ -50,3 +50,6 @@ lazy-lock.json
 
 # Local Terminal export backups
 config/terminal/*.bak_*
+
+# Graphify generated output
+graphify-out/

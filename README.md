@@ -195,6 +195,10 @@ PowerShell 7 dan barcha testlar:
 .\tests\run.ps1
 ```
 
+GitHub Actions Windows muhitida shu testlar va Zebar TypeScript tekshiruvini
+har push va pull request uchun bajaradi. Zebar tugmalari AutoHotkey'ni PATH,
+`SCOOP` yoki Scoop buyrug'ining joylashuvidan topadi; bo'sh joyli yo'llar qo'llanadi.
+
 Paket qo'shish uchun `setup.json`, modul qo'shish uchun
 `config/powershell/modules.json` ni tahrirlang. Batafsil tartib
 [kodni o'qish yo'riqnomasida](docs/code-guide.md).

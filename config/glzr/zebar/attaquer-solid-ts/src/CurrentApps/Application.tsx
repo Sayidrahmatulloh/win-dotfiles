@@ -1,5 +1,5 @@
 import { appIcons } from './icons';
-import { runWm } from '../actions';
+import { runWidgetAction } from '../actions';
 import "./style.css"
 import { Component } from "solid-js"
 import { GlazeWmOutput } from "zebar"
@@ -16,9 +16,7 @@ const Application: Component<ApplicationProps> = (props) => {
 
   const handleAppClick = () => {
     handleClick()
-    runWm(props.glazewm, 
-      `shell-exec '%userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/FocusWindow.ahk' ${props.window.handle}`,
-    )
+    void runWidgetAction(props.glazewm, 'FocusWindow', props.window.handle)
   }
 
   return (

@@ -1,4 +1,4 @@
-import { runWm } from '../actions';
+import { runWidgetAction } from '../actions';
 import "./style.css"
 import { Component } from "solid-js"
 import { GlazeWmOutput } from "zebar"
@@ -13,9 +13,7 @@ const WindowsButton: Component<WindowsButtonProps> = (props) => {
 
   const handleWindowsClick = () => {
     handleClick()
-    runWm(props.glazewm, 
-      "shell-exec %userprofile%/scoop/apps/autohotkey/current/v2/AutoHotkey64.exe %userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/OpenStartMenu.ahk",
-    )
+    void runWidgetAction(props.glazewm, 'OpenStartMenu')
   }
   return (
     <button type="button" aria-label="Start menu" data-tooltip="Open Start menu"

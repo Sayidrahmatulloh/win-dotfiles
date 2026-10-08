@@ -1,5 +1,5 @@
 import StatusIcon from '../StatusIcon';
-import { runWm } from '../actions';
+import { runWidgetAction } from '../actions';
 import "./style.css";
 import { Component } from "solid-js";
 import { NetworkOutput } from "zebar";
@@ -16,9 +16,7 @@ const NetworkStatus: Component<NetworkStatusProps> = (props) => {
 
   const handleOpenActionCenterClick = () => {
     handleClick();
-    runWm(props.glazewm, 
-      "shell-exec %userprofile%/scoop/apps/autohotkey/current/v2/AutoHotkey64.exe %userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/OpenActionCenter.ahk",
-    );
+    void runWidgetAction(props.glazewm, 'OpenActionCenter');
   };
   const getNetworkIcon = () => <StatusIcon name={props.network?.defaultInterface?.type === 'ethernet' ? 'ethernet' : props.network?.defaultInterface?.type === 'wifi' ? 'wifi' : 'offline'}/>;
   return (

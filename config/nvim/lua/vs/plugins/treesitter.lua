@@ -24,13 +24,13 @@ return {
       })
     end,
     init = function()
-      require("nvim-treesitter.install").compilers = { "cl", "gcc", "clang"}
+      require("nvim-treesitter.install").compilers = { "cl", "gcc", "clang" }
     end,
   },
   {
     "nvim-treesitter/nvim-treesitter-textobjects",
     branch = "main",
-    lazy=false,
+    lazy = false,
     dependencies = {
       { "nvim-treesitter/nvim-treesitter", branch = "main" },
     },

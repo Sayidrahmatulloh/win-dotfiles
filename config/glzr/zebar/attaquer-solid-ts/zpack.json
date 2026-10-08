@@ -36,6 +36,10 @@
           },
           {
             "program": "powershell.exe",
+            "argsRegex": "^-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File [A-Za-z]:[/\\\\][^\"\r\n]*[/\\\\]attaquer-solid-ts[/\\\\]dist[/\\\\]assets[/\\\\]scripts[/\\\\]InvokeWidgetAction\\.ps1 -Action ResolveAutoHotkey$"
+          },
+          {
+            "program": "powershell.exe",
             "argsRegex": "^-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File [A-Za-z]:[/\\\\][^\"\\r\\n]*[/\\\\]attaquer-solid-ts[/\\\\]dist[/\\\\]assets[/\\\\]scripts[/\\\\]SetGlazeTheme\\.ps1 -Theme (green|blue|purple)$"
           }
         ]

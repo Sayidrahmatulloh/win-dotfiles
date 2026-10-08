@@ -1,5 +1,5 @@
 import StatusIcon from '../StatusIcon';
-import { runWm } from '../actions';
+import { runWidgetAction } from '../actions';
 import "./style.css"
 import { Component } from "solid-js"
 import { GlazeWmOutput } from "zebar"
@@ -14,9 +14,7 @@ const SearchButton: Component<SearchButtonProps> = (props) => {
 
   const handleSearchClick = () => {
     handleClick()
-    runWm(props.glazewm, 
-      "shell-exec %userprofile%/scoop/apps/autohotkey/current/v2/AutoHotkey64.exe %userprofile%/.glzr/zebar/attaquer-solid-ts/dist/assets/scripts/OpenWindowsSearch.ahk",
-    )
+    void runWidgetAction(props.glazewm, 'OpenWindowsSearch')
   }
   return (
     <button type="button" aria-label="Windows search" data-tooltip="Open Windows search"

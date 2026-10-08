@@ -117,7 +117,8 @@ function Set-ProfileEntry {
     return
   }
 
-  Add-Content -Path $ProfilePath -Value $Line
+  $separator = if ($content -and -not $content.EndsWith("`n")) { [Environment]::NewLine } else { '' }
+  Add-Content -LiteralPath $ProfilePath -Value ($separator + $Line)
   Write-Done "profile entry added: $ProfilePath"
 }
 

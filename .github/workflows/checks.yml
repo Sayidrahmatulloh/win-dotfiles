@@ -1,0 +1,30 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PowerShell regression tests
+        shell: pwsh
+        run: ./tests/run.ps1
+  zebar:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: config/glzr/zebar/attaquer-solid-ts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Check TypeScript
+        run: bun run typecheck
+      - name: Check direct widget actions
+        run: bun test

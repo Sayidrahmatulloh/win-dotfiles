@@ -1,5 +1,5 @@
-import { createSignal, onCleanup } from 'solid-js';
-import { actionError, setActionError } from './actions';
+import { createSignal, onCleanup, onMount } from 'solid-js';
+import { actionError, setActionError, prepareWidgetActions } from './actions';
 /* @refresh reload */
 import "./index.css"
 import { render } from "solid-js/web"
@@ -36,6 +36,7 @@ const providers = zebar.createProviderGroup({
 render(() => <App />, document.getElementById("root")!)
 
 function App() {
+  onMount(() => { void prepareWidgetActions(); });
   const [output, setOutput] = createStore(providers.outputMap)
 
   const [providerError, setProviderError] = createSignal('');

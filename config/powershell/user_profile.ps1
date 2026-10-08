@@ -159,14 +159,14 @@ function Clear-System {
   $tempPaths = @("$env:TEMP\*", "$env:LOCALAPPDATA\Temp\*")
   # C:\Windows\Temp requires admin — only include when elevated
   if ($isAdmin) { $tempPaths += 'C:\Windows\Temp\*' }
-  try {
-    Remove-Item $tempPaths -Recurse -Force -ErrorAction SilentlyContinue
-    Write-Host ' done' -ForegroundColor Green
-  }
-  catch { Write-Host ' partial' -ForegroundColor Yellow }
+  $cleanupErrors = @()
+  Remove-Item $tempPaths -Recurse -Force -ErrorAction SilentlyContinue -ErrorVariable +cleanupErrors
+  if ($cleanupErrors.Count) {
+    Write-Host " partial ($($cleanupErrors.Count) errors; some files could not be removed)" -ForegroundColor Yellow
+  } else { Write-Host ' done' -ForegroundColor Green }
 
   Write-Host 'Recycle Bin...' -NoNewline
-  try { Clear-RecycleBin -Force -ErrorAction SilentlyContinue; Write-Host ' done' -ForegroundColor Green }
+  try { Clear-RecycleBin -Force -ErrorAction Stop; Write-Host ' done' -ForegroundColor Green }
   catch { Write-Host ' failed' -ForegroundColor Yellow }
 
   if ($isAdmin) {
