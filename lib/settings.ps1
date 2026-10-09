@@ -1,4 +1,4 @@
-﻿# Read data shared by setup and doctor. Loading this file changes nothing.
+# Read data shared by setup and doctor. Loading this file changes nothing.
 function Assert-ConfigList {
     param($Value, [string]$Name)
     if ($Value -isnot [array]) { throw "$Name must be a JSON array." }
@@ -69,4 +69,22 @@ function Get-ConfigLinks {
 
 function Get-PowerShellProfileLine {
     return '. $env:USERPROFILE\.config\powershell\user_profile.ps1'
+}
+# Check the selected build, runtime startup and deployed widget link together.
+function Assert-ZebarConfiguration {
+    param([Parameter(Mandatory)][string]$RepoRoot, $Configuration = (Get-SetupConfig -RepoRoot $RepoRoot), [string]$SettingsPath)
+    $widgetPath = $Configuration.zebar.widget
+    $pack = Split-Path $widgetPath -Leaf
+    $manifest = Get-Content (Join-Path $RepoRoot "$widgetPath/zpack.json") -Raw | ConvertFrom-Json
+    if (-not $SettingsPath) { $SettingsPath = Join-Path $RepoRoot 'config/glzr/zebar/settings.json' }
+    $settings = Get-Content -LiteralPath $SettingsPath -Raw | ConvertFrom-Json
+    $startup = @($settings.startupConfigs | Where-Object pack -EQ $pack)
+    if (-not $startup.Count) { throw "Zebar startupConfigs must select configured widget: $pack" }
+    foreach ($entry in $startup) {
+        $widget = @($manifest.widgets | Where-Object name -EQ $entry.widget)
+        if ($widget.Count -ne 1) { throw "Zebar startup widget is missing from zpack.json: $($entry.widget)" }
+        if ($entry.preset -notin @($widget[0].presets.name)) { throw "Zebar startup preset is missing from zpack.json: $($entry.preset)" }
+    }
+    $link = @($Configuration.links | Where-Object { $_.source -eq $widgetPath -and $_.root -eq 'USERPROFILE' -and $_.destination -eq ".glzr/zebar/$pack" })
+    if ($link.Count -ne 1) { throw "Zebar selected widget must have one matching runtime link: $pack" }
 }

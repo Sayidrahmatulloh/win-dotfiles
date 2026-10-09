@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 #  config/symlinks.ps1 — Link configs to their correct paths
 # ============================================================
 
@@ -6,6 +6,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 . "$PSScriptRoot\..\lib\utils.ps1"
+. "$PSScriptRoot\..\lib\setup.ps1"
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -126,15 +127,17 @@ function Set-ProfileEntry {
 
 function Main {
   Check-Admin
+  Assert-ZebarConfiguration -RepoRoot $DOTFILES
+  Initialize-SourceDirs $SYMLINKS
+  Initialize-ZebarRuntime -RepoRoot $DOTFILES -Destination (Join-Path $env:USERPROFILE '.glzr/zebar')
 
   Write-Section 'Source dirs:'
-  Initialize-SourceDirs $SYMLINKS
 
   Write-Section 'Symlinks:'
   $linked = [System.Collections.Generic.List[string]]::new()
   $failed = [System.Collections.Generic.List[string]]::new()
 
-  foreach ($link in $SYMLINKS) {
+  foreach ($link in ($SYMLINKS | Where-Object { $_.Dst -notlike (Join-Path $env:USERPROFILE '.glzr/zebar/*') })) {
     New-Symlink -Src $link.Src -Dst $link.Dst -Linked $linked -Failed $failed
   }
 

@@ -1,4 +1,4 @@
-﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
@@ -48,3 +48,26 @@ Assert-That ((Test-DoctorLink $fixture (Join-Path $fixture 'link')).Status -eq '
 $script:target=Join-Path $fixture 'other'
 Assert-That ((Test-DoctorLink $fixture (Join-Path $fixture 'link')).Status -eq 'FAIL') 'Wrong checkout junction was accepted.'
 Write-Host 'Doctor tests passed.'
+
+# Real runtime checks: matching, stale, invalid selection and missing files.
+$runtimeFixture = Join-Path $fixture 'runtime'
+New-Item -ItemType Directory -Path $runtimeFixture | Out-Null
+Copy-Item "$RepoRoot/config/glzr/zebar/settings.json" "$runtimeFixture/settings.json"
+Copy-Item "$RepoRoot/widgets/zebar/normalize.css" "$runtimeFixture/normalize.css"
+$config = Get-SetupConfig $RepoRoot
+$result = @(Test-DoctorZebarRuntime -RepoRoot $RepoRoot -Configuration $config -RuntimeDirectory $runtimeFixture)
+Assert-That (@($result | Where-Object Status -ne OK).Count -eq 0) 'Matching runtime files were rejected.'
+Add-Content "$runtimeFixture/settings.json" ' '
+$result = @(Test-DoctorZebarRuntime -RepoRoot $RepoRoot -Configuration $config -RuntimeDirectory $runtimeFixture)
+Assert-That (@($result | Where-Object Status -eq WARN).Count -eq 1) 'Stale runtime settings were missed.'
+$settings = Get-Content "$RepoRoot/config/glzr/zebar/settings.json" -Raw | ConvertFrom-Json
+$settings.startupConfigs[0].pack = 'missing'
+$settings | ConvertTo-Json -Depth 10 | Set-Content "$runtimeFixture/settings.json"
+$result = Invoke-DoctorCheck 'runtime' { Test-DoctorZebarRuntime -RepoRoot $RepoRoot -Configuration $config -RuntimeDirectory $runtimeFixture }
+Assert-That ($result.Status -eq 'FAIL') 'Wrong runtime startup pack was accepted.'
+Set-Content "$runtimeFixture/settings.json" '{invalid'
+$result = Invoke-DoctorCheck 'runtime' { Test-DoctorZebarRuntime -RepoRoot $RepoRoot -Configuration $config -RuntimeDirectory $runtimeFixture }
+Assert-That ($result.Status -eq 'FAIL') 'Malformed runtime JSON was accepted.'
+Remove-Item -LiteralPath "$runtimeFixture/settings.json"
+$result = Invoke-DoctorCheck 'runtime' { Test-DoctorZebarRuntime -RepoRoot $RepoRoot -Configuration $config -RuntimeDirectory $runtimeFixture }
+Assert-That ($result.Status -eq 'FAIL') 'Missing runtime settings were accepted.'

@@ -36,7 +36,7 @@ Assert-That ($result.Failed -contains 'inventory-error') 'Inventory failure was 
 Assert-That ($script:installed.Count -eq 1 -and $script:installed[0] -eq 'next') 'Failed inventory caused an install or blocked the next item.'
 
 # Scoop fonts use the same loop as tools. No real package manager runs.
-Invoke-Expression (Read-Functions 'fonts/fonts.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/fonts.ps1')
 $Update = $false
 function Ensure-NerdFontsBucket {}
 function Test-ScoopFontInstalled { param($Name) $Name -eq 'existing' }

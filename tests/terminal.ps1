@@ -1,10 +1,10 @@
-﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
 . "$RepoRoot\lib\files.ps1"
 . "$RepoRoot\lib\settings.ps1"
-Invoke-Expression (Read-Functions 'config/terminal/terminal.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/terminal.ps1')
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('terminal-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 $packaged = Join-Path $fixture 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
@@ -32,3 +32,6 @@ try { Copy-TerminalSettings -Source $source -Destination $packaged } catch { $th
 Assert-That $threw 'Invalid JSON was accepted.'
 Assert-That ((Get-Content $packaged -Raw) -ceq $before) 'Invalid source overwrote working settings.'
 Write-Host 'Terminal tests passed.'
+$entrySettings = Join-Path $fixture 'entrypoint/settings.json'
+& "$RepoRoot/scripts/install/terminal.ps1" -SettingsPath $entrySettings
+Assert-That ((Get-FileHash $entrySettings).Hash -eq (Get-FileHash "$RepoRoot/config/terminal/settings.json").Hash) 'Moved Terminal entrypoint did not find the saved settings.'

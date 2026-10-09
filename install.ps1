@@ -1,4 +1,4 @@
-﻿# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
+# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
 [CmdletBinding()]
 param([string]$DotfilesPath)
 Set-StrictMode -Version Latest
@@ -56,19 +56,23 @@ function Main {
     . "$DOTFILES\lib\setup.ps1"
     # Validate all input data before any package/configuration stage runs.
     $null = Get-SetupConfig -RepoRoot $DOTFILES
+    Assert-ZebarConfiguration -RepoRoot $DOTFILES
     $null = Get-PowerShellModules -RepoRoot $DOTFILES
+    . "$DOTFILES\scripts\theme\ThemeConfig.ps1"
+    $null = Get-ThemeCatalog -Root $DOTFILES
     Write-Banner
     $results = [Collections.Generic.List[object]]::new()
-    $results.Add((Invoke-Step 'Scoop packages' { & "$DOTFILES\packages\scoop.ps1" }))
+    $results.Add((Invoke-Step 'Scoop packages' { & "$DOTFILES\scripts\install\scoop.ps1" }))
     Refresh-SetupEnvironment
-    $results.Add((Invoke-Step 'Winget apps' { & "$DOTFILES\packages\winget.ps1" }))
+    $results.Add((Invoke-Step 'Winget apps' { & "$DOTFILES\scripts\install\winget.ps1" }))
     Refresh-SetupEnvironment
-    $results.Add((Invoke-Step 'Fonts' { & "$DOTFILES\fonts\fonts.ps1" }))
-    $results.Add((Invoke-Step 'PS modules' { Install-PSModules }))
+    $results.Add((Invoke-Step 'Fonts' { & "$DOTFILES\scripts\install\fonts.ps1" }))
+    $results.Add((Invoke-Step 'Bibata cursors' { & "$DOTFILES\scripts\install\cursors.ps1" }))
+    $results.Add((Invoke-Step 'PS modules' { Install-PSModules -RepoRoot $DOTFILES }))
     $results.Add((Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }))
-    $results.Add((Invoke-Step 'Git config' { & "$DOTFILES\config\git\git.ps1" }))
-    $results.Add((Invoke-Step 'Windows Terminal' { & "$DOTFILES\config\terminal\terminal.ps1" }))
-    $results.Add((Invoke-Step 'Build Zebar widget' { Build-Zebar }))
+    $results.Add((Invoke-Step 'Git config' { & "$DOTFILES\scripts\install\git.ps1" }))
+    $results.Add((Invoke-Step 'Windows Terminal' { & "$DOTFILES\scripts\install\terminal.ps1" }))
+    $results.Add((Invoke-Step 'Build Zebar widget' { Build-Zebar -RepoRoot $DOTFILES }))
     Write-Host "`nSetup results:"
     $results | Format-Table Name, Success, Message -Wrap | Out-Host
     Write-Host "Log: $logPath"

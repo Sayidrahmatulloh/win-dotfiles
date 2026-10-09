@@ -16,15 +16,27 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: config/glzr/zebar/attaquer-solid-ts
+        shell: pwsh
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
+      - name: Resolve and validate selected widget
+        run: |
+          . ./lib/settings.ps1
+          Assert-ZebarConfiguration -RepoRoot $PWD.Path
+          $widget = (Get-SetupConfig -RepoRoot $PWD.Path).zebar.widget
+          "ZEBAR_WIDGET=$widget" >> $env:GITHUB_ENV
       - name: Install locked dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --cwd $env:ZEBAR_WIDGET --frozen-lockfile
       - name: Check TypeScript
-        run: bun run typecheck
+        run: bun run --cwd $env:ZEBAR_WIDGET typecheck
       - name: Check direct widget actions
-        run: bun test
+        run: bun test --cwd $env:ZEBAR_WIDGET
+      - name: Prepare font for production build
+        run: ./tools/prepare-ci-font.ps1
+      - name: Build widget and desktop assets
+        run: bun run --cwd $env:ZEBAR_WIDGET build
+      - name: Verify built desktop files
+        run: ./tools/check-desktop-build.ps1

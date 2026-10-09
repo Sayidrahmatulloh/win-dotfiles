@@ -11,6 +11,7 @@ Loyihani birinchi marta ko'rayotgan bo'lsangiz, [kodni o'qish yo'riqnomasi](docs
 - **Shell:** PowerShell 7+ bilan Oh My Posh (`dev.omp.json`), Vi mode, FZF qidiruvi (`Ctrl+f`, `Ctrl+r`), Git integratsiyasi (`posh-git`) va `terminal-icons`.
 - **Tiling Window Manager:** [GlazeWM](https://github.com/glzr-io/glazewm) (i3/bspwm kabi klaviatura orqali boshqariladigan oynalar menejeri).
 - **Status Bar:** [Zebar](https://github.com/glzr-io/zebar) + SolidJS/TypeScript asosidagi chiroyli va yengil panel (`attaquer-solid-ts`).
+- **Cursor:** Bibata Modern — standart Amber, Ice va Classic variantlari; Zebar mavzusi bilan avtomatik almashadi.
 - **Muharrir:** [Neovim](https://neovim.io) (LazyVim bazasida) va VSCode Neovim uchun yagona optimallashtirilgan konfiguratsiya.
 - **Paket Menejerlari:** [Scoop](https://scoop.sh) va [Winget](https://github.com/microsoft/winget-cli) orqali to'liq avtomatlashtirilgan dasturlar o'rnatilishi.
 - **Shriftlar:** Nerd Fonts (`JetBrainsMono-NF`, `CascadiaCode-NF`, `FiraCode-NF`) va dasturlash shriftlari.
@@ -47,9 +48,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Dotfile
 Bootstrap mavjud PowerShell 7'ni qayta o'rnatmaydi. Installer mavjud checkoutni saqlaydi, mavjud paketlarni o'tkazib yuboradi va yetishmaganlarini o'rnatadi. Paketlarni yangilash alohida, ixtiyoriy:
 
 ```powershell
-.\packages\scoop.ps1 -Update
-.\packages\winget.ps1 -Update
-.\fonts\fonts.ps1 -Update
+.\scripts\install\scoop.ps1 -Update
+.\scripts\install\winget.ps1 -Update
+.\scripts\install\fonts.ps1 -Update
 ```
 
 Har bosqichning natijasi oxirida ko'rsatiladi. Xato bo'lsa jarayon 1, hammasi muvaffaqiyatli bo'lsa 0 kodi bilan tugaydi. Loglar `%LOCALAPPDATA%\win-dotfiles\logs` ichida saqlanadi. Muammoni tuzatib, bootstrap'ni qayta bajaring; konfiguratsiyalar uchun mavjud backup mexanizmi saqlanadi.
@@ -73,8 +74,15 @@ win-dotfiles/
 │   ├── nvim/           # Neovim / VS Code Neovim
 │   ├── glzr/           # GlazeWM va Zebar
 │   └── symlinks.ps1    # Konfiguratsiya papkalarini ulash
-├── packages/           # Scoop va Winget bosqichlari
-├── fonts/              # Shrift o'rnatish va ZIP arxivlar
+├── scripts/
+│   ├── install/        # Scoop, Winget, fonts va cursors bosqichlari
+│   └── theme/          # Windows mavzusini boshqarish
+├── assets/
+│   ├── fonts/          # ZIP shriftlar
+│   ├── cursors/        # Bibata ZIP va litsenziya
+│   └── wallpapers/    # Wallpaper manbalari
+├── themes/themes.json  # Yagona mavzu katalogi
+├── tools/              # CI va build tekshirish vositalari
 ├── lib/                # Vazifasi bo'yicha ajratilgan umumiy funksiyalar
 ├── docs/code-guide.md  # Kodni o'qish va kengaytirish yo'riqnomasi
 └── tests/run.ps1       # Barcha regression testlarni ishga tushirish
@@ -120,13 +128,13 @@ Preview can be selected explicitly with `-SettingsPath`.
 After changing Terminal settings, save the current configuration into the repo:
 
 ```powershell
-.\config\terminal\terminal.ps1 -Mode Export
+.\scripts\install\terminal.ps1 -Mode Export
 ```
 
 Restore just Terminal settings:
 
 ```powershell
-.\config\terminal\terminal.ps1
+.\scripts\install\terminal.ps1
 ```
 
 Review exported settings before committing: custom profiles can contain personal
@@ -158,7 +166,7 @@ email and credential settings stay local. A rerun does not duplicate the include
 Run only this step with:
 
 ```powershell
-.\config\git\git.ps1
+.\scripts\install\git.ps1
 ```
 
 On a new computer, set your identity once (or use a repo-local identity):
@@ -212,3 +220,15 @@ logda saqlanadi. Link yaratish muvaffaqiyatsiz bo'lsa oldingi konfiguratsiya
 qaytariladi. ZIP shriftlarning registry yozuvi ham tekshiriladi va qayta setup
 yarim qolgan ro'yxatdan o'tkazishni tuzatadi. Batafsil xatti-harakat va testlar
 [kodni o'qish yo'riqnomasida](docs/code-guide.md).
+
+
+Mavzu ranglari va wallpaper yo'llari `themes/themes.json`da boshqariladi. Cursor uchun standart Bibata variantlari ishlatiladi: green → Amber, blue → Ice, purple → Classic. `install.ps1` repo'dagi `assets/cursors/Bibata-Modern-Zebar.zip`ni `%LOCALAPPDATA%\win-dotfiles\cursors\Bibata-Modern-Zebar` ichiga ochadi. Avvalgi cursor sxemasi `original.clixml`ga saqlanadi.
+
+Zebar build'i umumiy skriptlar, mavzu katalogi, cursor ZIP va wallpaper'larni `dist/desktop/`ga yig'adi. Batafsil [arxitektura yo'riqnomasi](docs/architecture.md).
+
+Cursor'ni tiklash uchun avval Zebar'ni yoping, keyin:
+
+```powershell
+. ./scripts/theme/SetCursor.ps1
+Restore-ThemeCursor
+```

@@ -1,0 +1,29 @@
+{
+  "default": "green",
+  "themes": [
+    {
+      "id": "green",
+      "label": "Green",
+      "accent": "#a6e22e",
+      "surface": "#a6e22e18",
+      "wallpaper": "assets/wallpapers/original-girl-green-garden-v5.png",
+      "cursor": "amber"
+    },
+    {
+      "id": "blue",
+      "label": "Blue",
+      "accent": "#96c5ff",
+      "surface": "#96c5ff20",
+      "wallpaper": "assets/wallpapers/original-girl-blue-night-v5.png",
+      "cursor": "ice"
+    },
+    {
+      "id": "purple",
+      "label": "Purple",
+      "accent": "#c4a7e7",
+      "surface": "#c4a7e720",
+      "wallpaper": "assets/wallpapers/original-girl-purple-room-v5.png",
+      "cursor": "classic"
+    }
+  ]
+}

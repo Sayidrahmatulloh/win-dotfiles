@@ -1,10 +1,10 @@
-﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
 . "$RepoRoot\lib\files.ps1"
 . "$RepoRoot\lib\settings.ps1"
-Invoke-Expression (Read-Functions 'config/git/git.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/git.ps1')
 $fixture=Join-Path ([IO.Path]::GetTempPath()) ('git config test '+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 $source=Join-Path $fixture 'shared config'; $destination=Join-Path $fixture '.gitconfig'
@@ -35,3 +35,5 @@ try { Install-GitConfig $invalid $destination } catch { $threw=$true }
 Assert-That $threw 'Invalid shared config was accepted.'
 Assert-That ((Get-Content -LiteralPath $destination -Raw) -ceq $before) 'Invalid config changed global config.'
 Write-Host 'Git config tests passed.'
+& "$RepoRoot/scripts/install/git.ps1" -GlobalConfigPath (Join-Path $fixture 'entrypoint/config')
+Assert-That ((& git config --file (Join-Path $fixture 'entrypoint/config') --includes alias.st) -eq 'status --short --branch') 'Moved Git entrypoint did not find the shared config.'

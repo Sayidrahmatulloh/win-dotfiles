@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
 . "$RepoRoot\lib\utils.ps1"
-Invoke-Expression (Read-Functions 'fonts/fonts.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/fonts.ps1')
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('font-repair-test-' + [guid]::NewGuid().ToString('N'))
 $SYSTEM_FONTS = Join-Path $fixture 'installed'
 New-Item -ItemType Directory -Path $fixture | Out-Null
@@ -12,7 +12,11 @@ Set-Content -LiteralPath $font -Value 'font bytes'
 $script:registered = $null
 $script:registrationFails = $true
 $script:registrationCalls = 0
-function Get-ItemPropertyValue { param($LiteralPath,$Name,$ErrorAction) return $script:registered }
+function Get-ItemPropertyValue {
+    param($LiteralPath,$Name,$ErrorAction)
+    if ($null -eq $script:registered) { throw [System.Management.Automation.PSArgumentException]::new('Missing registry value.') }
+    return $script:registered
+}
 function New-Item {
     param($ItemType,$Path,[switch]$Force)
     if ($Path -like 'HKCU:*') { return }

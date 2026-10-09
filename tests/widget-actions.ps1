@@ -2,7 +2,7 @@ param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
-Invoke-Expression (Read-Functions 'config/glzr/zebar/attaquer-solid-ts/public/assets/scripts/InvokeWidgetAction.ps1')
+Invoke-Expression (Read-Functions 'widgets/zebar/attaquer-solid-ts/public/assets/scripts/InvokeWidgetAction.ps1')
 $script:commandPath = $null
 $script:scoopCommand = $null
 $script:existingPaths = @()
@@ -28,7 +28,7 @@ $script:existingPaths = @()
 $threw = $false
 try { Resolve-AutoHotkeyPath } catch { $threw = $true }
 Assert-That $threw 'Missing AutoHotkey was accepted.'
-$manifest = Get-Content (Join-Path $RepoRoot 'config/glzr/zebar/attaquer-solid-ts/zpack.json') -Raw | ConvertFrom-Json
+$manifest = Get-Content (Join-Path $RepoRoot 'widgets/zebar/attaquer-solid-ts/zpack.json') -Raw | ConvertFrom-Json
 $rule = $manifest.widgets[0].privileges.shellCommands | Where-Object argsRegex -Like '*InvokeWidgetAction*'
 $prefix = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File D:\Widget With Spaces\attaquer-solid-ts\dist\assets\scripts\InvokeWidgetAction.ps1 -Action '
 Assert-That (($prefix + 'ResolveAutoHotkey') -match $rule.argsRegex) 'Manifest rejected startup path resolution with spaces.'

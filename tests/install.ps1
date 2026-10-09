@@ -1,4 +1,4 @@
-﻿# Exercise the install entry point with stubbed stages; no real installer runs.
+# Exercise the install entry point with stubbed stages; no real installer runs.
 param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -24,6 +24,15 @@ $fakeHelpers = @(
 ) -join "`n"
 [IO.File]::WriteAllText((Join-Path $library 'utils.ps1'), $fakeHelpers)
 Copy-Item -LiteralPath (Join-Path $RepoRoot 'lib/setup.ps1') -Destination (Join-Path $library 'setup.ps1')
+$themeScripts = Join-Path $DOTFILES 'scripts/theme'
+New-Item -ItemType Directory -Path $themeScripts -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $RepoRoot 'scripts/theme/ThemeConfig.ps1') -Destination $themeScripts
+Copy-Item -LiteralPath (Join-Path $RepoRoot 'themes') -Destination $DOTFILES -Recurse
+$zebarSettings = Join-Path $DOTFILES 'config/glzr/zebar'
+$widgetManifest = Join-Path $DOTFILES (Get-SetupConfig -RepoRoot $RepoRoot).zebar.widget
+New-Item -ItemType Directory -Path $zebarSettings,$widgetManifest -Force | Out-Null
+Copy-Item "$RepoRoot/config/glzr/zebar/settings.json" $zebarSettings
+Copy-Item (Join-Path $RepoRoot ((Get-SetupConfig -RepoRoot $RepoRoot).zebar.widget + '/zpack.json')) $widgetManifest
 function Install-Scoop {}
 function Sync-Repo {}
 function Refresh-SetupEnvironment {}
@@ -35,11 +44,11 @@ try {
     $script:stageNames = @()
     $script:failingStage = ''
     $exitCode = Main
-    $expected = @('Scoop packages','Winget apps','Fonts','PS modules','Symlinks','Git config','Windows Terminal','Build Zebar widget')
+    $expected = @('Scoop packages','Winget apps','Fonts','Bibata cursors','PS modules','Symlinks','Git config','Windows Terminal','Build Zebar widget')
     Assert-That ($exitCode -eq 0) 'Successful setup did not return 0.'
     Assert-That (($script:stageNames -join ',') -eq ($expected -join ',')) 'Setup stage order changed.'
     $script:stageNames = @()
-    $script:failingStage = 'Fonts'
+    $script:failingStage = 'Bibata cursors'
     $exitCode = Main
     Assert-That ($exitCode -eq 1) 'Failed setup did not return 1.'
     Assert-That (($script:stageNames -join ',') -eq ($expected -join ',')) 'Failed stage prevented later stages.'

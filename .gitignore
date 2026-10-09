@@ -29,9 +29,9 @@ pnpm-lock.yaml
 **/CaskaydiaMonoNerdFont-Regular.ttf
 
 # Proprietary / commercial fonts (prevent license/DMCA issues)
-fonts/files/monolisa.zip
-fonts/files/dankmono.zip
-fonts/files/dankmono-nf.zip
+assets/fonts/monolisa.zip
+assets/fonts/dankmono.zip
+assets/fonts/dankmono-nf.zip
 
 # ── Editor & IDEs ──────────────────────────────────────────────
 .vscode/
@@ -53,3 +53,6 @@ config/terminal/*.bak_*
 
 # Graphify generated output
 graphify-out/
+.test-tmp/
+.dist-stage-*/
+.dist-backup-*/

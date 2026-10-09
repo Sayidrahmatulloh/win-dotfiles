@@ -79,9 +79,29 @@
       "destination": ".glzr/glazewm"
     },
     {
-      "source": "config/glzr/zebar",
+      "source": "widgets/zebar/attaquer-buildless",
       "root": "USERPROFILE",
-      "destination": ".glzr/zebar"
+      "destination": ".glzr/zebar/attaquer-buildless"
+    },
+    {
+      "source": "widgets/zebar/attaquer-solid-ts",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/attaquer-solid-ts"
+    },
+    {
+      "source": "widgets/zebar/attaquer-solid-ts-battery",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/attaquer-solid-ts-battery"
+    },
+    {
+      "source": "widgets/zebar/attaquer-solid-ts-disk",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/attaquer-solid-ts-disk"
+    },
+    {
+      "source": "widgets/zebar/quiet-velvet",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/quiet-velvet"
     }
   ],
   "requiredCommands": [
@@ -100,7 +120,7 @@
     "code"
   ],
   "zebar": {
-    "widget": "config/glzr/zebar/attaquer-solid-ts",
+    "widget": "widgets/zebar/attaquer-solid-ts",
     "fontPackage": "CascadiaMono-NF",
     "fontFile": "CaskaydiaMonoNerdFont-Regular.ttf"
   }

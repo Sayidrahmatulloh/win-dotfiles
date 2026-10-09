@@ -1,0 +1,23 @@
+{
+  "name": "solidjs-ts",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "build": "pwsh -NoProfile -File ../../../tools/build-zebar.ps1",
+    "build:raw": "tsc --noEmit && vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@glzr/style-guide": "^1.1.0",
+    "@kobalte/core": "^0.13.7",
+    "solid-js": "1.9.11",
+    "zebar": "3.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.3.3",
+    "vite": "6.4.1",
+    "vite-plugin-solid": "2.11.10"
+  },
+  "type": "module"
+}

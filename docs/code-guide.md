@@ -8,7 +8,7 @@ funksiyalari esa **amal** hisoblanadi. Bu ikki qism alohida saqlanadi.
 
 1. `setup.json` — nima o'rnatiladi, konfiguratsiyalar qayerga ulanadi?
 2. `install.ps1` ichidagi `Main` — bosqichlar qanday tartibda bajariladi?
-3. `packages/scoop.ps1` yoki `packages/winget.ps1` — bitta bosqich qanday ishlaydi?
+3. `scripts/install/scoop.ps1` yoki `scripts/install/winget.ps1` — bitta bosqich qanday ishlaydi?
 4. `lib/packages.ps1` — barcha paketlar uchun umumiy install/update sikli.
 5. `doctor.ps1`, keyin `lib/diagnostics.ps1` — setup qanday tekshiriladi?
 
@@ -26,11 +26,15 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `config/powershell/modules.json` | Profil, setup va doctor ishlatadigan yagona modul ro'yxati |
 | `install.ps1` | Bosqichlarni ketma-ket ishga tushirish, log va yakuniy natija |
 | `doctor.ps1` | Faqat tekshirish va hisobot chiqarish |
-| `packages/*.ps1` | Paket menejeriga tegishli buyruqlar va bosqich |
-| `fonts/fonts.ps1` | Scoop shriftlari va ZIP shriftlarini ro'yxatdan o'tkazish |
+| `scripts/install/{scoop,winget}.ps1` | Paket menejeriga tegishli buyruqlar va bosqich |
+| `scripts/install/fonts.ps1` | Scoop shriftlari va ZIP shriftlarini ro'yxatdan o'tkazish |
+| `scripts/install/cursors.ps1` | Bibata ZIP'ni ochish va faol rangni qo'llash |
+| `themes/themes.json` | Mavzu ID, ranglar, wallpaper va cursor varianti |
+| `scripts/theme/ApplyTheme.ps1` | GlazeWM, wallpaper va cursor'ni birga almashtirish |
+| `assets/` | Shrift arxivlari, cursor ZIP va wallpaper manbalari |
 | `config/symlinks.ps1` | Papkalarni ulash va PowerShell profilini sozlash |
-| `config/git/git.ps1` | Umumiy Git konfiguratsiyasini include qilish |
-| `config/terminal/terminal.ps1` | Terminal sozlamalarini saqlash yoki tiklash |
+| `scripts/install/git.ps1` | Umumiy Git konfiguratsiyasini include qilish |
+| `scripts/install/terminal.ps1` | Terminal sozlamalarini saqlash yoki tiklash |
 | `lib/utils.ps1` | Setup uchun umumiy yordamchilarni yuklash |
 | `lib/settings.ps1` | JSON ro'yxatlarini o'qish, link yo'llarini hisoblash |
 | `lib/files.ps1` | Backup, Terminal yo'li, link manzilini tekshirish |
@@ -86,6 +90,15 @@ PowerShell 7 ichida repo papkasidan:
 .\tests\run.ps1
 .\doctor.ps1
 ```
+
+Zebar build'i va uning desktop assetlarini tekshirish:
+
+```powershell
+bun run --cwd widgets/zebar/attaquer-solid-ts build
+./tools/check-desktop-build.ps1
+```
+
+Papka vazifalari va yangi yo'llar: [architecture.md](architecture.md).
 
 Testlar haqiqiy dasturlarni o'rnatmaydi va foydalanuvchining konfiguratsiyasini
 almashtirmaydi. Ular vaqtinchalik fixture fayllari va soxta paket buyruqlaridan

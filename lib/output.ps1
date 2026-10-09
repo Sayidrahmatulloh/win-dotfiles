@@ -128,30 +128,52 @@ function Write-Summary {
   $upgraded = if ($R.ContainsKey('Upgraded')) { $R.Upgraded.Count } else { 0 }
   $latest = if ($R.ContainsKey('Latest')) { $R.Latest.Count } else { 0 }
   $failed = $R.Failed.Count
-  $width = [math]::Max(0, 32 - $Label.Length)
-
-  Write-Host ''
-  Write-Host "  ${LCYAN}┌─ ${BOLD}${LWHITE}$Label Summary${RESET}${LCYAN} $('─' * $width)┐${RESET}"
-
-  if ($installed -gt 0) {
-    Write-Host "  ${LCYAN}│${RESET}  $ICON_OK   ${LGREEN}Installed${RESET}   $installed"
-  }
-  if ($upgraded -gt 0) {
-    Write-Host "  ${LCYAN}│${RESET}  $ICON_UP   ${LBLUE}Upgraded${RESET}    $upgraded"
-  }
-  if ($latest -gt 0) {
-    Write-Host "  ${LCYAN}│${RESET}  $ICON_SKIP  ${GRAY}Up to date${RESET}  $latest"
-  }
-  if ($failed -gt 0) {
-    Write-Host "  ${LCYAN}│${RESET}  $ICON_FAIL  ${LRED}Failed${RESET}      $failed"
-    foreach ($item in $R.Failed) {
-      Write-Host "  ${LCYAN}│${RESET}       ${GRAY}· $item${RESET}"
+  $title = "$Label Summary"
+  $rows = [Collections.Generic.List[string]]::new()
+  foreach ($status in @(
+    @{Count=$installed; Icon=$ICON_OK; Name='Installed'; Color=$LGREEN},
+    @{Count=$upgraded; Icon=$ICON_UP; Name='Upgraded'; Color=$LBLUE},
+    @{Count=$latest; Icon=$ICON_SKIP; Name='Up to date'; Color=$GRAY},
+    @{Count=$failed; Icon=$ICON_FAIL; Name='Failed'; Color=$LRED}
+  )) {
+    if ($status.Count -gt 0) {
+      $text = '{0,-12} {1,4}' -f $status.Name, $status.Count
+      $rows.Add("$($status.Icon)  $($status.Color)$text${RESET}")
     }
   }
-  if ($installed -eq 0 -and $upgraded -eq 0 -and $failed -eq 0) {
-    Write-Host "  ${LCYAN}│${RESET}  $ICON_SKIP  ${GRAY}Nothing to do — all up to date${RESET}"
+  if ($rows.Count -eq 0) { $rows.Add("${GRAY}No packages to process.${RESET}") }
+
+  # One width for every edge; ANSI escapes do not occupy terminal columns.
+  $ansi = '\x1b\[[0-9;]*m'
+  $terminalWidth = try { $Host.UI.RawUI.WindowSize.Width } catch { 80 }
+  if ($terminalWidth -le 0) { $terminalWidth = 80 }
+  $inner = [math]::Min([math]::Max(34, $title.Length + 4), [math]::Max(8, $terminalWidth - 4))
+  $contentWidth = $inner - 4
+  function Write-SummaryLine {
+    param([string]$Text)
+    $plain = $Text -replace $ansi, ''
+    if ($plain.Length -le $contentWidth) {
+      $padding = ' ' * ($contentWidth - $plain.Length)
+      Write-Host "  ${LCYAN}│${RESET}  $Text$padding  ${LCYAN}│${RESET}"
+      return
+    }
+    # Wrap long labels and failed package names instead of overflowing the box.
+    for ($offset = 0; $offset -lt $plain.Length; $offset += $contentWidth) {
+      $part = $plain.Substring($offset, [math]::Min($contentWidth, $plain.Length - $offset))
+      $padding = ' ' * ($contentWidth - $part.Length)
+      Write-Host "  ${LCYAN}│${RESET}  ${GRAY}$part${RESET}$padding  ${LCYAN}│${RESET}"
+    }
   }
 
-  Write-Host "  ${LCYAN}└$('─' * 36)┘${RESET}"
+  Write-Host ''
+  Write-Host "  ${LCYAN}╭$('─' * $inner)╮${RESET}"
+  Write-SummaryLine "${BOLD}${LWHITE}$title${RESET}"
+  Write-Host "  ${LCYAN}├$('─' * $inner)┤${RESET}"
+  foreach ($row in $rows) { Write-SummaryLine $row }
+  if ($failed -gt 0) {
+    Write-SummaryLine ''
+    foreach ($item in $R.Failed) { Write-SummaryLine "${LRED}· $item${RESET}" }
+  }
+  Write-Host "  ${LCYAN}╰$('─' * $inner)╯${RESET}"
   Write-Host ''
 }

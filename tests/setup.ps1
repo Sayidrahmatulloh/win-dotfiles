@@ -1,4 +1,4 @@
-﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
@@ -19,7 +19,7 @@ Assert-That (-not $failure.Success -and $failure.Message -eq 'simulated error') 
 $next=Invoke-Step 'next' { }
 Assert-That $next.Success 'A failed stage prevented later stages.'
 
-Invoke-Expression (Read-Functions 'packages/scoop.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/scoop.ps1')
 $Update=$false
 function Test-ToolInstalled { param($Name) return $Name -eq 'existing' }
 function Install-Tool { param($Name) $script:installedTools.Add($Name); return $Name -ne 'broken' }
@@ -38,7 +38,7 @@ try { Main } catch { $threw=$true }
 Assert-That $threw 'Scoop package failure did not reach installer.'
 $TOOLS=@('existing'); Main
 
-Invoke-Expression (Read-Functions 'packages/winget.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/winget.ps1')
 function Test-AppInstalled { param($AppId) return $AppId -eq 'existing' }
 function Install-App { param($AppId) return $AppId -ne 'broken' }
 function Update-App { throw 'Existing apps must not be upgraded by default.' }
@@ -53,16 +53,16 @@ Assert-That $threw 'Winget package failure did not reach installer.'
 
 Invoke-Expression (Read-Functions 'install.ps1')
 Invoke-Expression (Read-Functions 'lib/setup.ps1')
-$DOTFILES=$RepoRoot
+$DOTFILES='deliberately-invalid-global-root'
 $script:bunCalls=0
 function bun { $script:bunCalls++; $global:LASTEXITCODE=1 }
 $threw=$false
-try { Build-Zebar } catch { $threw=$_.Exception.Message -like 'Zebar dependencies failed*' }
+try { Build-Zebar -RepoRoot $RepoRoot } catch { $threw=$_.Exception.Message -like 'Zebar dependencies failed*' }
 Assert-That ($threw -and $script:bunCalls -eq 1) 'Failed dependency install continued to build.'
 $script:bunCalls=0
 function bun { $script:bunCalls++; $global:LASTEXITCODE=if ($script:bunCalls -eq 1) {0} else {1} }
 $threw=$false
-try { Build-Zebar } catch { $threw=$_.Exception.Message -like 'Zebar build failed*' }
+try { Build-Zebar -RepoRoot $RepoRoot } catch { $threw=$_.Exception.Message -like 'Zebar build failed*' }
 Assert-That $threw 'A stale dist directory hid build failure.'
 
 Invoke-Expression (Read-Functions 'config/symlinks.ps1')
@@ -77,11 +77,11 @@ $fontDir=Join-Path $script:testScoopRoot 'apps/CascadiaMono-NF/current'
 New-Item -ItemType Directory -Path $fontDir -Force | Out-Null
 [IO.File]::WriteAllText((Join-Path $fontDir $fontName),'fixture-font')
 function Get-ScoopRoot { return $script:testScoopRoot }
-Ensure-ZebarFont -WidgetDir $widgetDir
+Ensure-ZebarFont -RepoRoot $RepoRoot -WidgetDir $widgetDir
 $targetFont=Join-Path $widgetDir "src/fonts/$fontName"
 Assert-That ((Get-Content -LiteralPath $targetFont -Raw) -eq 'fixture-font') 'Font was not restored from Scoop.'
 [IO.File]::WriteAllText($targetFont,'existing-font')
-Ensure-ZebarFont -WidgetDir $widgetDir
+Ensure-ZebarFont -RepoRoot $RepoRoot -WidgetDir $widgetDir
 Assert-That ((Get-Content -LiteralPath $targetFont -Raw) -eq 'existing-font') 'Existing font was overwritten.'
 
 Invoke-Expression (Read-Functions 'bootstrap.ps1')

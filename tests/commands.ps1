@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
 . "$RepoRoot\lib\utils.ps1"
-Invoke-Expression (Read-Functions 'packages/winget.ps1')
+Invoke-Expression (Read-Functions 'scripts/install/winget.ps1')
 $WINGET_FLAGS = @('--silent')
 $script:exitCode = 0
 $script:output = @()
