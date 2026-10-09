@@ -60,8 +60,7 @@ VS Code uchun esa `lua/vs/config` va `lua/vs/plugins`ni tanlaydi. Bu ikki
 muhitning vazifalari farq qiladi; papkalar shu sababli ajratilgan.
 
 Setup yig'adigan faol Zebar widget'i — `attaquer-solid-ts`; u
-`setup.json`dagi `zebar.widget` bilan belgilanadi. `attaquer-buildless`,
-`attaquer-solid-ts-battery`, `attaquer-solid-ts-disk` va `quiet-velvet`
+`setup.json`dagi `zebar.widget` bilan belgilanadi. `attaquer-buildless` va `quiet-velvet`
 mavjud qo'shimcha variantlar sifatida saqlanadi, standart setup ularni
 yig'maydi. `.marketplace` Zebar xizmat ma'lumotlari uchun ishlatiladi.
 Variantni o'chirishdan oldin GlazeWM startup buyrug'i va Zebar tanlovini tekshirish kerak.
@@ -120,3 +119,19 @@ operatsiya filesystem darajasida mutlaq atomic almashtirish emas.
 
 `build:raw` ichki build buyrug'i, `dev` esa to'g'ridan-to'g'ri watch build.
 Oddiy production yangilash uchun `build` ishlatiladi.
+
+## Setup bosqichlarini tanlash
+
+`Get-SetupStages` installer ichidagi ID, label va action'larning yagona
+ro'yxatini qaytaradi. `Select-SetupStages` `-Only` yoki `-Skip` ro'yxatini
+filtrlaydi: comma bilan berilgan CLI argumentlari ham qabul qilinadi,
+registr farqi va takrorlangan nomlar qo'shimcha bosqich yaratmaydi.
+Noma'lum nomlar, ziddiyatli parametrlar va bo'sh yakuniy tanlov log yoki
+package bosqichlarini boshlashdan oldin rad etiladi.
+
+Bootstrap ro'yxatlarni child pwsh jarayoniga bitta comma-separated string
+sifatida uzatadi; `-File` uchun array forwarding muammosi shu tarzda hal
+qilinadi. Bosqichlar har doim odatdagi tartibda bajariladi. Faqat tanlangan
+bosqichlarga kerakli modules/theme/Zebar ma'lumotlari oldindan tekshiriladi.
+Boshqa bosqichlar dependency sifatida yashirincha qo'shilmaydi; dastlabki
+PowerShell/repo/Scoop tayyorgarligi esa kerak bo'lsa saqlanadi.

@@ -1,6 +1,6 @@
 # Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
 [CmdletBinding()]
-param([string]$DotfilesPath)
+param([string]$DotfilesPath, [string[]]$Only = @(), [string[]]$Skip = @())
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $DOTFILES = if ($DotfilesPath) { [IO.Path]::GetFullPath($DotfilesPath) }
@@ -39,10 +39,41 @@ function Sync-Repo {
   if (-not (Test-Path -LiteralPath "$DOTFILES\lib\utils.ps1")) { throw 'The checkout is missing lib/utils.ps1.' }
 }
 
+function Get-SetupStages {
+    @(
+        @{Id='Scoop'; Name='Scoop packages'; Action={ & "$DOTFILES/scripts/install/scoop.ps1" }}
+        @{Id='Winget'; Name='Winget apps'; Action={ & "$DOTFILES/scripts/install/winget.ps1" }}
+        @{Id='Fonts'; Name='Fonts'; Action={ & "$DOTFILES/scripts/install/fonts.ps1" }}
+        @{Id='Cursors'; Name='Bibata cursors'; Action={ & "$DOTFILES/scripts/install/cursors.ps1" }}
+        @{Id='Modules'; Name='PS modules'; Action={ Install-PSModules -RepoRoot $DOTFILES }}
+        @{Id='Symlinks'; Name='Symlinks'; Action={ & "$DOTFILES/config/symlinks.ps1" }}
+        @{Id='Git'; Name='Git config'; Action={ & "$DOTFILES/scripts/install/git.ps1" }}
+        @{Id='Terminal'; Name='Windows Terminal'; Action={ & "$DOTFILES/scripts/install/terminal.ps1" }}
+        @{Id='Zebar'; Name='Build Zebar widget'; Action={ Build-Zebar -RepoRoot $DOTFILES }}
+    )
+}
+
+function Select-SetupStages {
+    param([string[]]$Only = @(), [string[]]$Skip = @())
+    if ($Only.Count -and $Skip.Count) { throw 'Use either -Only or -Skip, not both.' }
+    $stages = @(Get-SetupStages)
+    $names = @($stages.Id)
+    $onlyNames = @($Only | ForEach-Object { $_ -split ',' | ForEach-Object { $_.Trim() } })
+    $skipNames = @($Skip | ForEach-Object { $_ -split ',' | ForEach-Object { $_.Trim() } })
+    foreach ($name in @($onlyNames) + @($skipNames)) {
+        if ($name -notin $names) { throw "Unknown setup stage '$name'. Available: $($names -join ', ')." }
+    }
+    $selected = @($stages | Where-Object { (-not $onlyNames.Count -or $_.Id -in $onlyNames) -and $_.Id -notin $skipNames })
+    if (-not $selected.Count) { throw 'No setup stages selected.' }
+    return $selected
+}
+
 function Main {
   if ($PSVersionTable.PSVersion.Major -lt 7 -or -not $IsWindows) { throw 'Use bootstrap.ps1 from Windows PowerShell to install PowerShell 7 first.' }
   $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
   if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run setup in a normal user terminal. App installers request elevation when needed.' }
+  $stages = @(Select-SetupStages -Only $Only -Skip $Skip)
+  $stageIds = @($stages.Id)
   $logDir = Join-Path $env:LOCALAPPDATA 'win-dotfiles\logs'
   New-Item -ItemType Directory -Path $logDir -Force | Out-Null
   $logPath = Join-Path $logDir ('setup-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '.log')
@@ -50,29 +81,25 @@ function Main {
   Write-Host "Log: $logPath"
 
   try {
-    Install-Scoop | Out-Host
+    if ('Scoop' -in $stageIds -or 'Fonts' -in $stageIds -or -not (Test-Path -LiteralPath "$DOTFILES/lib/utils.ps1")) { Install-Scoop | Out-Host }
     Sync-Repo | Out-Host
     . "$DOTFILES\lib\utils.ps1"
     . "$DOTFILES\lib\setup.ps1"
-    # Validate all input data before any package/configuration stage runs.
+    # Validate the manifest and data needed by the selected stages before running them.
     $null = Get-SetupConfig -RepoRoot $DOTFILES
-    Assert-ZebarConfiguration -RepoRoot $DOTFILES
-    $null = Get-PowerShellModules -RepoRoot $DOTFILES
-    . "$DOTFILES\scripts\theme\ThemeConfig.ps1"
-    $null = Get-ThemeCatalog -Root $DOTFILES
+    if ('Zebar' -in $stageIds -or 'Symlinks' -in $stageIds) { Assert-ZebarConfiguration -RepoRoot $DOTFILES }
+    if ('Modules' -in $stageIds) { $null = Get-PowerShellModules -RepoRoot $DOTFILES }
+    if (@($stageIds | Where-Object { $_ -in @('Cursors','Zebar') }).Count) {
+        . "$DOTFILES/scripts/theme/ThemeConfig.ps1"
+        $null = Get-ThemeCatalog -Root $DOTFILES
+    }
     Write-Banner
     $results = [Collections.Generic.List[object]]::new()
-    $results.Add((Invoke-Step 'Scoop packages' { & "$DOTFILES\scripts\install\scoop.ps1" }))
-    Refresh-SetupEnvironment
-    $results.Add((Invoke-Step 'Winget apps' { & "$DOTFILES\scripts\install\winget.ps1" }))
-    Refresh-SetupEnvironment
-    $results.Add((Invoke-Step 'Fonts' { & "$DOTFILES\scripts\install\fonts.ps1" }))
-    $results.Add((Invoke-Step 'Bibata cursors' { & "$DOTFILES\scripts\install\cursors.ps1" }))
-    $results.Add((Invoke-Step 'PS modules' { Install-PSModules -RepoRoot $DOTFILES }))
-    $results.Add((Invoke-Step 'Symlinks' { & "$DOTFILES\config\symlinks.ps1" }))
-    $results.Add((Invoke-Step 'Git config' { & "$DOTFILES\scripts\install\git.ps1" }))
-    $results.Add((Invoke-Step 'Windows Terminal' { & "$DOTFILES\scripts\install\terminal.ps1" }))
-    $results.Add((Invoke-Step 'Build Zebar widget' { Build-Zebar -RepoRoot $DOTFILES }))
+    Write-Host "Selected stages: $($stageIds -join ', ')"
+    foreach ($stage in $stages) {
+        $results.Add((Invoke-Step $stage.Name $stage.Action))
+        if ($stage.Id -in @('Scoop','Winget')) { Refresh-SetupEnvironment }
+    }
     Write-Host "`nSetup results:"
     $results | Format-Table Name, Success, Message -Wrap | Out-Host
     Write-Host "Log: $logPath"

@@ -1,6 +1,6 @@
 # Compatible with Windows PowerShell 5.1.
 [CmdletBinding()]
-param([string]$DotfilesPath)
+param([string]$DotfilesPath, [string[]]$Only = @(), [string[]]$Skip = @())
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -19,6 +19,7 @@ function Find-PowerShell7 {
 }
 
 function Start-DotfilesSetup {
+    if ($Only.Count -and $Skip.Count) { throw 'Use either -Only or -Skip, not both.' }
     $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
     if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         throw 'Open a normal PowerShell window. Individual app installers request elevation when needed.'
@@ -49,7 +50,11 @@ function Start-DotfilesSetup {
             Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/Sayidrahmatulloh/win-dotfiles/main/install.ps1' -OutFile $temporaryInstaller
             $installer = $temporaryInstaller
         }
-        & $pwsh -NoProfile -ExecutionPolicy Bypass -File $installer -DotfilesPath $DotfilesPath
+        $childArguments = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$installer,'-DotfilesPath',$DotfilesPath)
+        # -File accepts one string for an array parameter; the installer splits commas.
+        if ($Only.Count) { $childArguments += @('-Only',($Only -join ',')) }
+        if ($Skip.Count) { $childArguments += @('-Skip',($Skip -join ',')) }
+        & $pwsh @childArguments
         if ($LASTEXITCODE -ne 0) { throw "Setup has unfinished steps (exit $LASTEXITCODE). Review its log and retry." }
     } finally {
         if ($temporaryInstaller -and (Test-Path -LiteralPath $temporaryInstaller)) { Remove-Item -LiteralPath $temporaryInstaller -Force }

@@ -85,6 +85,7 @@ Ensure-ZebarFont -RepoRoot $RepoRoot -WidgetDir $widgetDir
 Assert-That ((Get-Content -LiteralPath $targetFont -Raw) -eq 'existing-font') 'Existing font was overwritten.'
 
 Invoke-Expression (Read-Functions 'bootstrap.ps1')
+$Only=@(); $Skip=@()
 $pwshPath=Find-PowerShell7
 Assert-That (-not [string]::IsNullOrWhiteSpace($pwshPath)) 'Existing PowerShell 7 was not discovered.'
 $principal=[Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
@@ -93,6 +94,13 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     function Invoke-TestPwsh { $script:childArguments=@($args); $global:LASTEXITCODE=0 }
     $DotfilesPath=$RepoRoot
     Start-DotfilesSetup
+    $Only = @('Zebar','Terminal')
+    Start-DotfilesSetup
+    Assert-That ($script:childArguments -contains '-Only' -and $script:childArguments -contains 'Zebar,Terminal') 'Bootstrap did not forward Only as one comma-delimited argument.'
+    $Only = @(); $Skip = @('Winget','Fonts')
+    Start-DotfilesSetup
+    Assert-That ($script:childArguments -contains '-Skip' -and $script:childArguments -contains 'Winget,Fonts') 'Bootstrap did not forward Skip.'
+    $Skip = @()
     Assert-That ($script:childArguments -contains '-NoProfile') 'User profile was loaded during setup.'
     Assert-That ($script:childArguments -contains [IO.Path]::GetFullPath($RepoRoot)) 'Repository path was not passed to child process.'
     function Invoke-TestPwsh { $global:LASTEXITCODE=1 }

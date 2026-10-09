@@ -53,6 +53,26 @@ Bootstrap mavjud PowerShell 7'ni qayta o'rnatmaydi. Installer mavjud checkoutni 
 .\scripts\install\fonts.ps1 -Update
 ```
 
+Faqat kerakli bosqichlarni bajarish yoki ayrimlarini o'tkazib yuborish:
+
+```powershell
+.\bootstrap.ps1 -Only Zebar,Terminal
+.\bootstrap.ps1 -Skip Winget
+# PowerShell 7 ichidan installer'ni bevosita chaqirish ham mumkin:
+.\install.ps1 -Only Git,Terminal
+```
+
+Bosqich nomlari: `Scoop`, `Winget`, `Fonts`, `Cursors`, `Modules`,
+`Symlinks`, `Git`, `Terminal`, `Zebar`. Nomlar registrga bog'liq emas;
+tanlanganlar doim setup tartibida bajariladi. `-Only` va `-Skip` birga
+ishlatilmaydi. Parametrsiz barcha bosqichlar bajariladi.
+
+`-Only` kerakli paketlarni avtomatik qo'shmaydi: masalan, Zebar uchun Bun
+va shrift avval tayyor bo'lishi kerak. Mavjud checkout'da `-Only Zebar,Terminal`
+Scoop/Winget bosqichlarini boshlamaydi. Birinchi ishga tushirishda PowerShell 7,
+repo'ni clone qilish uchun Scoop/Git tayyorgarligi, Fonts tanlansa Scoop
+tayyorgarligi zarur bo'lishi mumkin; ular `-Skip` bilan o'chirilmaydi.
+
 Har bosqichning natijasi oxirida ko'rsatiladi. Xato bo'lsa jarayon 1, hammasi muvaffaqiyatli bo'lsa 0 kodi bilan tugaydi. Loglar `%LOCALAPPDATA%\win-dotfiles\logs` ichida saqlanadi. Muammoni tuzatib, bootstrap'ni qayta bajaring; konfiguratsiyalar uchun mavjud backup mexanizmi saqlanadi.
 
 Zebar Bun va uning lockfile'i orqali yig'iladi. Build muvaffaqiyatsiz tugasa, eski `dist` borligi muvaffaqiyat deb hisoblanmaydi. Zebar uchun CaskaydiaMono Nerd Font asseti toza clone'da o'rnatilgan CascadiaMono-NF paketidan avtomatik tiklanadi.
