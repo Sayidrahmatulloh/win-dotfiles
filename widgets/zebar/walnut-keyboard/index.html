@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="uz">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Walnut — Developer Keyboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body class="widget">
+  <main class="layout">
+    <header class="top">
+      <div class="brand">
+        <span class="brandmark">w</span>
+        <div>
+          <b>WALNUT</b>
+          <small>DEVELOPER’S DESK</small>
+        </div>
+      </div>
+      <div class="tools">
+        <button class="tool" id="sound" aria-pressed="false">Sound · off</button>
+        <button class="tool" id="theme" aria-pressed="false">Light</button>
+        <button class="tool" id="widget">Widget ↗</button>
+      </div>
+    </header>
+    <section class="stage" aria-label="Developer keyboard">
+      <div class="deskmat">
+        <div class="keyboard">
+          <i class="screw a">
+          </i>
+          <i class="screw b">
+          </i>
+          <i class="screw c">
+          </i>
+          <i class="screw d">
+          </i>
+          <div class="plate" id="keys">
+          </div>
+          <span class="signature">Sayidrahmatulloh</span>
+        </div>
+      </div>
+      <div class="info" aria-live="polite">
+        <strong id="selected">YOUR TOOLS. AT YOUR FINGERTIPS.</strong>
+        <p id="description">Tugmani bosing · Manzilni o'zgartirish uchun o'ng tugma yoki uzoq bosish</p>
+      </div>
+    </section>
+    <footer class="footer">
+      <span>
+        <i class="dot">
+        </i>47 TOOLS · ONE WORKSPACE</span>
+      <span class="hint">
+        <kbd>Tab</kbd> tanlash <kbd>Enter</kbd> ochish · <kbd>Esc</kbd> tahrirlashni yopish</span>
+      <span>WALNUT / 01</span>
+    </footer>
+  </main>
+  <button class="tool widget-exit" id="exit">Widgetdan chiqish</button>
+  <dialog class="modal" id="editor">
+    <form id="editForm">
+      <h2 id="editTitle">Tugmani sozlash</h2>
+      <p>Tugma havolani standart brauzerda ochadi. Sozlangan manzil shu widgetda saqlanadi.</p>
+      <label for="url">Veb-manzil</label>
+      <input id="url" type="url" placeholder="https://…" required>
+      <p class="error" id="error" hidden>https:// yoki http:// bilan boshlanuvchi manzil kiriting.</p>
+      <div class="actions">
+        <button class="tool" type="button" id="cancel">Bekor qilish</button>
+        <button class="tool save" type="submit">Saqlash</button>
+      </div>
+    </form>
+  </dialog>
+  <p id="loadError" class="load-error" role="alert" hidden>
+  </p>
+  <script type="module" src="./main.js">
+  </script>
+</body>
+
+</html>

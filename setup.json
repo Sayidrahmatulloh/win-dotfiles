@@ -92,6 +92,16 @@
       "source": "widgets/zebar/quiet-velvet",
       "root": "USERPROFILE",
       "destination": ".glzr/zebar/quiet-velvet"
+    },
+    {
+      "source": "widgets/zebar/walnut-keyboard",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/walnut-keyboard"
+    },
+    {
+      "source": "widgets/zebar/walnut-laptop",
+      "root": "USERPROFILE",
+      "destination": ".glzr/zebar/walnut-laptop"
     }
   ],
   "requiredCommands": [

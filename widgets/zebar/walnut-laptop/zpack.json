@@ -1,0 +1,43 @@
+{
+  "$schema": "https://github.com/glzr-io/zebar/raw/v3.1.1/resources/zpack-schema.json",
+  "name": "walnut-laptop",
+  "version": "1.0.0",
+  "description": "Walnut laptop screen widget",
+  "widgets": [
+    {
+      "name": "laptop-screen",
+      "htmlPath": "./laptop.html",
+      "zOrder": "bottom_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": [
+        "laptop.html",
+        "laptop.css",
+        "drag.js"
+      ],
+      "privileges": {
+        "shellCommands": []
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "bottom_center",
+          "offsetX": "0px",
+          "offsetY": "-350px",
+          "width": "100%",
+          "height": "500px",
+          "monitorSelection": {
+            "type": "primary"
+          },
+          "dockToEdge": {
+            "enabled": false,
+            "edge": null,
+            "windowMargin": "0px"
+          }
+        }
+      ]
+    }
+  ]
+}

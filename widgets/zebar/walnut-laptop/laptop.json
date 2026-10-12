@@ -1,0 +1,26 @@
+{
+  "apps": [
+    {
+      "name": "VS Code",
+      "icon": "vscode",
+      "program": "C:\\Users\\developer\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+      "args": []
+    },
+    {
+      "name": "Brauzer",
+      "icon": "browser",
+      "program": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "args": [
+        "https://www.google.com/"
+      ]
+    },
+    {
+      "name": "Desktop",
+      "icon": "folder",
+      "program": "explorer.exe",
+      "args": [
+        "C:\\Users\\developer\\Desktop"
+      ]
+    }
+  ]
+}

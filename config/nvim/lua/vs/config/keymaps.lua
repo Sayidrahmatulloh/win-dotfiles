@@ -21,7 +21,7 @@ local mappings = {                                                              
   -- File operations
   { "n", "<localleader>,",   "workbench.action.files.save" },                    -- Save file
   { "v", "<localleader>,",   "workbench.action.files.save" },                    -- Save file
-  { "n", "<leader>ef",       "workbench.view.explorer" },                        -- Open explorer
+  { "n", "<leader>fe",       "workbench.view.explorer" },                        -- Open explorer
   { "n", "<leader>ec",       "workbench.files.action.collapseExplorerFolders" }, -- Collapse folders
   { "n", "<leader><leader>", "workbench.action.quickOpen" },                     -- Quick open
   -- Text editing
@@ -91,7 +91,7 @@ local mappings = {                                                              
   { "n", "<leader>jb",       "workbench.action.navigateBack" },                   -- Navigate back
   { "n", "<leader>je",       "workbench.action.navigateToLastEditLocation" },     -- Jump to last edit
   -- File management
-  { 'n', "<leader>nf",       "fileutils.newFile" },                               -- Create new file
+  { 'n', "<leader>fn",       "fileutils.newFile" },                               -- Create new file
   { 'n', "<leader>fd",       "fileutils.removeFile" },                            -- Delete file
   { 'n', "<leader>rf",       "fileutils.renameFile" },                            -- Rename file
   { 'n', "<leader>df",       "fileutils.duplicateFile" },                         -- Duplicate file
@@ -99,9 +99,11 @@ local mappings = {                                                              
   -- Quick search & peek actions
   { "n", "<leader>ss",       "workbench.action.showAllSymbols" },                 -- Show all symbols
   { "n", "<leader>sa",       "workbench.action.showCommands" },                   -- Show commands
-  { "n", "<leader>so",       "workbench.action.quickOpen" },                      -- Show files
-  { "n", "<leader>sf",       "workbench.action.navigateForwardInEditLocations" }, -- Show files
-  { "n", "<leader>sb",       "workbench.action.navigateBackInEditLocations" },    -- Show files
+  { "n", "<leader>so",       "workbench.action.quickOpen" },                      -- Quick open
+  { "n", "<leader>se",       "workbench.action.quickOpenSelectNext" },            -- Quick open next
+  { "n", "<leader>sq",       "workbench.action.quickOpenSelectPrevious" },        -- Quick open previous
+  { "n", "<leader>sf",       "workbench.action.navigateForwardInEditLocations" }, -- Navigate forward
+  { "n", "<leader>sb",       "workbench.action.navigateBackInEditLocations" },    -- Navigate back
   { "n", "<leader>vd",       "editor.action.peekDefinition" },                    -- Peek definition
   { "n", "<leader>vi",       "editor.action.peekImplementation" },                -- Peek implementation
   { "n", "<leader>vt",       "editor.action.peekTypeDefinition" },                -- Peek type definition

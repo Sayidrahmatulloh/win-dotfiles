@@ -1,0 +1,57 @@
+{
+  "$schema": "https://github.com/glzr-io/zebar/raw/v3.1.1/resources/zpack-schema.json",
+  "name": "walnut-keyboard",
+  "version": "1.1.0",
+  "description": "Walnut developer keyboard launcher",
+  "widgets": [
+    {
+      "name": "keyboard",
+      "htmlPath": "./index.html",
+      "zOrder": "bottom_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": [
+        "index.html",
+        "styles.css",
+        "main.js",
+        "keyboard.json",
+        "assets/**",
+        "zebar.js",
+        "LICENSE.md",
+        "drag.js"
+      ],
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "argsRegex": "^https?://[^\\s\"<>]+$"
+          },
+          {
+            "program": "C:\\Users\\developer\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+            "argsRegex": "^$"
+          }
+        ]
+      },
+      "presets": [
+        {
+          "width": "1100px",
+          "monitorSelection": {
+            "type": "primary"
+          },
+          "dockToEdge": {
+            "windowMargin": "0px",
+            "enabled": false,
+            "edge": null
+          },
+          "offsetX": "0px",
+          "anchor": "bottom_center",
+          "height": "470px",
+          "offsetY": "24px",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

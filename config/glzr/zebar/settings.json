@@ -5,6 +5,16 @@
       "pack": "attaquer-solid-ts",
       "widget": "top-bar",
       "preset": "1080p"
+    },
+    {
+      "pack": "walnut-keyboard",
+      "widget": "keyboard",
+      "preset": "default"
+    },
+    {
+      "pack": "walnut-laptop",
+      "widget": "laptop-screen",
+      "preset": "default"
     }
   ]
 }
