@@ -38,7 +38,8 @@
       "lazygit",
       "posh-git",
       "psfzf",
-      "terminal-icons"
+      "terminal-icons",
+      "dotnet-sdk"
     ],
     "fonts": [
       "JetBrainsMono-NF",

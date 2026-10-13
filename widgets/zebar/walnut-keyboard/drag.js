@@ -79,5 +79,21 @@ export function setupKeyboardDrag() {
       settle(event.key === 'ArrowDown');
     }
   });
+  let lockRevision = 0;
+  let checkingLock = false;
+  setInterval(async () => {
+    if (checkingLock) return;
+    checkingLock = true;
+    try {
+      const response = await fetch('./lock-state.json', { cache: 'no-store' });
+      if (!response.ok) return;
+      const state = await response.json();
+      if (state.revision > lockRevision && !drag) {
+        lockRevision = state.revision;
+        settle(Boolean(state.hidden));
+      }
+    } catch { /* Keep dragging functional if the companion app is unavailable. */ }
+    finally { checkingLock = false; }
+  }, 500);
   return { resize };
 }

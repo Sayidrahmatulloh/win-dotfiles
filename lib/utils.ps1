@@ -5,5 +5,4 @@
 . "$PSScriptRoot\files.ps1"
 . "$PSScriptRoot\packages.ps1"
 . "$PSScriptRoot\scoop.ps1"
-
 . "$PSScriptRoot\commands.ps1"

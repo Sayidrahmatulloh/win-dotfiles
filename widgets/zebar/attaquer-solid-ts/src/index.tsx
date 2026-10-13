@@ -1,3 +1,4 @@
+import './widget-guard';
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { actionError, setActionError, prepareWidgetActions } from './actions';
 /* @refresh reload */

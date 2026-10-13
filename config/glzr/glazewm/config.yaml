@@ -2,7 +2,9 @@ general:
   # Commands to run when the WM has started. This is useful for running a
   # script or launching another application.
   # Example: The below command launches Zebar.
-  startup_commands: ["shell-exec zebar"]
+  startup_commands:
+    - "shell-exec zebar"
+    - 'shell-exec wscript.exe //B //Nologo "%USERPROFILE%/.glzr/glazewm/start-walnut-lock.vbs"'
 
   # Commands to run just before the WM is shutdown.
   # Example: The below command kills Zebar.
@@ -60,7 +62,7 @@ window_effects:
     # ** Exclusive to Windows 11 due to API limitations.
     border:
       enabled: true
-      color: "#96c5ff"
+      color: "#a6e22e"
 
     # Remove the title bar from the window's frame. Note that this can
     # cause rendering issues for some applications.
@@ -135,6 +137,7 @@ window_rules:
     match:
       # Ignores any Zebar windows.
       - window_process: { equals: "zebar" }
+      - window_title: { equals: "Walnut — invisible code entry" }
 
       # Ignores picture-in-picture windows for browsers.
       - window_title: { regex: "[Pp]icture.in.[Pp]icture" }

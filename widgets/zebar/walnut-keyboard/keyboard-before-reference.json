@@ -1,0 +1,412 @@
+{
+  "tiltDegrees": 30,
+  "rows": [
+    [
+      {
+        "name": "Python",
+        "icon": "python",
+        "color": "#3679a8",
+        "url": "https://python.org",
+        "size": 1
+      },
+      {
+        "name": "Java",
+        "icon": "java",
+        "color": "#dd6a30",
+        "url": "https://dev.java",
+        "size": 1
+      },
+      {
+        "name": "Go",
+        "icon": "go",
+        "color": "#00a9bb",
+        "url": "https://go.dev",
+        "size": 1
+      },
+      {
+        "name": "Rust",
+        "icon": "rust",
+        "color": "#45382d",
+        "url": "https://rust-lang.org",
+        "size": 1
+      },
+      {
+        "name": "Node.js",
+        "icon": "nodedotjs",
+        "color": "#548540",
+        "url": "https://nodejs.org",
+        "size": 1
+      },
+      {
+        "name": "PHP",
+        "icon": "php",
+        "color": "#7375aa",
+        "url": "https://php.net",
+        "size": 1
+      },
+      {
+        "name": "Ruby",
+        "icon": "ruby",
+        "color": "#b92e31",
+        "url": "https://ruby-lang.org",
+        "size": 1
+      },
+      {
+        "name": "C",
+        "icon": "c",
+        "color": "#427ca4",
+        "url": "https://en.cppreference.com/w/c",
+        "size": 1
+      },
+      {
+        "name": "C#",
+        "icon": "sharp",
+        "color": "#7953a5",
+        "url": "https://learn.microsoft.com/dotnet/csharp",
+        "size": 1
+      },
+      {
+        "name": "C++",
+        "icon": "cpp",
+        "color": "#3578ad",
+        "url": "https://isocpp.org",
+        "size": 1
+      },
+      {
+        "name": "Kotlin",
+        "icon": "kotlin",
+        "color": "#b657c9",
+        "url": "https://kotlinlang.org",
+        "size": 1
+      },
+      {
+        "name": "Swift",
+        "icon": "swift",
+        "color": "#e97530",
+        "url": "https://swift.org",
+        "size": 1
+      },
+      {
+        "name": "Dart",
+        "icon": "dart",
+        "color": "#218db2",
+        "url": "https://dart.dev",
+        "size": 1
+      },
+      {
+        "name": "Backspace",
+        "size": 1.8,
+        "action": "reset"
+      }
+    ],
+    [
+      {
+        "name": "Tab",
+        "size": 1.4,
+        "action": "none"
+      },
+      {
+        "name": "React",
+        "icon": "react",
+        "color": "#159bb4",
+        "url": "https://react.dev",
+        "size": 1
+      },
+      {
+        "name": "Vue",
+        "icon": "vue",
+        "color": "#399b76",
+        "url": "https://vuejs.org",
+        "size": 1
+      },
+      {
+        "name": "Angular",
+        "icon": "angular",
+        "color": "#bd2c43",
+        "url": "https://angular.dev",
+        "size": 1
+      },
+      {
+        "name": "Svelte",
+        "icon": "svelte",
+        "color": "#ef5531",
+        "url": "https://svelte.dev",
+        "size": 1
+      },
+      {
+        "name": "Next.js",
+        "icon": "nextdotjs",
+        "color": "#27251f",
+        "url": "https://nextjs.org",
+        "size": 1
+      },
+      {
+        "name": "Nuxt",
+        "icon": "nuxt",
+        "color": "#00a67c",
+        "url": "https://nuxt.com",
+        "size": 1
+      },
+      {
+        "name": "Astro",
+        "icon": "astro",
+        "color": "#a34392",
+        "url": "https://astro.build",
+        "size": 1
+      },
+      {
+        "name": "Tailwind",
+        "icon": "tailwindcss",
+        "color": "#21a7b6",
+        "url": "https://tailwindcss.com",
+        "size": 1
+      },
+      {
+        "name": "Bootstrap",
+        "icon": "bootstrap",
+        "color": "#7650b8",
+        "url": "https://getbootstrap.com",
+        "size": 1
+      },
+      {
+        "name": "Sass",
+        "icon": "sass",
+        "color": "#bd6995",
+        "url": "https://sass-lang.com",
+        "size": 1
+      },
+      {
+        "name": "Redux",
+        "icon": "redux",
+        "color": "#805ab8",
+        "url": "https://redux.js.org",
+        "size": 1
+      },
+      {
+        "name": "Vite",
+        "icon": "vite",
+        "color": "#9872d8",
+        "url": "https://vite.dev",
+        "size": 1
+      },
+      {
+        "name": "\\",
+        "size": 1.4,
+        "action": "none"
+      }
+    ],
+    [
+      {
+        "name": "Caps",
+        "size": 1.6,
+        "action": "none"
+      },
+      {
+        "name": "Express",
+        "icon": "express",
+        "color": "#635d4c",
+        "url": "https://expressjs.com",
+        "size": 1
+      },
+      {
+        "name": "NestJS",
+        "icon": "nestjs",
+        "color": "#cf3659",
+        "url": "https://nestjs.com",
+        "size": 1
+      },
+      {
+        "name": "Django",
+        "icon": "django",
+        "color": "#215944",
+        "url": "https://djangoproject.com",
+        "size": 1
+      },
+      {
+        "name": "Flask",
+        "icon": "flask",
+        "color": "#4c5145",
+        "url": "https://flask.palletsprojects.com",
+        "size": 1
+      },
+      {
+        "name": "FastAPI",
+        "icon": "fastapi",
+        "color": "#029a87",
+        "url": "https://fastapi.tiangolo.com",
+        "size": 1
+      },
+      {
+        "name": "Spring",
+        "icon": "spring",
+        "color": "#6f993e",
+        "url": "https://spring.io",
+        "size": 1
+      },
+      {
+        "name": "Laravel",
+        "icon": "laravel",
+        "color": "#db5741",
+        "url": "https://laravel.com",
+        "size": 1
+      },
+      {
+        "name": "Rails",
+        "icon": "rubyonrails",
+        "color": "#ba383c",
+        "url": "https://rubyonrails.org",
+        "size": 1
+      },
+      {
+        "name": ".NET",
+        "icon": "dotnet",
+        "color": "#7954a4",
+        "url": "https://dotnet.microsoft.com",
+        "size": 1
+      },
+      {
+        "name": "Gin",
+        "icon": "gin",
+        "color": "#248f9a",
+        "url": "https://gin-gonic.com",
+        "size": 1
+      },
+      {
+        "name": "Deno",
+        "icon": "deno",
+        "color": "#363f35",
+        "url": "https://deno.com",
+        "size": 1
+      },
+      {
+        "name": "Enter",
+        "size": 2,
+        "action": "none"
+      }
+    ],
+    [
+      {
+        "name": "Shift",
+        "size": 2,
+        "action": "none"
+      },
+      {
+        "name": "PostgreSQL",
+        "icon": "postgresql",
+        "color": "#3c7495",
+        "url": "https://postgresql.org",
+        "size": 1
+      },
+      {
+        "name": "MySQL",
+        "icon": "mysql",
+        "color": "#3e8197",
+        "url": "https://mysql.com",
+        "size": 1
+      },
+      {
+        "name": "MongoDB",
+        "icon": "mongodb",
+        "color": "#568740",
+        "url": "https://mongodb.com",
+        "size": 1
+      },
+      {
+        "name": "Redis",
+        "icon": "redis",
+        "color": "#be4236",
+        "url": "https://redis.io",
+        "size": 1
+      },
+      {
+        "name": "SQLite",
+        "icon": "sqlite",
+        "color": "#317893",
+        "url": "https://sqlite.org",
+        "size": 1
+      },
+      {
+        "name": "Kafka",
+        "icon": "apachekafka",
+        "color": "#44413b",
+        "url": "https://kafka.apache.org",
+        "size": 1
+      },
+      {
+        "name": "GraphQL",
+        "icon": "graphql",
+        "color": "#d74599",
+        "url": "https://graphql.org",
+        "size": 1
+      },
+      {
+        "name": "Prisma",
+        "icon": "prisma",
+        "color": "#3e5868",
+        "url": "https://prisma.io",
+        "size": 1
+      },
+      {
+        "name": "Supabase",
+        "icon": "supabase",
+        "color": "#379b73",
+        "url": "https://supabase.com",
+        "size": 1
+      },
+      {
+        "name": "Firebase",
+        "icon": "firebase",
+        "color": "#e6a025",
+        "url": "https://firebase.google.com",
+        "size": 1
+      },
+      {
+        "name": "Shift",
+        "size": 2.4,
+        "action": "none"
+      }
+    ],
+    [
+      {
+        "name": "Ctrl",
+        "size": 1.4,
+        "action": "none"
+      },
+      {
+        "name": "Win",
+        "size": 1.4,
+        "action": "sound"
+      },
+      {
+        "name": "Alt",
+        "size": 1.4,
+        "action": "none"
+      },
+      {
+        "name": "VS Code",
+        "icon": "space",
+        "color": "#493f31",
+        "size": 6.2,
+        "program": "C:\\Users\\developer\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+      },
+      {
+        "name": "Alt",
+        "size": 1.4,
+        "action": "none"
+      },
+      {
+        "name": "Fn",
+        "size": 1.4,
+        "action": "sound"
+      },
+      {
+        "name": "Ctrl",
+        "size": 1.4,
+        "action": "none"
+      }
+    ]
+  ],
+  "browser": {
+    "program": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  }
+}

@@ -60,3 +60,19 @@ grip.addEventListener('click', () => {
   settle(0);
 });
 window.addEventListener('resize', () => settle(side));
+let lockRevision = 0;
+let checkingLock = false;
+setInterval(async () => {
+  if (checkingLock) return;
+  checkingLock = true;
+  try {
+    const response = await fetch('./lock-state.json', { cache: 'no-store' });
+    if (!response.ok) return;
+    const state = await response.json();
+    if (state.revision > lockRevision && !drag) {
+      lockRevision = state.revision;
+      settle(state.hidden ? 1 : 0);
+    }
+  } catch { /* The laptop remains usable without the companion app. */ }
+  finally { checkingLock = false; }
+}, 500);

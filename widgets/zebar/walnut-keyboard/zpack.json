@@ -20,7 +20,9 @@
         "assets/**",
         "zebar.js",
         "LICENSE.md",
-        "drag.js"
+        "drag.js",
+        "lock-state.json",
+        "widget-guard.js"
       ],
       "privileges": {
         "shellCommands": [
