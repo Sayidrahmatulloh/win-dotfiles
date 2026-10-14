@@ -176,9 +176,18 @@ foreach ($screen in [Windows.Forms.Screen]::AllScreens) {
     $others += $cover
 }
 $script:unlocked = $false
+$script:releaseTicks = 0
 $timer = New-Object Windows.Forms.Timer
 $timer.Interval = 200
 $timer.Add_Tick({
+    if ($script:unlocked) {
+        if ([WalnutKeys]::InputReleased) { $script:releaseTicks++ } else { $script:releaseTicks = 0 }
+        if ($script:releaseTicks -ge 2) {
+            $timer.Stop()
+            $form.Close()
+        }
+        return
+    }
     if (-not $script:unlocked -and -not $Preview) {
         $form.Activate()
         [void]$codeInput.Focus()
@@ -197,8 +206,8 @@ $codeInput.Add_KeyDown({
             return
         }
         $script:unlocked = $true
-        [WalnutKeys]::Stop()
-        $form.Close()
+        # Keep both hooks and all covers until the unlocking Enter/click is released.
+        [WalnutKeys]::BeginDrain()
     } catch {
         [WalnutKeys]::Stop()
         $timer.Stop()

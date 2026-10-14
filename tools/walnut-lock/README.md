@@ -1,5 +1,7 @@
 # Walnut lock
 
+Qulf paytida sichqoncha clicklari va scroll global hook orqali yutiladi. Oddiy klaviatura inputi faqat Walnut jarayoni fokusda bo‘lganda uzatiladi. To‘g‘ri koddan keyin ham barcha bosilgan tugmalar qo‘yib yuborilib, qisqa tinch interval o‘tmaguncha qoplama va hooklar saqlanadi; ochuvchi Enter yoki click orqadagi ilovaga o‘tmaydi.
+
 `start.cmd` — bloklashni qo'lda ochish. GlazeWM ishga tushganda ham avtomatik ochiladi, Zebar yuklanishi uchun 5 soniya kutadi. Bir vaqtning o'zida faqat bitta nusxa ishlaydi.
 
 Birinchi safar kod yaratish oynasi chiqadi; bloklash keyingi ochilishda boshlanadi. Kod repoga yozilmaydi: foydalanuvchi profilida saltlangan PBKDF2 hash DPAPI bilan shifrlanadi. `-SetupOnly` bilan kodni almashtirish mumkin.
