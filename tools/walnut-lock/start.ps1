@@ -158,6 +158,14 @@ $codeInput.UseSystemPasswordChar = $true
 $codeInput.SetBounds(-2000, -2000, 100, 30)
 $codeInput.MaxLength = 64
 $form.Controls.Add($codeInput)
+$form.ActiveControl = $codeInput
+# Restore the input immediately on activation, rather than waiting for the timer.
+$form.Add_Activated({
+    if (-not $script:unlocked) {
+        $form.ActiveControl = $codeInput
+        [void]$codeInput.Focus()
+    }
+})
 $form.Add_MouseDown({ [void]$codeInput.Focus() })
 $others = @()
 foreach ($screen in [Windows.Forms.Screen]::AllScreens) {
@@ -176,26 +184,18 @@ foreach ($screen in [Windows.Forms.Screen]::AllScreens) {
     $others += $cover
 }
 $script:unlocked = $false
-$script:releaseTicks = 0
 $timer = New-Object Windows.Forms.Timer
 $timer.Interval = 200
 $timer.Add_Tick({
-    if ($script:unlocked) {
-        if ([WalnutKeys]::InputReleased) { $script:releaseTicks++ } else { $script:releaseTicks = 0 }
-        if ($script:releaseTicks -ge 2) {
-            $timer.Stop()
-            $form.Close()
-        }
-        return
-    }
     if (-not $script:unlocked -and -not $Preview) {
-        $form.Activate()
-        [void]$codeInput.Focus()
+        if (-not $form.ContainsFocus) { $form.Activate() }
+        if (-not $codeInput.Focused) { [void]$codeInput.Focus() }
     }
 })
 $codeInput.Add_KeyDown({
     if ($_.KeyCode -ne 'Enter') { return }
     $_.SuppressKeyPress = $true
+    if ($script:unlocked) { return }
     try {
         $salt = [Convert]::FromBase64String($credential.salt)
         $candidate = Get-CodeHash $codeInput.Text $salt
@@ -206,8 +206,8 @@ $codeInput.Add_KeyDown({
             return
         }
         $script:unlocked = $true
-        # Keep both hooks and all covers until the unlocking Enter/click is released.
-        [WalnutKeys]::BeginDrain()
+        $timer.Stop()
+        $form.Close()
     } catch {
         [WalnutKeys]::Stop()
         $timer.Stop()
@@ -215,7 +215,12 @@ $codeInput.Add_KeyDown({
         [void][Windows.Forms.MessageBox]::Show('Tekshiruvda xatolik yuz berdi. Bloklash oʻchirildi.','Walnut')
     }
 })
-$form.Add_Shown({ [void]$codeInput.Focus(); $timer.Start() })
+$form.Add_Shown({
+    $form.Activate()
+    $form.ActiveControl = $codeInput
+    [void]$codeInput.Focus()
+    $timer.Start()
+})
 try {
     foreach ($cover in $others) { $cover.Show() }
     if (-not $Preview) { [WalnutKeys]::Start() }
