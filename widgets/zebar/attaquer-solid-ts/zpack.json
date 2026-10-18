@@ -16,7 +16,7 @@
       "shownInTaskbar": false,
       "focused": false,
       "resizable": false,
-      "transparent": true,
+      "transparent": false,
       "includeFiles": [
         "dist/**"
       ],

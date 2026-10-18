@@ -17,7 +17,15 @@ function Install-Scoop {
   if (Get-Command scoop -ErrorAction SilentlyContinue) { Write-Host 'Scoop already installed.' }
   else {
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-    Invoke-RestMethod 'https://get.scoop.sh' | Invoke-Expression
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $installer = Join-Path ([IO.Path]::GetTempPath()) ("scoop-install-$([guid]::NewGuid().ToString('N')).ps1")
+    try {
+        Invoke-WebRequest -UseBasicParsing -Uri 'https://get.scoop.sh' -OutFile $installer
+        & $installer
+    }
+    finally {
+        if (Test-Path -LiteralPath $installer) { Remove-Item -LiteralPath $installer -Force -ErrorAction SilentlyContinue }
+    }
     Refresh-SetupEnvironment
     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) { throw 'Scoop installation did not complete.' }
   }
@@ -81,7 +89,7 @@ function Main {
   Write-Host "Log: $logPath"
 
   try {
-    if ('Scoop' -in $stageIds -or 'Fonts' -in $stageIds -or -not (Test-Path -LiteralPath "$DOTFILES/lib/utils.ps1")) { Install-Scoop | Out-Host }
+    if ('Scoop' -in $stageIds -or 'Fonts' -in $stageIds -or -not (Test-Path -LiteralPath "$DOTFILES\lib\utils.ps1")) { Install-Scoop | Out-Host }
     Sync-Repo | Out-Host
     . "$DOTFILES\lib\utils.ps1"
     . "$DOTFILES\lib\setup.ps1"
@@ -90,7 +98,7 @@ function Main {
     if ('Zebar' -in $stageIds -or 'Symlinks' -in $stageIds) { Assert-ZebarConfiguration -RepoRoot $DOTFILES }
     if ('Modules' -in $stageIds) { $null = Get-PowerShellModules -RepoRoot $DOTFILES }
     if (@($stageIds | Where-Object { $_ -in @('Cursors','Zebar') }).Count) {
-        . "$DOTFILES/scripts/theme/ThemeConfig.ps1"
+        . "$DOTFILES\scripts\theme\ThemeConfig.ps1"
         $null = Get-ThemeCatalog -Root $DOTFILES
     }
     Write-Banner

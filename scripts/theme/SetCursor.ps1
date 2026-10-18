@@ -1,4 +1,4 @@
-﻿. (Join-Path $PSScriptRoot 'ThemeConfig.ps1')
+. (Join-Path $PSScriptRoot 'ThemeConfig.ps1')
 function Get-CursorRoles {
     [ordered]@{
         Arrow='Pointer.cur'; Help='Help.cur'; AppStarting='Work.ani'; Wait='Busy.ani'
@@ -91,6 +91,7 @@ function Restore-ThemeCursor {
     $backup = Join-Path $env:LOCALAPPDATA 'win-dotfiles/cursors/original.clixml'
     $snapshot = Import-Clixml -LiteralPath $backup -ErrorAction Stop
     $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Control Panel\Cursors', $true)
+    if (-not $key) { throw 'Windows cursor registry key is missing.' }
     try {
         foreach ($value in $snapshot) {
             if ($value.Exists) { $key.SetValue($value.Name, $value.Value, [Microsoft.Win32.RegistryValueKind]$value.Kind) }

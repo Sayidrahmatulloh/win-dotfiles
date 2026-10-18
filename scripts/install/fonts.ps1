@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 #  scripts/install/fonts.ps1 — Install system fonts via Scoop and zip files
 # ============================================================
 
@@ -103,7 +103,7 @@ function Install-ZipFonts {
   Write-Section 'Zip fonts:'
 
   $r = New-Results
-  $zips = @(Get-ChildItem "$FilesDir\*.zip" -ErrorAction SilentlyContinue)
+  $zips = @(Get-ChildItem -LiteralPath $FilesDir -Filter '*.zip' -ErrorAction SilentlyContinue)
 
   if ($zips.Count -eq 0) {
     Write-Skip 'no zip archives found'
@@ -121,7 +121,7 @@ function Install-ZipFonts {
       Expand-Archive -Path $zip.FullName -DestinationPath $dest -Force
       Write-Host ''   # newline after inline Write-Step
 
-      $files = @(Get-ChildItem $dest -Include '*.ttf', '*.otf' -Recurse -ErrorAction SilentlyContinue)
+      $files = @(Get-ChildItem -LiteralPath $dest -Include '*.ttf', '*.otf' -Recurse -ErrorAction SilentlyContinue)
 
       if ($files.Count -eq 0) {
         Write-Skip "no font files in: $($zip.Name)"

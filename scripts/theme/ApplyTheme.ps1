@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$true)]
     [string]$Theme,
     [string]$ConfigPath = (Join-Path $env:USERPROFILE '.glzr/glazewm/config.yaml')
@@ -16,7 +16,10 @@ function Reload-GlazeConfig {
         $bytes = [Text.Encoding]::UTF8.GetBytes($command)
         $socket.SendAsync([ArraySegment[byte]]::new($bytes), [Net.WebSockets.WebSocketMessageType]::Text, $true, $timeout.Token).GetAwaiter().GetResult() | Out-Null
         $buffer = New-Object byte[] 16384
-        while ($true) {
+        $maxMessages = 50
+        $messageCount = 0
+        while ($messageCount -lt $maxMessages) {
+            $messageCount++
             $stream = [IO.MemoryStream]::new()
             try {
                 do {
@@ -31,6 +34,7 @@ function Reload-GlazeConfig {
                 return
             }
         }
+        throw 'GlazeWM reload timed out waiting for response.'
     } finally { $socket.Dispose(); $timeout.Dispose() }
 }
 $mutex = New-Object System.Threading.Mutex($false, 'Local\ZebarGlazeTheme')
@@ -42,8 +46,8 @@ try {
     $config = (Resolve-Path -LiteralPath $ConfigPath).Path
     $original = [IO.File]::ReadAllText($config)
     $pattern = '(?ms)(^  focused_window:\r?\n(?:(?!^  \S).)*?^    border:\r?\n(?:(?!^    \S).)*?^      color:[ \t]*)["'']?#[0-9a-fA-F]{6}["'']?'
-    $matches = [regex]::Matches($original, $pattern)
-    if ($matches.Count -ne 1) { throw 'Could not locate the focused window border color safely.' }
+    $regexMatches = [regex]::Matches($original, $pattern)
+    if ($regexMatches.Count -ne 1) { throw 'Could not locate the focused window border color safely.' }
     $color = $selectedTheme.accent
     $updated = [regex]::Replace($original, $pattern, {param($match) $match.Groups[1].Value + '"' + $color + '"'})
     if ($updated -ceq $original) { Set-ThemeWallpaper -Theme $Theme; Set-ThemeCursor -Theme $Theme; exit 0 }

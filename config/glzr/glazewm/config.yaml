@@ -4,7 +4,7 @@ general:
   # Example: The below command launches Zebar.
   startup_commands:
     - "shell-exec zebar"
-    - 'shell-exec wscript.exe //B //Nologo "%USERPROFILE%/.glzr/glazewm/start-walnut-lock.vbs"'
+    # - 'shell-exec wscript.exe //B //Nologo "%USERPROFILE%/.glzr/glazewm/start-walnut-lock.vbs"'
 
   # Commands to run just before the WM is shutdown.
   # Example: The below command kills Zebar.
@@ -91,7 +91,7 @@ window_effects:
     hide_title_bar:
       enabled: false
     corner_style:
-      enabled: false
+      enabled: true
       style: "rounded"
     transparency:
       enabled: false

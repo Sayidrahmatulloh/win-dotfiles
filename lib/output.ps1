@@ -1,6 +1,6 @@
-﻿# Console formatting only. No setup actions run when loaded.
+# Console formatting only. No setup actions run when loaded.
 # ============================================================
-#  lib/utils.ps1 — Shared helpers for all dotfiles scripts
+#  lib/output.ps1 — Console formatting helpers for dotfiles scripts
 # ============================================================
 
 # ── ANSI colours ──────────────────────────────────────────────────────────────

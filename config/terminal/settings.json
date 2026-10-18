@@ -34,10 +34,10 @@
         "face": "JetBrainsMono Nerd Font"
       },
       "colorScheme": "Monokai Clean",
-      "padding": "12, 10, 12, 10",
+      "padding": "2, 2, 2, 2",
       "cursorShape": "bar",
       "scrollbarState": "hidden",
-      "opacity": 100,
+      "opacity": 95,
       "useAcrylic": false
     },
     "list": [

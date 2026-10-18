@@ -1,4 +1,4 @@
-﻿# Run with Windows PowerShell 5.1 in STA mode. No admin rights required.
+# Run with Windows PowerShell 5.1 in STA mode. No admin rights required.
 param([switch]$SetupOnly, [switch]$Preview, [switch]$SelfTest, [ValidateRange(0,30)][int]$StartupDelaySeconds = 0)
 $ErrorActionPreference = 'Stop'
 if ($PSVersionTable.PSEdition -eq 'Core') {
@@ -167,7 +167,7 @@ $form.Add_Activated({
     }
 })
 $form.Add_MouseDown({ [void]$codeInput.Focus() })
-$others = @()
+$others = [Collections.Generic.List[object]]::new()
 foreach ($screen in [Windows.Forms.Screen]::AllScreens) {
     if ($screen.Primary) { continue }
     $cover = New-Object WalnutOverlay
@@ -181,7 +181,7 @@ foreach ($screen in [Windows.Forms.Screen]::AllScreens) {
     $cover.BackgroundImageLayout = 'None'
     $cover.ShowInTaskbar = $false
     $cover.Add_MouseDown({ $form.Activate(); [void]$codeInput.Focus() })
-    $others += $cover
+    $others.Add($cover)
 }
 $script:unlocked = $false
 $timer = New-Object Windows.Forms.Timer

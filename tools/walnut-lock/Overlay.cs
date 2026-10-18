@@ -6,6 +6,7 @@ public sealed class WalnutOverlay : Form {
         AutoScaleMode = AutoScaleMode.None;
     }
     protected override void WndProc(ref Message message) {
+        // 0x14 = WM_ERASEBKGND: suppress background erasing to eliminate flicker during redraws
         if (message.Msg == 0x14) { message.Result = new System.IntPtr(1); return; }
         base.WndProc(ref message);
     }

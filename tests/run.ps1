@@ -1,9 +1,9 @@
-﻿# Run every test in its own PowerShell process so mocks cannot leak between suites.
+# Run every test in its own PowerShell process so mocks cannot leak between suites.
 [CmdletBinding()]
 param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Run tests from PowerShell 7.' }
-$powerShell = (Get-Process -Id $PID).Path
+$powerShell = [Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
 $failures = @()
 $tests = Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.ps1' -File |
     Where-Object Name -notin @('run.ps1', 'helpers.ps1') | Sort-Object Name

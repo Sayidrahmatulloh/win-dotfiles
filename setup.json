@@ -36,9 +36,6 @@
       "autohotkey",
       "keyviz",
       "lazygit",
-      "posh-git",
-      "psfzf",
-      "terminal-icons",
       "dotnet-sdk"
     ],
     "fonts": [

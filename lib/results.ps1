@@ -1,4 +1,4 @@
-﻿# Result records and stage reporting shared by setup scripts.
+# Result records and stage reporting shared by setup scripts.
 # ── Result helpers ────────────────────────────────────────────────────────────
 
 function New-Results {
@@ -24,7 +24,8 @@ function Merge-Results {
 
 function Invoke-Step {
   param([string]$Name, [scriptblock]$Block)
-  Write-Stage '*' $Name
+  $stageIcon = if (Get-Variable -Name 'ICON_UP' -ValueOnly -ErrorAction SilentlyContinue) { $ICON_UP } else { '*' }
+  Write-Stage $stageIcon $Name
   try {
     & $Block | Out-Host
     return [pscustomobject]@{ Name = $Name; Success = $true; Message = 'Completed' }

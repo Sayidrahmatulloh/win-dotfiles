@@ -1,4 +1,4 @@
-﻿# Read-only diagnostics entry point. Check implementations are in lib/diagnostics.ps1.
+# Read-only diagnostics entry point. Check implementations are in lib/diagnostics.ps1.
 [CmdletBinding()]
 param(
     [string]$DotfilesPath = $PSScriptRoot,
@@ -7,6 +7,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Diagnostics dependencies:
+# - lib/settings.ps1: Get-SetupConfig, Get-PowerShellModules, Assert-ZebarConfiguration
+# - lib/files.ps1: Test-ConfigLink, Get-TerminalSettingsPath
+# - lib/diagnostics.ps1: Get-DoctorResults, New-DoctorResult, Invoke-DoctorCheck
 . "$PSScriptRoot\lib\settings.ps1"
 . "$PSScriptRoot\lib\files.ps1"
 . "$PSScriptRoot\lib\diagnostics.ps1"
