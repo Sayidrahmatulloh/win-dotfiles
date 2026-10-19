@@ -1,4 +1,4 @@
-param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
@@ -52,7 +52,7 @@ try { Main } catch { $threw=$true }
 Assert-That $threw 'Winget package failure did not reach installer.'
 
 Invoke-Expression (Read-Functions 'install.ps1')
-Invoke-Expression (Read-Functions 'lib/setup.ps1')
+. "$RepoRoot/lib/setup.ps1"
 $DOTFILES='deliberately-invalid-global-root'
 $script:bunCalls=0
 function bun { $script:bunCalls++; $global:LASTEXITCODE=1 }

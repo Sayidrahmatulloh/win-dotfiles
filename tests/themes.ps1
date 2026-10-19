@@ -1,7 +1,8 @@
-param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/helpers.ps1"
 . "$RepoRoot/scripts/theme/ThemeConfig.ps1"
+. "$RepoRoot/scripts/theme/GlazeConfig.ps1"
 $catalog = Get-ThemeCatalog -Root $RepoRoot
 Assert-That ($catalog.default -in @($catalog.themes.id)) 'Default theme is missing.'
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('theme-test-' + [guid]::NewGuid().ToString('N'))
@@ -28,4 +29,27 @@ foreach ($theme in $catalog.themes) {
 }
 Assert-That (($prefix + 'green -Extra value') -notmatch $rule.argsRegex) 'Manifest allowed additional arguments.'
 Assert-That (($prefix + 'unknown') -notmatch $rule.argsRegex) 'Manifest allowed an unknown theme.'
+
+$source = @'
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: "#a6e22e"
+  other_windows:
+    border:
+      color: "#abcdef"
+'@
+foreach ($lineEnding in @("`n", "`r`n")) {
+    $original = ($source -replace "`r?`n", $lineEnding)
+    $updated = Set-GlazeBorderColor -Content $original -Accent '#123456'
+    $expected = $original -replace '(?m)^(      color: )"#a6e22e"', '$1"#123456"'
+    Assert-That ($updated -ceq $expected) 'Border rewrite changed unrelated YAML content or line endings.'
+    Assert-That ((Set-GlazeBorderColor -Content $updated -Accent '#123456') -ceq $updated) 'Border rewrite was not idempotent.'
+}
+foreach ($invalid in @('focused_window: {}', ($source + "`n" + $source))) {
+    $threw = $false
+    try { Set-GlazeBorderColor -Content $invalid -Accent '#123456' | Out-Null } catch { $threw = $true }
+    Assert-That $threw 'Ambiguous or missing focused border was rewritten.'
+}
 Write-Host 'Theme catalog validation, wallpaper paths and shell privileges passed.'

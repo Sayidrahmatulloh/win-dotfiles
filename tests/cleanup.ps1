@@ -1,8 +1,8 @@
-param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
+﻿param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot\helpers.ps1"
-Invoke-Expression (Read-Functions 'config/powershell/user_profile.ps1')
+Invoke-Expression (Read-Functions 'config/powershell/profile/maintenance.ps1')
 # All destructive commands are mocked. Exercise reporting with locked temp files.
 function Remove-Item {
     [CmdletBinding()]

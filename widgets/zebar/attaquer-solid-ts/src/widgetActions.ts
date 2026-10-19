@@ -1,24 +1,35 @@
-export type WidgetAction = 'OpenWindowsSearch' | 'OpenStartMenu' | 'OpenActionCenter' | 'FocusWindow';
+export type WidgetAction =
+  'OpenWindowsSearch' | 'OpenStartMenu' | 'OpenActionCenter' | 'FocusWindow';
 
 function normalizePath(path: string) {
-  if (!/^[A-Za-z]:[\\/]/.test(path) || /["\r\n%]/.test(path)) throw new Error('Invalid widget executable or script path');
+  if (!/^[A-Za-z]:[\\/]/.test(path) || /["\r\n%]/.test(path))
+    throw new Error('Invalid widget executable or script path');
   return path.replace(/\\/g, '/');
 }
 
-export function createWidgetActions(resolveExecutable: () => Promise<string>, scriptDirectory: () => string) {
+export function createWidgetActions(
+  resolveExecutable: () => Promise<string>,
+  scriptDirectory: () => string,
+) {
   let executable: Promise<string> | undefined;
   function prepare() {
     if (!executable) {
-      executable = resolveExecutable().then(normalizePath).catch(error => {
-        executable = undefined;
-        throw error;
-      });
+      executable = resolveExecutable()
+        .then(normalizePath)
+        .catch((error) => {
+          executable = undefined;
+          throw error;
+        });
     }
     return executable;
   }
   async function command(action: WidgetAction, windowHandle?: number) {
-    if (!['OpenWindowsSearch', 'OpenStartMenu', 'OpenActionCenter', 'FocusWindow'].includes(action)) throw new Error('Unknown widget action');
-    if (action === 'FocusWindow' && (windowHandle === undefined || !Number.isSafeInteger(windowHandle) || windowHandle < 0)) {
+    if (!['OpenWindowsSearch', 'OpenStartMenu', 'OpenActionCenter', 'FocusWindow'].includes(action))
+      throw new Error('Unknown widget action');
+    if (
+      action === 'FocusWindow' &&
+      (windowHandle === undefined || !Number.isSafeInteger(windowHandle) || windowHandle < 0)
+    ) {
       throw new Error('A valid window handle is required');
     }
     const path = await prepare();

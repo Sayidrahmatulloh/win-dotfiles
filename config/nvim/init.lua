@@ -1,6 +1,6 @@
 -- Select the configuration for the current editor environment.
 if vim.g.vscode then
-  require("vs.config")
+  require("vscode_nvim.config")
 else
-  require("config.lazy")
+  require("standalone.config")
 end

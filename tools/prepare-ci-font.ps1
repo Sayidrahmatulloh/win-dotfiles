@@ -1,10 +1,12 @@
 ﻿# CI only: download the upstream Nerd Fonts archive, never install system fonts.
+param([string]$FontDirectory)
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
 . "$repoRoot/lib/settings.ps1"
 $config = Get-SetupConfig -RepoRoot $repoRoot
 $widget = Join-Path $repoRoot $config.zebar.widget
-$target = Join-Path $widget "src/fonts/$($config.zebar.fontFile)"
+if (-not $FontDirectory) { $FontDirectory = Join-Path $widget 'src/fonts' }
+$target = Join-Path $FontDirectory $config.zebar.fontFile
 if (Test-Path -LiteralPath $target -PathType Leaf) { return }
 $work = Join-Path ([IO.Path]::GetTempPath()) ('zebar-ci-font-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $work | Out-Null

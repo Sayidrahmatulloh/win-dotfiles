@@ -41,7 +41,14 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `lib/packages.ps1` | Barcha menejerlar uchun yagona paket sikli |
 | `lib/commands.ps1` | Buyruq chiqishi va exit code; xatoni aniq qaytarish |
 | `lib/scoop.ps1` | Scoop buyruqlari; tools va fonts birga foydalanadi |
-| `lib/setup.ps1` | PowerShell modullari va Zebar build'i |
+| `lib/setup.ps1` | Post-clone yordamchilarini yuklash; o'rnatish boshlamaydi |
+| `lib/modules.ps1` | Yetishmayotgan PowerShell modullarini o'rnatish |
+| `lib/zebar/build.ps1` | Shrift, staged build va tekshirilgan build'ni yoqish |
+| `lib/zebar/runtime.ps1` | Runtime fayllari va widget linklarini tiklash imkoniyati bilan ko'chirish |
+| `config/powershell/profile/` | Interaktiv profil, muhit, development va maintenance buyruqlari |
+| `scripts/theme/GlazeConfig.ps1` | GlazeWM reload va focused border matnini hisoblash |
+| `tools/walnut-lock/credentials.ps1` | Faqat berilgan yo'ldagi credentialni o'qish/yozish |
+| `tools/walnut-lock/ui.ps1` | Oyna va ekran tasvirini yaratish |
 | `lib/diagnostics.ps1` | Doctor tekshiruvlari |
 | `lib/results.ps1` | Bosqich natijalari va xatolarni yig'ish |
 | `lib/output.ps1` | Terminaldagi ranglar va hisobot ko'rinishi |
@@ -90,6 +97,20 @@ PowerShell 7 ichida repo papkasidan:
 .\tests\run.ps1
 .\doctor.ps1
 ```
+
+Test, build, qo'shimcha widgetlar va o'rnatilgan Neovim integratsiyasini birga tekshirish:
+
+```powershell
+./tools/check.ps1 -Neovim -Variants
+```
+
+`-Neovim` uchun pluginlar, formatterlar va profil modullari avval o'rnatilgan
+bo'lishi kerak. `tools/check-nvim.ps1` parametrsiz faqat ikki muhitning tuzilmasi
+va Lua sintaksisini plugin o'rnatmasdan tekshiradi; CI shu rejimni ishlatadi.
+`-Variants` qo'shimcha widget dependency'larini lockfile bilan tayyorlaydi va yig'adi.
+
+JS/TS/CSS yozish uslubi root'dagi `.prettierrc.json`da belgilangan.
+Vendordagi `zebar.js`, dependency va generatsiya qilingan buildlar formatlanmaydi.
 
 Zebar build'i va uning desktop assetlarini tekshirish:
 

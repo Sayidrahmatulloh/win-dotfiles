@@ -1,4 +1,4 @@
-# Result records and stage reporting shared by setup scripts.
+﻿# Result records and stage reporting shared by setup scripts.
 # ── Result helpers ────────────────────────────────────────────────────────────
 
 function New-Results {
@@ -11,13 +11,13 @@ function New-Results {
 }
 
 function Merge-Results {
-  param($A, $B)
-  foreach ($key in $A.Keys) {
-    if ($B.ContainsKey($key)) {
-      foreach ($item in $B[$key]) { $A[$key].Add($item) }
+  param([Alias('A')]$Destination, [Alias('B')]$Source)
+  foreach ($key in $Destination.Keys) {
+    if ($Source.ContainsKey($key)) {
+      foreach ($item in $Source[$key]) { $Destination[$key].Add($item) }
     }
   }
-  return $A
+  return $Destination
 }
 
 # ── Step runner: report failures and allow later stages to continue ───────────

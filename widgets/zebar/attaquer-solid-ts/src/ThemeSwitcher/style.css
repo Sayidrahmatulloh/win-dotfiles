@@ -1,7 +1,36 @@
-.app { --bar-accent: var(--theme-accent, #a6e22e); }
-.app .workspace.focused,.app .workspace.displayed { background:var(--theme-active-bg,#a6e22e18); }
-.theme-switcher { display:flex;align-items:center;flex-shrink:0;height:28px; }
-.app .theme-trigger { width:28px;padding:0;justify-content:center;border:0;background:transparent;box-shadow:none;border-radius:5px; }
-.app .theme-trigger:hover { background:var(--bar-hover);box-shadow:none; }
-.app .left .theme-trigger { color:var(--bar-accent); }
-.theme-moon { width:18px;height:18px;flex:0 0 18px;transform-box:view-box;transform-origin:center; }
+.app {
+  --bar-accent: var(--theme-accent, #a6e22e);
+}
+.app .workspace.focused,
+.app .workspace.displayed {
+  background: var(--theme-active-bg, #a6e22e18);
+}
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 28px;
+}
+.app .theme-trigger {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 5px;
+}
+.app .theme-trigger:hover {
+  background: var(--bar-hover);
+  box-shadow: none;
+}
+.app .left .theme-trigger {
+  color: var(--bar-accent);
+}
+.theme-moon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  transform-box: view-box;
+  transform-origin: center;
+}

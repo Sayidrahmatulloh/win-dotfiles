@@ -1,5 +1,9 @@
 # Walnut lock
 
+Kod vazifalari: `start.ps1` — lifecycle va hodisalar, `credentials.ps1` —
+credentialni o'qish/yozish, `ui.ps1` — oyna va ekran tasvirini yaratish.
+`start.ps1 -SelfTest` input hookini yoqmasdan kod va UI qurilishini tekshiradi.
+
 Qulf paytida sichqoncha clicklari va scroll global hook orqali yutiladi. Oddiy klaviatura inputi faqat Walnut jarayoni fokusda bo'lganda uzatiladi. To'g'ri kod bilan Enter bosilganda qulf parol tekshiruvidan so'ng darhol ochiladi; tugmalar qo'yib yuborilishini yoki qo'shimcha intervalni kutmaydi.
 
 `start.cmd` — bloklashni qo'lda ochish. GlazeWM ishga tushganda ham avtomatik ochiladi, Zebar yuklanishi uchun 5 soniya kutadi. Bir vaqtning o'zida faqat bitta nusxa ishlaydi.

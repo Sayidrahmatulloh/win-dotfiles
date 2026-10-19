@@ -40,3 +40,37 @@ jobs:
         run: bun run --cwd $env:ZEBAR_WIDGET build
       - name: Verify built desktop files
         run: ./tools/check-desktop-build.ps1
+  widget-variants:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        widget: [attaquer-buildless]
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: widgets/zebar/${{ matrix.widget }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Prepare bundled font
+        if: matrix.widget == 'attaquer-buildless'
+        run: ../../../tools/prepare-ci-font.ps1 -FontDirectory (Join-Path $PWD.Path 'fonts')
+      - name: Build widget
+        run: bun run build
+  neovim-structure:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Neovim for checks
+        shell: pwsh
+        run: |
+          choco install neovim --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { throw 'Neovim installation failed.' }
+          "$env:ProgramFiles\Neovim\bin" >> $env:GITHUB_PATH
+      - name: Check both configuration profiles without plugins
+        shell: pwsh
+        run: ./tools/check-nvim.ps1

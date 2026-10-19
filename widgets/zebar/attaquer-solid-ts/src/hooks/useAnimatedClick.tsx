@@ -1,4 +1,4 @@
-import { createSignal, onCleanup } from "solid-js";
+import { createSignal, onCleanup } from 'solid-js';
 
 export function useAnimatedClick(animationDuration: number = 200) {
   const [isActive, setIsActive] = createSignal(false);

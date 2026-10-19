@@ -1,4 +1,4 @@
-# Exercise the install entry point with stubbed stages; no real installer runs.
+﻿# Exercise the install entry point with stubbed stages; no real installer runs.
 param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -24,7 +24,7 @@ $fakeHelpers = @(
     'function Invoke-Step { param($Name, $Block); $script:stageNames += $Name; [pscustomobject]@{ Name=$Name; Success=($Name -ne $script:failingStage); Message="stubbed stage" } }'
 ) -join "`n"
 [IO.File]::WriteAllText((Join-Path $library 'utils.ps1'), $fakeHelpers)
-Copy-Item -LiteralPath (Join-Path $RepoRoot 'lib/setup.ps1') -Destination (Join-Path $library 'setup.ps1')
+Copy-Item -LiteralPath (Join-Path $RepoRoot 'lib/setup.ps1'), (Join-Path $RepoRoot 'lib/modules.ps1'), (Join-Path $RepoRoot 'lib/zebar') -Destination $library -Recurse
 $themeScripts = Join-Path $DOTFILES 'scripts/theme'
 New-Item -ItemType Directory -Path $themeScripts -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $RepoRoot 'scripts/theme/ThemeConfig.ps1') -Destination $themeScripts

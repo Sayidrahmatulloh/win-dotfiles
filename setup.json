@@ -87,11 +87,6 @@
       "destination": ".glzr/zebar/attaquer-solid-ts"
     },
     {
-      "source": "widgets/zebar/quiet-velvet",
-      "root": "USERPROFILE",
-      "destination": ".glzr/zebar/quiet-velvet"
-    },
-    {
       "source": "widgets/zebar/walnut-keyboard",
       "root": "USERPROFILE",
       "destination": ".glzr/zebar/walnut-keyboard"

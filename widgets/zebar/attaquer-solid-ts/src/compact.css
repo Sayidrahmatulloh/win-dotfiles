@@ -1,100 +1,319 @@
-
 /* Compact desktop bar: consistent sizes and details on demand. */
-.app { font-size: 13px; padding: 6px 8px; gap: 8px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; }
-.app .left, .app .center, .app .right { gap: 6px; }
-.app button { height: 28px; min-height: 28px; padding: 0 5px; border-radius: 5px; }
-.app .template { height: 28px; margin: 0; }
-.app img { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
-.app .app-icon { width: 20px; height: 20px; }
-.app .content, .app .volume-icon { gap: 5px; }
-.app .ram-summary { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.app .network .labels { display: none; }
-.app .volume-text { min-width: 3ch; font-variant-numeric: tabular-nums; }
-.app .volume-slider { padding: 0 6px; }
-.app .volume-slider .SliderRoot { width: 90px; opacity: 1; overflow: visible; }
-.app .volume-slider[hidden] { display: none; }
-.app .media { width: 220px; max-width: 220px; min-width: 0; gap: 2px; }
-.app .media .prev, .app .media .next { display: none; width: 26px; flex-shrink: 0; }
-.app .media:hover .prev, .app .media:hover .next, .app .media:focus-within .prev, .app .media:focus-within .next { display: flex; }
-.app .media .play-pause { width: 26px; flex-shrink: 0; }
-.app .media-text { flex: 1; min-width: 0; max-width: 145px; font-size: 12px; overflow: hidden; }
-.app .media-text span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.app .systray-toggle, .app .systray-icon-container { width: 28px; height: 28px; }
-.app .app-entry { margin: 0; }
-@media(max-width:1100px){.app .media{width:160px;max-width:160px}.app .left,.app .center,.app .right{gap:4px}}
-@media(max-width:900px){.app .left .media{display:none}}
-@media(max-width:650px){.app{display:flex;overflow-x:auto;scrollbar-width:none;padding:6px 3px}.app .left,.app .center,.app .right{flex:0 0 auto}}
+.app {
+  font-size: 13px;
+  padding: 6px 8px;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+}
+.app .left,
+.app .center,
+.app .right {
+  gap: 6px;
+}
+.app button {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 5px;
+  border-radius: 5px;
+}
+.app .template {
+  height: 28px;
+  margin: 0;
+}
+.app img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.app .app-icon {
+  width: 20px;
+  height: 20px;
+}
+.app .content,
+.app .volume-icon {
+  gap: 5px;
+}
+.app .ram-summary {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.app .network .labels {
+  display: none;
+}
+.app .volume-text {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+}
+.app .volume-slider {
+  padding: 0 6px;
+}
+.app .volume-slider .SliderRoot {
+  width: 90px;
+  opacity: 1;
+  overflow: visible;
+}
+.app .volume-slider[hidden] {
+  display: none;
+}
+.app .media {
+  width: 220px;
+  max-width: 220px;
+  min-width: 0;
+  gap: 2px;
+}
+.app .media .prev,
+.app .media .next {
+  display: none;
+  width: 26px;
+  flex-shrink: 0;
+}
+.app .media:hover .prev,
+.app .media:hover .next,
+.app .media:focus-within .prev,
+.app .media:focus-within .next {
+  display: flex;
+}
+.app .media .play-pause {
+  width: 26px;
+  flex-shrink: 0;
+}
+.app .media-text {
+  flex: 1;
+  min-width: 0;
+  max-width: 145px;
+  font-size: 12px;
+  overflow: hidden;
+}
+.app .media-text span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app .systray-toggle,
+.app .systray-icon-container {
+  width: 28px;
+  height: 28px;
+}
+.app .app-entry {
+  margin: 0;
+}
+@media (max-width: 1100px) {
+  .app .media {
+    width: 160px;
+    max-width: 160px;
+  }
+  .app .left,
+  .app .center,
+  .app .right {
+    gap: 4px;
+  }
+}
+@media (max-width: 900px) {
+  .app .left .media {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .app {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 6px 3px;
+  }
+  .app .left,
+  .app .center,
+  .app .right {
+    flex: 0 0 auto;
+  }
+}
 
 /* Content widths prevent long RAM labels and time from overlapping adjacent controls. */
-.app .right { gap: 10px; padding-right: 4px; }
-.app .right > * { flex: 0 0 auto; }
-.app .memory, .app .date, .app .network { width: auto; min-width: max-content; }
-.app .memory .content, .app .date .content { display: flex; gap: 6px; white-space: nowrap; }
-.app .battery { gap: 6px; padding-inline: 4px; white-space: nowrap; }
-.app .volume-icon { color: var(--pink); }
-.app .date { color: rgb(180, 200, 255); overflow: visible; }
-.app .low-usage { color: var(--green); }
-.app .medium-usage { color: var(--yellow); }
-.app .high-usage { color: var(--orange); }
-.app .extreme-usage { color: var(--b-red); }
-@media(max-width:1100px){.app .right { gap: 8px; }}
+.app .right {
+  gap: 10px;
+  padding-right: 4px;
+}
+.app .right > * {
+  flex: 0 0 auto;
+}
+.app .memory,
+.app .date,
+.app .network {
+  width: auto;
+  min-width: max-content;
+}
+.app .memory .content,
+.app .date .content {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+.app .battery {
+  gap: 6px;
+  padding-inline: 4px;
+  white-space: nowrap;
+}
+.app .date {
+  overflow: visible;
+}
+.app .low-usage {
+  color: var(--green);
+}
+.app .medium-usage {
+  color: var(--yellow);
+}
+.app .high-usage {
+  color: var(--orange);
+}
+.app .extreme-usage {
+  color: var(--b-red);
+}
+@media (max-width: 1100px) {
+  .app .right {
+    gap: 8px;
+  }
+}
 
 /* Restore the reference workspace design; share interaction styling across the bar. */
-.app { --bar-accent: #96c5ff; --bar-text: #d4d8e0; --bar-hover: rgba(180,195,215,.12); }
-.app .left { gap: 6px; }
-.app .left .logo, .app .left .search, .app .left .toggle-tiling-direction { color: var(--bar-text); }
-.app .workspace { color: #b9c0cd; background: transparent; box-shadow: none; border-radius: 5px; }
-.app button:hover { animation: none; background: var(--bar-hover); box-shadow: none; }
-.app .workspace.focused, .app .workspace.displayed {
-  color: var(--bar-accent); background: #96c5ff20;
+.app .left {
+  gap: 6px;
+}
+.app .left .logo,
+.app .left .search,
+.app .left .toggle-tiling-direction {
+  color: var(--bar-text);
+}
+.app .workspace {
+  color: #aab4c2;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 5px;
+}
+.app button:hover {
+  animation: none;
+  background: var(--bar-hover);
+  box-shadow: none;
+}
+.app button:focus-visible,
+.app [role='slider']:focus-visible {
+  outline: 2px solid var(--bar-accent);
+  outline-offset: -2px;
+}
+.app .right {
+  gap: 10px;
+}
+.app .right button {
+  border-radius: 5px;
+}
+.app .right .cpu-bar {
+  width: auto;
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+}
+.app .right .systray-toggle {
+  color: #aab4c2;
+}
+@media (max-width: 1100px) {
+  .app .right {
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app button,
+  .app .workspace {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Dark green palette: color indicates focus or a sustained warning, not the metric type. */
+#root {
+  background: #0b1015;
+}
+.app {
+  --bar-accent: #a6e22e;
+  --bar-text: #cdd3dc;
+  --bar-hover: #ffffff0d;
+  color: var(--bar-text);
+}
+.app .left button,
+.app .right button,
+.app .right .template {
+  color: var(--bar-text);
+}
+.app .right .cpu,
+.app .right .memory,
+.app .right .network,
+.app .right .volume-icon,
+.app .right .battery,
+.app .right .date {
+  color: var(--bar-text);
+}
+.app .workspace.focused,
+.app .workspace.displayed {
+  color: var(--bar-accent);
+  background: #a6e22e18;
   box-shadow: inset 0 -2px var(--bar-accent);
 }
-.app button:focus-visible, .app [role="slider"]:focus-visible { outline: 2px solid var(--bar-accent); outline-offset: -2px; }
-.app .right { gap: 10px; }
-.app .right button { border-radius: 5px; }
-.app .right .network { color: var(--blue); }
-.app .right .volume-icon { color: var(--pink); }
-.app .right .date { color: rgb(180,200,255); }
-.app .right .low-usage { color: var(--green); }
-.app .right .medium-usage { color: var(--yellow); }
-.app .right .high-usage { color: var(--orange); }
-.app .right .extreme-usage { color: var(--b-red); }
-.app .right .cpu-bar { width: auto; min-width: 3ch; font-variant-numeric: tabular-nums; }
-.app .right .systray-toggle { color: #b9c0cd; }
-@media(max-width:1100px){.app .right{gap:8px}}
-@media(prefers-reduced-motion:reduce){.app button,.app .workspace{transition:none;animation:none}}
-
-/* Green trial: color indicates focus or a sustained warning, not the metric type. */
-#root { background: #15191f; }
-.app { --bar-accent: #a6e22e; --bar-text: #cdd3dc; --bar-hover: #ffffff0d; color: var(--bar-text); }
-.app .left button, .app .right button, .app .right .template { color: var(--bar-text); }
-.app .right .cpu, .app .right .memory, .app .right .network, .app .right .volume-icon, .app .right .battery, .app .right .date { color: var(--bar-text); }
-.app .workspace.focused, .app .workspace.displayed { color: var(--bar-accent); background: #a6e22e18; box-shadow: inset 0 -2px var(--bar-accent); }
-.app .right .usage-warning { color: #e5c07b; }
-.app .right .usage-critical { color: #e06c75; }
-.app .status-icon { width:18px; height:18px; flex:0 0 18px; vertical-align:middle; }
-.app .SliderRange { background: var(--bar-accent); }
-.app .SliderTrack:hover .SliderRange { background: var(--bar-accent); }
-.app .SliderThumb { background: #cdd3dc; }
-.app .progress-play { background: var(--bar-accent); }
-.app button:hover { background: var(--bar-hover); animation: none; }
+.app .right .usage-warning {
+  color: #f9e2af;
+}
+.app .right .usage-critical {
+  color: #f38ba8;
+}
+.app .status-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  vertical-align: middle;
+}
+.app .SliderRange {
+  background: var(--bar-accent);
+}
+.app .SliderTrack:hover .SliderRange {
+  background: var(--bar-accent);
+}
+.app .SliderThumb {
+  background: #cdd3dc;
+}
+.app .progress-play {
+  background: var(--bar-accent);
+}
+.app button:hover {
+  background: var(--bar-hover);
+  animation: none;
+}
 
 /* Shared hover treatment; shadows avoid changing control dimensions. */
-.app .left button, .app .right button {
- transition:background-color 140ms ease,box-shadow 140ms ease;
+.app .left button,
+.app .right button {
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
 }
-.app .right button:hover, .app .left button:not(.workspace):hover {
- background:color-mix(in srgb,var(--bar-accent) 9%,#15191f);
- box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bar-accent) 24%,transparent);
+.app .right button:hover,
+.app .left button:not(.workspace):hover {
+  background: color-mix(in srgb, var(--bar-accent) 9%, #0b1015);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-accent) 24%, transparent);
 }
 .app .workspace:hover {
- background:color-mix(in srgb,var(--bar-accent) 12%,#15191f);
- box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bar-accent) 24%,transparent);
+  background: color-mix(in srgb, var(--bar-accent) 12%, #0b1015);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bar-accent) 24%, transparent);
 }
-.app .workspace.focused:hover, .app .workspace.displayed:hover {
- box-shadow:inset 0 -2px var(--bar-accent),inset 0 0 0 1px color-mix(in srgb,var(--bar-accent) 24%,transparent);
+.app .workspace.focused:hover,
+.app .workspace.displayed:hover {
+  box-shadow:
+    inset 0 -2px var(--bar-accent),
+    inset 0 0 0 1px color-mix(in srgb, var(--bar-accent) 24%, transparent);
 }
-.app .right button:active, .app .left button:active {
- background:color-mix(in srgb,var(--bar-accent) 17%,#15191f);
+.app .right button:active,
+.app .left button:active {
+  background: color-mix(in srgb, var(--bar-accent) 17%, #0b1015);
 }
-@media(prefers-reduced-motion:reduce){.app .left button,.app .right button{transition:none}}
+@media (prefers-reduced-motion: reduce) {
+  .app .left button,
+  .app .right button {
+    transition: none;
+  }
+}

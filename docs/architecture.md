@@ -55,13 +55,17 @@ ruxsati ham yangilanadi va `tests/themes.ps1` bilan tekshiriladi.
 
 ## Neovim va Zebar variantlari
 
-`config/nvim/init.lua` oddiy Neovim uchun `lua/config` va `lua/plugins`,
-VS Code uchun esa `lua/vs/config` va `lua/vs/plugins`ni tanlaydi. Bu ikki
-muhitning vazifalari farq qiladi; papkalar shu sababli ajratilgan.
+`config/nvim/init.lua` oddiy Neovim uchun `lua/standalone/`, VS Code uchun
+`lua/vscode_nvim/` konfiguratsiyasini tanlaydi. Har birida `config/` va `plugins/`
+alohida. Ikkalasi foydalanadigan lazy.nvim yuklovchisi, workflow aliaslari va
+editing plaginlari `lua/shared/` ichida; bir muhit ikkinchisini import qilmaydi.
+`lua/config/`dagi uchta kichik fayl LazyVimning standart options, keymaps va
+autocmds yuklash nuqtalarini `standalone/config/`ga yo'naltiradi. Lockfile'lar
+va plugin o'rnatish kataloglari har bir muhit uchun alohida saqlanadi.
 
 Setup yig'adigan faol Zebar widget'i — `attaquer-solid-ts`; u
-`setup.json`dagi `zebar.widget` bilan belgilanadi. `attaquer-buildless` va `quiet-velvet`
-mavjud qo'shimcha variantlar sifatida saqlanadi, standart setup ularni
+`setup.json`dagi `zebar.widget` bilan belgilanadi. `attaquer-buildless`
+qo'shimcha variant sifatida saqlanadi, standart setup uni
 yig'maydi. `.marketplace` Zebar xizmat ma'lumotlari uchun ishlatiladi.
 Variantni o'chirishdan oldin GlazeWM startup buyrug'i va Zebar tanlovini tekshirish kerak.
 
@@ -89,7 +93,10 @@ uning manba papkasi o'zgartirilmaydi. Ko'chirishdan keyin
 
 Git va Terminal amallari `scripts/install/` ichida; ularning manba
 konfiguratsiyalari `config/git/` va `config/terminal/` ichida qoladi.
-`lib/setup.ps1` funksiyalari repo yo'lini majburiy `-RepoRoot` orqali oladi.
+`lib/setup.ps1` faqat `lib/modules.ps1`, `lib/zebar/build.ps1` va
+`lib/zebar/runtime.ps1` yordamchilarini yuklaydi. Amallar repo yo'lini majburiy
+`-RepoRoot` orqali oladi. Link yaratish va directory backup qoidalari
+`lib/files.ps1`da umumiy saqlanadi.
 
 Faol widget yo'lining asosiy manbasi `setup.json`dagi `zebar.widget`.
 CI shu qiymatni o'qiydi. `Assert-ZebarConfiguration` startup pack, widget,
@@ -135,3 +142,29 @@ qilinadi. Bosqichlar har doim odatdagi tartibda bajariladi. Faqat tanlangan
 bosqichlarga kerakli modules/theme/Zebar ma'lumotlari oldindan tekshiriladi.
 Boshqa bosqichlar dependency sifatida yashirincha qo'shilmaydi; dastlabki
 PowerShell/repo/Scoop tayyorgarligi esa kerak bo'lsa saqlanadi.
+
+## Kod chegaralari
+
+`Assert-SetupConfig` o'qilgan ma'lumotni tekshiradi; `Get-SetupConfig` faylni
+o'qiydi va shu tekshiruvni chaqiradi. Installer'da tanlangan bosqichlar uchun
+ma'lumot tekshiruvi va bosqichlarni bajarish alohida funksiyalar.
+
+PowerShell `user_profile.ps1` kirish nuqtasi `profile/interactive.ps1`,
+`environment.ps1`, `development.ps1`, `maintenance.ps1`ni yuklaydi.
+Maintenance funksiyalari profil ochilganda bajarilmaydi. Modul import xatosi
+haqiqiy exception bilan ko'rsatiladi.
+
+Faol widgetning `src/index.tsx` fayli sahifani ishga tushiradi; `App.tsx`
+komponentlarni joylashtiradi. `hooks/useProviders.ts` ma'lumot manbalari,
+ularning yopilishi va batareya retry timeriga egalik qiladi. Xato ko'rinishining
+sof qoidalari `providerHealth.ts`da. Media animatsiyasi komponent yonidagi
+`Media/useMediaMarquee.ts`da saqlanadi. CSS tokenlari, animatsiyalar va icon
+fontlari `src/styles/`da; layout qoidalari o'z fayllarida qoladi.
+
+Buildless variantida status/icon tanlash qoidalari `src/status.jsx`ga ajratilgan.
+Widgetlar alohida build va runtime paketlari bo'lib qoladi.
+
+Walnut lock'da `start.ps1` lifecycle va hodisalarni boshqaradi,
+`credentials.ps1` credential saqlaydi, `ui.ps1` oynalarni yaratadi. Har bir
+credential amali fayl yo'lini parametr sifatida oladi. `-SelfTest` hookni
+yoqishdan oldin tugaydi; regression test foydalanuvchi inputini bloklamaydi.

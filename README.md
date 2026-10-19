@@ -4,6 +4,8 @@ Windows 10/11 uchun mukammal sozlangan, tezkor va zamonaviy dasturchi muhiti kon
 
 Loyihani birinchi marta ko'rayotgan bo'lsangiz, [kodni o'qish yo'riqnomasi](docs/code-guide.md)dan boshlang. Paket va yo'llar `setup.json` ichida; bajariladigan amallar PowerShell fayllarida saqlanadi.
 
+Kod sifatini bosqichma-bosqich yaxshilash tartibi: [Clean Code refaktor rejasi](docs/clean-code-plan.md).
+
 ---
 
 ## ✨ Xususiyatlar
@@ -92,6 +94,7 @@ win-dotfiles/
 │   ├── terminal/       # Terminal sozlamalari va saqlash/tiklash skripti
 │   ├── powershell/     # Profil, mavzu va modules.json
 │   ├── nvim/           # Neovim / VS Code Neovim
+│   ├── vscode/         # Custom UI CSS va ulash yo'riqnomasi
 │   ├── glzr/           # GlazeWM va Zebar
 │   └── symlinks.ps1    # Konfiguratsiya papkalarini ulash
 ├── scripts/
@@ -221,6 +224,12 @@ PowerShell 7 dan barcha testlar:
 
 ```powershell
 .\tests\run.ps1
+```
+
+Widgetlar build'i va tayyor Neovim muhiti bilan to'liq mahalliy tekshiruv:
+
+```powershell
+./tools/check.ps1 -Neovim -Variants
 ```
 
 GitHub Actions Windows muhitida shu testlar va Zebar TypeScript tekshiruvini

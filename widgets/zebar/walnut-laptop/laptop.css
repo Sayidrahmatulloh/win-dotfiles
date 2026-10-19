@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  font-family: "Segoe UI", sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 * {
@@ -37,7 +37,11 @@ body {
   border-radius: 24px 24px 14px 14px;
   background: linear-gradient(120deg, #815b39, #3a291d 38%, #67472c 75%, #261c15);
   border: 1px solid #ac8155;
-  box-shadow: inset 0 2px 2px #f5d0a366, inset 0 -3px 5px #120d09, 0 7px 0 #20160f, 0 15px 25px #0009;
+  box-shadow:
+    inset 0 2px 2px #f5d0a366,
+    inset 0 -3px 5px #120d09,
+    0 7px 0 #20160f,
+    0 15px 25px #0009;
 }
 
 .camera {
@@ -48,7 +52,9 @@ body {
   height: 6px;
   border-radius: 50%;
   background: #111d22;
-  box-shadow: 0 0 0 2px #211810, inset 0 1px 2px #6e879b;
+  box-shadow:
+    0 0 0 2px #211810,
+    inset 0 1px 2px #6e879b;
 }
 
 .screen {
@@ -57,14 +63,18 @@ body {
   place-items: center;
   padding: 24px;
   border-radius: 6px;
-  background: radial-gradient(ellipse at 50% 50%, #75542d1c, transparent 65%), linear-gradient(145deg, #141c20, #0d1113 75%);
+  background:
+    radial-gradient(ellipse at 50% 50%, #75542d1c, transparent 65%),
+    linear-gradient(145deg, #141c20, #0d1113 75%);
   border: 2px solid #080b0c;
-  box-shadow: 0 0 0 4px #191713, inset 0 0 30px #0008;
+  box-shadow:
+    0 0 0 4px #191713,
+    inset 0 0 30px #0008;
 }
 
 h1 {
   margin: 0;
-  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(28px, 6.5vw, 72px);
   font-weight: 400;
   font-style: italic;
@@ -87,8 +97,15 @@ h1 {
   box-shadow: 0 4px 8px #0009;
 }
 
-.laptop { cursor: grab; touch-action: none; transition: translate 200ms ease; }
-.dragging .laptop { cursor: grabbing; transition: none; }
+.laptop {
+  cursor: grab;
+  touch-action: none;
+  transition: translate 200ms ease;
+}
+.dragging .laptop {
+  cursor: grabbing;
+  transition: none;
+}
 .side-grip {
   position: fixed;
   top: 50%;
@@ -105,8 +122,55 @@ h1 {
   touch-action: none;
   box-shadow: 0 3px 10px #0008;
 }
-.side-grip[hidden] { display: none; }
-@media (prefers-reduced-motion: reduce) { .laptop { transition: none; } }
+.side-grip[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .laptop {
+    transition: none;
+  }
+}
 
 /* The transparent window spans the monitor so sliding stays visible to its edge. */
-.laptop { width: min(990px, 100%); }
+.laptop {
+  width: min(990px, 100%);
+}
+
+/* Shared dark green desktop palette. */
+.lid {
+  background: linear-gradient(120deg, #293340, #151c24 38%, #293340 75%, #0b1015);
+  border-color: #293340;
+  box-shadow:
+    inset 0 2px 2px #929dab66,
+    inset 0 -3px 5px #0b1015,
+    0 7px 0 #0b1015,
+    0 15px 25px #0009;
+}
+.camera {
+  background: #0b1015;
+  box-shadow:
+    0 0 0 2px #293340,
+    inset 0 1px 2px #929dab;
+}
+.screen {
+  background: radial-gradient(ellipse, #a6e22e0c, transparent 65%), #0b1015;
+  border-color: #0b1015;
+  box-shadow:
+    0 0 0 4px #151c24,
+    inset 0 0 30px #0008;
+}
+h1 {
+  color: #a6e22e;
+  background: linear-gradient(135deg, #cdd3dc, #a6e22e);
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 2px 12px #a6e22e20);
+}
+.hinge {
+  background: linear-gradient(#293340, #151c24 45%, #0b1015);
+}
+.side-grip {
+  background: linear-gradient(110deg, #293340, #151c24);
+  border-color: #293340;
+  color: #a6e22e;
+}

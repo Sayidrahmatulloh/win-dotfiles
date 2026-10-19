@@ -31,7 +31,8 @@
   "profiles": {
     "defaults": {
       "font": {
-        "face": "JetBrainsMono Nerd Font"
+        "cellHeight": "2.0",
+        "face": "DankMono Nerd Font"
       },
       "colorScheme": "Monokai Clean",
       "padding": "2, 2, 2, 2",
@@ -108,23 +109,23 @@
       "background": "#0B1015",
       "foreground": "#CDD3DC",
       "cursorColor": "#A6E22E",
-      "selectionBackground": "#303A29",
-      "black": "#45475A",
+      "selectionBackground": "#293340",
+      "black": "#293340",
       "red": "#F38BA8",
       "green": "#A6E22E",
       "yellow": "#F9E2AF",
       "blue": "#89B4FA",
-      "purple": "#F5C2E7",
+      "purple": "#C4A7E7",
       "cyan": "#94E2D5",
-      "white": "#BAC2DE",
-      "brightBlack": "#585B70",
+      "white": "#AAB4C2",
+      "brightBlack": "#929DAB",
       "brightRed": "#F38BA8",
       "brightGreen": "#A6E22E",
       "brightYellow": "#F9E2AF",
       "brightBlue": "#89B4FA",
-      "brightPurple": "#F5C2E7",
+      "brightPurple": "#C4A7E7",
       "brightCyan": "#94E2D5",
-      "brightWhite": "#A6ADC8"
+      "brightWhite": "#CDD3DC"
     }
   ],
   "themes": [

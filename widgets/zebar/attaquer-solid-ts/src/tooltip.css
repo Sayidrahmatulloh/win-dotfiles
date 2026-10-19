@@ -1,13 +1,37 @@
-#root { height:40px; }
-.app { height:40px; }
-.bar-tooltip {
- position:fixed;top:46px;z-index:100;pointer-events:none;
- display:block;max-width:min(340px,calc(100vw - 16px));
- padding:9px 12px;border-radius:9px;
- color:#e0e5ed;background:#1c222cf5;
- border:1px solid color-mix(in srgb,var(--bar-accent) 30%,#343b48);
- box-shadow:0 4px 12px #00000040;
- font-size:12px;font-weight:400;line-height:1.45;white-space:normal;
- overflow-wrap:anywhere;text-align:left;
+/* Keep the extra window area clear when a tooltip expands the bar. */
+html,
+body {
+  background: transparent;
 }
-.bar-tooltip-inline { top:4px;max-height:32px;overflow:hidden;padding:6px 10px; }
+#root {
+  height: 40px;
+}
+.app {
+  height: 40px;
+}
+.bar-tooltip {
+  position: fixed;
+  top: 46px;
+  z-index: 100;
+  pointer-events: none;
+  display: block;
+  max-width: min(340px, calc(100vw - 16px));
+  padding: 9px 12px;
+  border-radius: 9px;
+  color: #cdd3dc;
+  background: #151c24;
+  border: 1px solid color-mix(in srgb, var(--bar-accent) 30%, #293340);
+  box-shadow: 0 4px 12px #00000040;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.bar-tooltip-inline {
+  top: 4px;
+  max-height: 32px;
+  overflow: hidden;
+  padding: 6px 10px;
+}

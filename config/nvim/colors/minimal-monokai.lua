@@ -1,22 +1,32 @@
+local palette = require("shared.colors")
+
 -- A local Monokai palette: no extra theme dependency.
 vim.cmd("highlight clear")
 vim.o.background = "dark"
 vim.g.colors_name = "minimal-monokai"
 
 local p = {
-  bg = "#0b1015", fg = "#f8f8f2", muted = "#848586", panel = "#151b22",
-  green = "#a6e22e", pink = "#f92672", blue = "#66d9ef",
-  yellow = "#e6db74", purple = "#ae81ff", orange = "#fd971f",
+  bg = palette.background,
+  fg = palette.text,
+  muted = palette.muted,
+  panel = palette.background,
+  green = palette.accent,
+  pink = palette.error,
+  blue = palette.blue,
+  yellow = palette.warning,
+  purple = palette.purple,
+  orange = palette.orange,
 }
+
 local groups = {
   Normal = { fg = p.fg, bg = p.bg },
   NormalNC = { link = "Normal" },
   NormalFloat = { fg = p.fg, bg = p.panel },
   FloatBorder = { fg = p.muted, bg = p.panel },
   FloatTitle = { fg = p.green, bg = p.panel },
-  LineNr = { fg = "#4b5563" },
+  LineNr = { fg = palette.fallback.line_number },
   CursorLineNr = { fg = p.fg },
-  Cursor = { fg = p.bg, bg = "#6bd20a" },
+  Cursor = { fg = p.bg, bg = palette.accent },
   TermCursor = { fg = p.bg, bg = p.blue },
   WinSeparator = { fg = p.panel, bg = p.bg },
   SignColumn = { bg = p.bg },
@@ -40,12 +50,12 @@ local groups = {
   Delimiter = { fg = p.fg },
   Title = { fg = p.green, bold = true },
   Directory = { fg = p.blue },
-  Visual = { bg = "#283341" },
+  Visual = { bg = palette.selection },
   Search = { fg = p.bg, bg = p.yellow },
   IncSearch = { fg = p.bg, bg = p.green },
   CurSearch = { link = "IncSearch" },
   Pmenu = { fg = p.fg, bg = p.panel },
-  PmenuSel = { fg = p.fg, bg = "#283341" },
+  PmenuSel = { fg = p.fg, bg = palette.selection },
   PmenuSbar = { bg = p.panel },
   PmenuThumb = { bg = p.muted },
   StatusLine = { fg = p.muted, bg = p.panel },
@@ -59,10 +69,10 @@ local groups = {
   DiagnosticWarn = { fg = p.orange },
   DiagnosticInfo = { fg = p.blue },
   DiagnosticHint = { fg = p.muted },
-  DiffAdd = { bg = "#1c3020" },
-  DiffChange = { bg = "#202b38" },
-  DiffDelete = { bg = "#381c28" },
-  DiffText = { bg = "#334356" },
+  DiffAdd = { bg = palette.fallback.diff_add },
+  DiffChange = { bg = palette.fallback.diff_change },
+  DiffDelete = { bg = palette.fallback.diff_delete },
+  DiffText = { bg = palette.fallback.diff_text },
   ["@variable"] = { fg = p.fg },
   ["@variable.parameter"] = { fg = p.orange, italic = true },
   ["@variable.builtin"] = { fg = p.blue, italic = true },
@@ -75,6 +85,7 @@ local groups = {
   ["@tag.attribute"] = { fg = p.green },
   ["@tag.delimiter"] = { fg = p.fg },
 }
+
 for name, value in pairs(groups) do
   vim.api.nvim_set_hl(0, name, value)
 end

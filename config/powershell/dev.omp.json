@@ -5,13 +5,13 @@
       "alignment": "left",
       "segments": [
         {
-          "foreground": "#FFBD00",
+          "foreground": "#A6E22E",
           "style": "plain",
           "template": "{{ .UserName }}'s ",
           "type": "session"
         },
         {
-          "foreground": "#00C6F7",
+          "foreground": "#CDD3DC",
           "options": {
             "style": "folder"
           },
@@ -20,15 +20,15 @@
           "type": "path"
         },
         {
-          "foreground": "#F62F2E",
+          "foreground": "#AAB4C2",
           "style": "plain",
-          "template": "<#ffffff>on</> {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }} ",
+          "template": "<#CDD3DC>on</> {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }} ",
           "type": "git"
         },
         {
-          "foreground": "#98C379",
+          "foreground": "#AAB4C2",
           "style": "plain",
-          "template": "<#ffffff>via</> \ue781 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} ",
+          "template": "<#CDD3DC>via</> \ue781 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} ",
           "type": "node"
         }
       ],
@@ -39,7 +39,7 @@
       "newline": true,
       "segments": [
         {
-          "foreground": "#FFBD00",
+          "foreground": "#A6E22E",
           "style": "plain",
           "template": "\u2b9e ",
           "type": "text"

@@ -1,0 +1,67 @@
+local function map(mode, lhs, rhs, desc, extra)
+  vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", { silent = true, desc = desc }, extra or {}))
+end
+
+map("i", "jk", "<Esc>", "Normal mode")
+map("i", "kj", "<Esc>", "Normal mode")
+
+map("x", "p", '"_dP', "Paste without replacing clipboard")
+
+map({ "n", "x" }, "gh", "^", "First non-blank character")
+map({ "n", "x" }, "gl", "$", "End of line")
+
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", "Down", { expr = true })
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", "Up", { expr = true })
+
+map("n", "<Esc>", "<cmd>nohlsearch<cr>", "Clear search highlight")
+map({ "n", "x" }, "<localleader>,", "<cmd>write<cr>", "Save file")
+
+map("n", "gn", "<cmd>bnext<cr>", "Next buffer")
+map("n", "gp", "<cmd>bprevious<cr>", "Previous buffer")
+map("n", "<S-h>", "<cmd>bprevious<cr>", "Previous buffer")
+map("n", "<S-l>", "<cmd>bnext<cr>", "Next buffer")
+
+map("n", "<leader>cf", function()
+  Snacks.bufdelete()
+end, "Close buffer")
+map("n", "<leader><leader>", function()
+  Snacks.picker.files()
+end, "Find files")
+map("n", "<leader>fg", function()
+  Snacks.picker.grep()
+end, "Search project")
+map("n", "<leader>fb", function()
+  Snacks.picker.buffers()
+end, "Buffers")
+map("n", "<leader>rl", function()
+  Snacks.picker.recent()
+end, "Recent files")
+map("n", "<leader>ef", function()
+  Snacks.explorer()
+end, "File explorer")
+map("n", "<leader>sa", function()
+  Snacks.picker.commands()
+end, "Commands")
+map("n", "<leader>pr", function()
+  Snacks.picker.diagnostics()
+end, "Project diagnostics")
+map("n", "<leader>vd", vim.diagnostic.open_float, "Line diagnostics")
+map("n", "<leader>re", vim.lsp.buf.rename, "Rename symbol")
+map({ "n", "x" }, "<leader>qf", vim.lsp.buf.code_action, "Code actions")
+map("n", "<leader>vh", vim.lsp.buf.hover, "Documentation")
+map({ "n", "x" }, "<leader>fm", function()
+  LazyVim.format({ force = true })
+end, "Format")
+map("n", "<leader>ui", function()
+  local visible = vim.o.winbar == ""
+  vim.o.winbar = visible and require("standalone.ui.winbar").expression or ""
+end, "Toggle file information above editor")
+map("n", "<leader>ud", function()
+  local enabled = vim.diagnostic.config().virtual_text
+  vim.diagnostic.config({ virtual_text = not enabled, underline = not enabled })
+end, "Toggle diagnostic annotations")
+
+local workflow = require("standalone.config.workflow")
+require("shared.workflow").setup(function(key)
+  return workflow[key]
+end)

@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 #  config/symlinks.ps1 — Link configs to their correct paths
 # ============================================================
 
@@ -63,23 +63,9 @@ function New-Symlink {
         if (-not (Test-Path -LiteralPath $Src -PathType Container)) { throw "Source folder is missing: $Src" }
         if (Test-ConfigLink -Source $Src -Destination $Dst) { Write-Skip "already linked: $Dst"; return }
         New-Item -ItemType Directory -Path (Split-Path $Dst -Parent) -Force | Out-Null
-        $existing = Get-Item -LiteralPath $Dst -Force -ErrorAction SilentlyContinue
-        if ($existing) {
-            # Moving a directory entry preserves both real folders and old link targets.
-            $backup = $Dst + '.bak_' + [guid]::NewGuid().ToString('N')
-            Move-Item -LiteralPath $Dst -Destination $backup -ErrorAction Stop
-            Write-Warn "backed up: $Dst -> $backup"
-        }
-        try { New-Item -ItemType SymbolicLink -Path $Dst -Target $Src -ErrorAction Stop | Out-Null }
-        catch {
-            $partial = Get-Item -LiteralPath $Dst -Force -ErrorAction SilentlyContinue
-            if ($partial) {
-                if ($partial.LinkType -notin @('Junction','SymbolicLink')) { throw 'Unexpected real folder appeared at the destination.' }
-                Remove-Item -LiteralPath $Dst -Force -ErrorAction Stop
-            }
-            New-Item -ItemType Junction -Path $Dst -Target $Src -ErrorAction Stop | Out-Null
-        }
-        if (-not (Test-ConfigLink -Source $Src -Destination $Dst)) { throw 'New link target could not be verified.' }
+        $backup = Move-ConfigEntryToBackup -Path $Dst
+        if ($backup) { Write-Warn "backed up: $Dst -> $backup" }
+        New-DirectoryLink -Source $Src -Destination $Dst
         Write-Done "linked: $Dst"
         $Linked.Add($Dst)
     } catch {

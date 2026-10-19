@@ -1,4 +1,4 @@
-# Read data shared by setup and doctor. Loading this file changes nothing.
+﻿# Read data shared by setup and doctor. Loading this file changes nothing.
 function Assert-ConfigList {
     param($Value, [string]$Name)
     if ($Value -isnot [array]) { throw "$Name must be a JSON array." }
@@ -22,9 +22,8 @@ function Assert-RelativeConfigPath {
     }
 }
 
-function Get-SetupConfig {
-    param([string]$RepoRoot)
-    $configuration = Get-Content -LiteralPath (Join-Path $RepoRoot 'setup.json') -Raw | ConvertFrom-Json
+function Assert-SetupConfig {
+    param($Configuration)
     foreach ($key in @('scoop','winget','links','requiredCommands','zebar')) { $null = Get-ConfigProperty $configuration $key }
     foreach ($key in @('buckets','packages','fonts')) {
         $null = Get-ConfigProperty $configuration.scoop $key
@@ -43,6 +42,12 @@ function Get-SetupConfig {
         $null = Get-ConfigProperty $configuration.zebar $key
         Assert-RelativeConfigPath $configuration.zebar.$key "zebar.$key"
     }
+}
+
+function Get-SetupConfig {
+    param([string]$RepoRoot)
+    $configuration = Get-Content -LiteralPath (Join-Path $RepoRoot 'setup.json') -Raw | ConvertFrom-Json
+    Assert-SetupConfig -Configuration $configuration
     return $configuration
 }
 

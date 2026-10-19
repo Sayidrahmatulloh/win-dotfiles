@@ -1,7 +1,7 @@
-import "./style.css";
-import { Component } from "solid-js";
-import { GlazeWmOutput } from "zebar";
-import Workspace from "./Workspace";
+import './style.css';
+import { Component } from 'solid-js';
+import { GlazeWmOutput } from 'zebar';
+import Workspace from './Workspace';
 
 interface WorkspacesProps {
   glazewm: GlazeWmOutput | null; // Typ props

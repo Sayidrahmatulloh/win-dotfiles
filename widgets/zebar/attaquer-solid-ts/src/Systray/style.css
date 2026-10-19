@@ -64,7 +64,8 @@
 
 .systray.expanded {
   max-width: min(180px, 18vw);
-  overflow-x: auto; scrollbar-width: none;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .systray-icon-container {

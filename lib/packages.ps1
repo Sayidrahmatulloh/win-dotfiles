@@ -13,24 +13,24 @@ function Sync-Packages {
     foreach ($name in $Names) {
         $index++
         try {
-            if (& $IsInstalled $name) {
-                if (-not $Update) {
-                    Write-Skip "already installed: $name"
-                    $results.Latest.Add($name)
-                    continue
-                }
-                Write-Step "[$index/$($Names.Count)]" $name 'upgrading'
-                $status = & $Upgrade $name
-                switch ($status) {
-                    'upgraded' { Write-Done "upgraded: $name"; $results.Upgraded.Add($name) }
-                    'latest' { Write-Skip "up to date: $name"; $results.Latest.Add($name) }
-                    default { throw "Upgrade failed: $name" }
-                }
-            } else {
+            if (-not (& $IsInstalled $name)) {
                 Write-Step "[$index/$($Names.Count)]" $name 'installing'
                 if (-not (& $Install $name)) { throw "Install failed: $name" }
                 Write-Done "installed: $name"
                 $results.Installed.Add($name)
+                continue
+            }
+            if (-not $Update) {
+                Write-Skip "already installed: $name"
+                $results.Latest.Add($name)
+                continue
+            }
+            Write-Step "[$index/$($Names.Count)]" $name 'upgrading'
+            $status = & $Upgrade $name
+            switch ($status) {
+                'upgraded' { Write-Done "upgraded: $name"; $results.Upgraded.Add($name) }
+                'latest' { Write-Skip "up to date: $name"; $results.Latest.Add($name) }
+                default { throw "Upgrade failed: $name" }
             }
         } catch {
             Write-Fail "$name : $($_.Exception.Message)"

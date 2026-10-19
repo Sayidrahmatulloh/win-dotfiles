@@ -1,10 +1,10 @@
 import StatusIcon from '../StatusIcon';
 import { safely } from '../actions';
-import "./style.css";
-import { Component } from "solid-js";
-import { DateOutput } from "zebar";
-import * as zebar from "zebar";
-import { useAnimatedClick } from "../hooks/useAnimatedClick";
+import './style.css';
+import { Component } from 'solid-js';
+import { DateOutput } from 'zebar';
+import * as zebar from 'zebar';
+import { useAnimatedClick } from '../hooks/useAnimatedClick';
 
 interface TimeStatusProps {
   date: DateOutput | null;
@@ -15,17 +15,22 @@ const TimeStatus: Component<TimeStatusProps> = (props) => {
 
   const handleTimeClick = () => {
     handleClick();
-    void safely(() => zebar.shellExec("explorer.exe", ["ms-actioncenter://"]), "Notification center");
+    void safely(
+      () => zebar.shellExec('explorer.exe', ['ms-actioncenter://']),
+      'Notification center',
+    );
   };
 
   return (
-    <button type="button" aria-label="Open notification center"
-      class={`date ${isActive() ? "clicked-animated" : ""}`}
+    <button
+      type="button"
+      aria-label="Open notification center"
+      class={`date ${isActive() ? 'clicked-animated' : ''}`}
       data-tooltip={props.date?.formatted}
       onClick={handleTimeClick}
     >
       <span class="content">
-        <StatusIcon name="clock"/>
+        <StatusIcon name="clock" />
         <span class="time">{props.date?.formatted?.substring(0, 5)}</span>
       </span>
     </button>
@@ -33,4 +38,3 @@ const TimeStatus: Component<TimeStatusProps> = (props) => {
 };
 
 export default TimeStatus;
-

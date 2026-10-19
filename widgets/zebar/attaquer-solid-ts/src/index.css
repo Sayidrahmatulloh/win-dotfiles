@@ -1,155 +1,16 @@
-/**
-* Import the Nerdfonts icon font.
-* Ref https://www.nerdfonts.com/cheat-sheet for a cheatsheet of available Nerdfonts icons.
-*/
-
-
-:root {
-  --color: #00cc6a;
-  --green: #75ea07;
-  --b-yellow: #ebec6c;
-  --yellow: #e0e109;
-  --b-orange: #fb8c00;
-  --orange: #ec6f08;
-  --b-red: #ff3e3e;
-  --red: #db1e1d;
-  --pink: #be70fa;
-  --purple: #8800dd;
-  --blue: #05e7e5;
-  --night-blue: #016ff6;
-  --windows-color: #3a86ff;
-}
-
+@import './styles/tokens.css';
+@import './styles/animations.css';
+@import './styles/icons.css';
 @font-face {
-  font-family: "CaskaydiaMonoNerdFont Locally";
-  src: url("./fonts/CaskaydiaMonoNerdFont-Regular.ttf") format("truetype");
+  font-family: 'CaskaydiaMonoNerdFont Locally';
+  src: url('./fonts/CaskaydiaMonoNerdFont-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
-@keyframes appear {
-  from {
-    transform: scale(1);
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -ms-transform: scale(1);
-    -o-transform: scale(1);
-  }
-
-  50% {
-    transform: scale(0.8);
-    -webkit-transform: scale(0.8);
-    -moz-transform: scale(0.8);
-    -ms-transform: scale(0.8);
-    -o-transform: scale(0.8);
-  }
-
-  to {
-    transform: scale(1);
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -ms-transform: scale(1);
-    -o-transform: scale(1);
-  }
-}
-
-@keyframes anticlockwise {
-  from {
-    transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(-90deg);
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-  }
-}
-
-@keyframes clockwise {
-  from {
-    transform: rotate(-90deg);
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-  }
-
-  to {
-    transform: rotate(0deg);
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
-  }
-}
-
-@keyframes anticlockwise2 {
-  from {
-    transform: rotate(0deg) translateX(1px);
-    -webkit-transform: rotate(0deg) translateX(1px);
-    -moz-transform: rotate(0deg) translateX(1px);
-    -ms-transform: rotate(0deg) translateX(1px);
-    -o-transform: rotate(0deg) translateX(1px);
-  }
-
-  to {
-    transform: rotate(-180deg) translateY(1px);
-    -webkit-transform: rotate(-180deg) translateY(1px);
-    -moz-transform: rotate(-180deg) translateY(1px);
-    -ms-transform: rotate(-180deg) translateY(1px);
-    -o-transform: rotate(-180deg) translateY(1px);
-  }
-}
-
-@keyframes clockwise2 {
-  from {
-    transform: rotate(-180deg) translateY(1px);
-    -webkit-transform: rotate(-180deg) translateY(1px);
-    -moz-transform: rotate(-180deg) translateY(1px);
-    -ms-transform: rotate(-180deg) translateY(1px);
-    -o-transform: rotate(-180deg) translateY(1px);
-  }
-
-  to {
-    transform: rotate(0deg) translateX(1px);
-    -webkit-transform: rotate(0deg) translateX(1px);
-    -moz-transform: rotate(0deg) translateX(1px);
-    -ms-transform: rotate(0deg) translateX(1px);
-    -o-transform: rotate(0deg) translateX(1px);
-  }
-}
-
-@keyframes hoverbutton {
-  from {}
-
-  to {
-    background: #aeaeae50;
-    box-shadow:
-      0 -1px 1px #9e9e9e44,
-      0 1px 1px #24242455;
-  }
-}
-
-@keyframes unhoverbutton {
-  from {
-    background: #aeaeae50;
-    box-shadow:
-      0 -1px 1px #9e9e9e44,
-      0 1px 1px #24242455;
-  }
-
-  to {}
-}
-
 body {
   color: rgb(255 255 255 / 90%);
-  font-family: "CaskaydiaMonoNerdFont Locally", ui-monospace, monospace;
+  font-family: 'CaskaydiaMonoNerdFont Locally', ui-monospace, monospace;
   font-size: 13px;
   overflow: hidden;
 }
@@ -162,7 +23,7 @@ body {
 #root {
   height: 100%;
   align-items: center;
-  background: #1c1c1ccc;
+  background: #0b1015;
 }
 
 i {
@@ -272,75 +133,116 @@ img {
 }
 
 /* Shared accessibility and sizing rules. */
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; }
-[hidden] { display: none !important; }
-button { cursor: pointer; font: inherit; }
-button:focus-visible, input:focus-visible, [role="slider"]:focus-visible { outline: 2px solid #67e8f9; outline-offset: -2px; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+[hidden] {
+  display: none !important;
+}
+button {
+  cursor: pointer;
+  font: inherit;
+}
+button:focus-visible,
+input:focus-visible,
+[role='slider']:focus-visible {
+  outline: 2px solid #a6e22e;
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
 
-.app { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; height: 100%; padding: 2px 8px; gap: 8px; }
-.left, .center, .right { min-width: 0; max-width: 100%; }
-.left { overflow: hidden; }
-.left > * { flex-shrink: 0; }
-.left > .media { flex-shrink: 1; min-width: 0; }
-.center { justify-self: stretch; overflow-x: auto; scrollbar-width: none; }
-.current-apps { min-width: max-content; margin: auto; }
-.right { justify-self: end; }
-.right > * { flex-shrink: 0; }
-.media-text { min-width: 0; }
-.action-error { position: fixed; right: 0; top: 0; z-index: 10; color: #ffb4b4; background: #462323; width: 20px; height: 20px; }
-@media (max-width: 1200px) { .weather, .memory .labels { display: none; } .media-text { max-width: 100px; } }
-@media (max-width: 900px) { .left .media, .network .labels { display: none; } .app { gap: 3px; padding-inline: 3px; } }
-@media (max-width: 650px) { .app { display: flex; overflow-x: auto; scrollbar-width: none; } .left, .center, .right { flex: 0 0 auto; overflow: visible; } }
-
-@font-face { font-family: 'LocalIcons'; src: url('./fonts/CaskaydiaMonoNerdFont-Regular.ttf') format('truetype'); font-display: swap; }
-.nf { font-family: 'LocalIcons', monospace; font-style: normal; }
-.nf-custom-windows::before { content: "\e70f"; }
-.nf-cod-settings_gear::before { content: "\eb51"; }
-.nf-md-web::before { content: "\f059f"; }
-.nf-cod-terminal_powershell::before { content: "\ebc7"; }
-.nf-md-calendar_month::before { content: "\f0e17"; }
-.nf-md-swap_horizontal::before { content: "\f04e1"; }
-.nf-md-swap_vertical::before { content: "\f04e2"; }
-.nf-fae-chip::before { content: "\e26f"; }
-.nf-oct-cpu::before { content: "\f4bc"; }
-.nf-md-power_plug::before { content: "\f06a5"; }
-.nf-fa-battery_0::before { content: "\f244"; }
-.nf-fa-battery_1::before { content: "\f243"; }
-.nf-fa-battery_2::before { content: "\f242"; }
-.nf-fa-battery_3::before { content: "\f241"; }
-.nf-fa-battery_4::before { content: "\f240"; }
-.nf-weather-day_sunny::before { content: "\e30d"; }
-.nf-weather-night_clear::before { content: "\e32b"; }
-.nf-weather-day_cloudy::before { content: "\e302"; }
-.nf-weather-night_alt_cloudy::before { content: "\e37e"; }
-.nf-weather-day_sprinkle::before { content: "\e309"; }
-.nf-weather-night_alt_sprinkle::before { content: "\e37b"; }
-.nf-weather-day_rain::before { content: "\e308"; }
-.nf-weather-night_alt_rain::before { content: "\e375"; }
-.nf-weather-day_snow::before { content: "\e30a"; }
-.nf-weather-night_alt_snow::before { content: "\e377"; }
-.nf-weather-day_lightning::before { content: "\e305"; }
-.nf-weather-night_alt_lightning::before { content: "\e373"; }
-.nf-md-application::before { content: "\f08c6"; }
-.nf-fa-spotify::before { content: "\f1bc"; }
-.nf-md-spotify::before { content: "\f04c7"; }
-.nf-dev-visualstudio::before { content: "\e70c"; }
-.nf-fa-video_camera::before { content: "\f03d"; }
-.nf-md-video::before { content: "\f0567"; }
-.nf-md-telegram::before { content: "\f0501"; }
-.nf-md-whatsapp::before { content: "\f05a3"; }
-.nf-md-steam::before { content: "\f04d3"; }
-.nf-fa-cube::before { content: "\f1b2"; }
-.nf-oct-terminal::before { content: "\f489"; }
-.nf-fa-folder_open::before { content: "\f07c"; }
-.nf-fa-chrome::before { content: "\f268"; }
-.nf-fa-firefox::before { content: "\f269"; }
-.nf-md-discord::before { content: "\f066f"; }
-.nf-md-note_text::before { content: "\f039e"; }
-.nf-dev-photoshop::before { content: "\e7b8"; }
-.nf-dev-illustrator::before { content: "\e7b4"; }
-.nf-md-microsoft_excel::before { content: "\f138f"; }
-.nf-md-microsoft_word::before { content: "\f1392"; }
-.nf-md-microsoft_powerpoint::before { content: "\f1390"; }
+.app {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  height: 100%;
+  padding: 2px 8px;
+  gap: 8px;
+}
+.left,
+.center,
+.right {
+  min-width: 0;
+  max-width: 100%;
+}
+.left {
+  overflow: hidden;
+}
+.left > * {
+  flex-shrink: 0;
+}
+.left > .media {
+  flex-shrink: 1;
+  min-width: 0;
+}
+.center {
+  justify-self: stretch;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.current-apps {
+  min-width: max-content;
+  margin: auto;
+}
+.right {
+  justify-self: end;
+}
+.right > * {
+  flex-shrink: 0;
+}
+.media-text {
+  min-width: 0;
+}
+.action-error {
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10;
+  color: #f38ba8;
+  background: #381c28;
+  width: 20px;
+  height: 20px;
+}
+@media (max-width: 1200px) {
+  .weather,
+  .memory .labels {
+    display: none;
+  }
+  .media-text {
+    max-width: 100px;
+  }
+}
+@media (max-width: 900px) {
+  .left .media,
+  .network .labels {
+    display: none;
+  }
+  .app {
+    gap: 3px;
+    padding-inline: 3px;
+  }
+}
+@media (max-width: 650px) {
+  .app {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .left,
+  .center,
+  .right {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+}
