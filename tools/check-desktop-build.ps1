@@ -1,7 +1,7 @@
 param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent), [string]$BuildDirectory)
 $ErrorActionPreference = 'Stop'
 
-. "$repoRoot/lib/settings.ps1"
+. "$repoRoot/lib/setup/settings.ps1"
 . "$repoRoot/scripts/theme/ThemeConfig.ps1"
 $widget = Join-Path $repoRoot (Get-SetupConfig -RepoRoot $repoRoot).zebar.widget
 if (-not $BuildDirectory) { $BuildDirectory = Join-Path $widget 'dist' }

@@ -5,8 +5,9 @@ $ErrorActionPreference = 'Stop'
 if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Run tests from PowerShell 7.' }
 $powerShell = [Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
 $failures = @()
-$tests = Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.ps1' -File |
-    Where-Object Name -notin @('run.ps1', 'helpers.ps1') | Sort-Object Name
+$suiteDirectory = Join-Path $PSScriptRoot 'powershell'
+$tests = @(Get-ChildItem -LiteralPath $suiteDirectory -Filter '*.ps1' -File | Sort-Object Name)
+if (-not $tests.Count) { throw "No PowerShell test suites found in $suiteDirectory." }
 foreach ($test in $tests) {
     Write-Host "`nTest: $($test.BaseName)"
     & $powerShell -NoProfile -File $test.FullName -RepoRoot $RepoRoot

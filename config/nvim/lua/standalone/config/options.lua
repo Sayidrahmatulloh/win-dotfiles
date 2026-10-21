@@ -4,6 +4,7 @@ vim.g.autoformat = true
 vim.g.snacks_animate = false
 
 local opt = vim.opt
+opt.guifont = "Operator Mono Lig:h14"
 opt.number = true
 opt.relativenumber = true
 opt.tabstop = 2
@@ -39,4 +40,4 @@ opt.updatetime = 250
 opt.timeoutlen = 400
 opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkon0"
 
-require("standalone.config.shell").setup()
+require("standalone.platform.shell").setup()

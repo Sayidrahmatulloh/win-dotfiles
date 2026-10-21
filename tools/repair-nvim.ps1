@@ -27,7 +27,7 @@ Push-Location -LiteralPath $RepoRoot
 try {
     & nvim --headless -u NONE -i NONE -n -l (Join-Path $PSScriptRoot 'repair-nvim-parsers.lua')
     if ($LASTEXITCODE -ne 0) { throw 'Treesitter parser repair failed.' }
-    & nvim --headless -u NONE -i NONE -n -l (Join-Path $RepoRoot 'tests/nvim-shell.lua')
+    & nvim --headless -u NONE -i NONE -n -l (Join-Path $RepoRoot 'tests/neovim/shell.lua')
     if ($LASTEXITCODE -ne 0) { throw 'PowerShell terminal verification failed.' }
 } finally {
     Pop-Location

@@ -1,5 +1,5 @@
 /* @refresh reload */
-import './widget-guard';
+import './services/runtime/widget-guard';
 import './index.css';
 import App from './App';
 import { render } from 'solid-js/web';

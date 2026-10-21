@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { isBatteryDeviceMissing, providerErrorMessage } from '../src/providerHealth';
+import { isBatteryDeviceMissing, providerErrorMessage } from '../src/services/providers/health';
 
 describe('provider health', () => {
   test('only missing battery errors are hidden during recovery', () => {

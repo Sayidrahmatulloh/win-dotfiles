@@ -6,7 +6,7 @@
       "label": "Green",
       "accent": "#a6e22e",
       "surface": "#a6e22e18",
-      "wallpaper": "assets/wallpapers/original-girl-green-garden-v5.png",
+      "wallpaper": "assets/wallpapers/car.jpg",
       "cursor": "amber"
     },
     {
@@ -14,7 +14,7 @@
       "label": "Blue",
       "accent": "#96c5ff",
       "surface": "#96c5ff20",
-      "wallpaper": "assets/wallpapers/original-girl-blue-night-v5.png",
+      "wallpaper": "assets/wallpapers/space.jpg",
       "cursor": "ice"
     },
     {
@@ -22,7 +22,7 @@
       "label": "Purple",
       "accent": "#c4a7e7",
       "surface": "#c4a7e720",
-      "wallpaper": "assets/wallpapers/walnut-studio.png",
+      "wallpaper": "assets/wallpapers/bg.jpg",
       "cursor": "classic"
     }
   ]

@@ -10,13 +10,18 @@ PowerShell 7'ni tayyorlaydi, `install.ps1` o'rnatish bosqichlarini bajaradi,
 | --- | --- |
 | `widgets/zebar/` | Zebar dastur kodi, testlar, dependency va build vositalari |
 | `config/` | Dasturlarning o'z formatidagi konfiguratsiyalar |
-| `scripts/install/` | Paket, shrift va cursor o'rnatish bosqichlari |
+| `scripts/install/` | Paketlar, shriftlar, cursor, link, Git va Terminal o'rnatish bosqichlari |
 | `scripts/theme/` | Windows ko'rinishini o'zgartiradigan umumiy PowerShell kodi |
 | `assets/` | ZIP va rasm kabi manba fayllar, tegishli litsenziyalar |
 | `themes/` | Mavzularning yagona JSON katalogi |
-| `lib/` | Setup va doctor foydalanadigan umumiy funksiyalar |
+| `lib/core/` | Buyruq bajarish, fayl/backup, natija va hisobot yordamchilari |
+| `lib/setup/` | Manifest, paket va modul o'rnatish qoidalari |
+| `lib/zebar/` | Staged build va runtime migratsiyasi |
+| `lib/{utils,setup,diagnostics}.ps1` | Barqaror kutubxona kirish nuqtalari va read-only diagnostika |
 | `tools/` | CI tayyorgarligi va build tekshiruvlari |
-| `tests/` | Vaqtinchalik fixture'lar bilan regression testlar |
+| `tests/powershell/` | Setup, helper, theme va diagnostika regression suite'lari |
+| `tests/neovim/` | Lua tuzilma, terminal, keymap va integratsiya sinovlari |
+| `tests/support/` | Suite sifatida ishga tushirilmaydigan test yordamchilari |
 | `docs/` | Tuzilma, ishlatish va kengaytirish yo'riqnomalari |
 
 Runtime ma'lumotlari repo ichiga yozilmaydi: log va cursor backup'lari
@@ -51,7 +56,7 @@ katalogdagi wallpaper'larni `dist/desktop/` ichiga nusxalaydi. Natijada
 repo va build bir xil nisbiy tuzilmani ishlatadi. Build nusxalarini qo'lda
 tahrirlash kerak emas. Zebar shell ruxsati faqat `ApplyTheme.ps1` va ruxsat
 etilgan mavzu argumentlariga berilgan; yangi ID qo'shilganda `zpack.json`
-ruxsati ham yangilanadi va `tests/themes.ps1` bilan tekshiriladi.
+ruxsati ham yangilanadi va `tests/powershell/themes.ps1` bilan tekshiriladi.
 
 ## Neovim va Zebar variantlari
 
@@ -89,19 +94,19 @@ Zebar widgetlari `widgets/zebar/` ichida, startup sozlamalari esa
 normalize.css fayllarini shu runtime papkaga nusxalaydi. O'zgargan fayllar
 avval backup qilinadi. Eski butun Zebar papkasiga link ham backup qilinadi;
 uning manba papkasi o'zgartirilmaydi. Ko'chirishdan keyin
-`config/symlinks.ps1`ni qayta ishga tushirish kerak.
+`scripts/install/links.ps1`ni qayta ishga tushirish kerak.
 
 Git va Terminal amallari `scripts/install/` ichida; ularning manba
 konfiguratsiyalari `config/git/` va `config/terminal/` ichida qoladi.
-`lib/setup.ps1` faqat `lib/modules.ps1`, `lib/zebar/build.ps1` va
+`lib/setup.ps1` faqat `lib/setup/modules.ps1`, `lib/zebar/build.ps1` va
 `lib/zebar/runtime.ps1` yordamchilarini yuklaydi. Amallar repo yo'lini majburiy
 `-RepoRoot` orqali oladi. Link yaratish va directory backup qoidalari
-`lib/files.ps1`da umumiy saqlanadi.
+`lib/core/files.ps1`da umumiy saqlanadi.
 
 Faol widget yo'lining asosiy manbasi `setup.json`dagi `zebar.widget`.
 CI shu qiymatni o'qiydi. `Assert-ZebarConfiguration` startup pack, widget,
 preset va runtime link tanlangan build bilan mosligini tekshiradi;
-installer, doctor va CI undan foydalanadi. `tests/zebar.ps1` mos kelmagan
+installer, doctor va CI undan foydalanadi. `tests/powershell/zebar.ps1` mos kelmagan
 sozlamalar, eski link migratsiyasi va qayta o'rnatishni tekshiradi.
 ## Zebar runtime va build xatolaridan tiklanish
 
@@ -155,10 +160,10 @@ Maintenance funksiyalari profil ochilganda bajarilmaydi. Modul import xatosi
 haqiqiy exception bilan ko'rsatiladi.
 
 Faol widgetning `src/index.tsx` fayli sahifani ishga tushiradi; `App.tsx`
-komponentlarni joylashtiradi. `hooks/useProviders.ts` ma'lumot manbalari,
+komponentlarni joylashtiradi. `services/providers/useProviders.ts` ma'lumot manbalari,
 ularning yopilishi va batareya retry timeriga egalik qiladi. Xato ko'rinishining
-sof qoidalari `providerHealth.ts`da. Media animatsiyasi komponent yonidagi
-`Media/useMediaMarquee.ts`da saqlanadi. CSS tokenlari, animatsiyalar va icon
+sof qoidalari `services/providers/health.ts`da. Media animatsiyasi komponent yonidagi
+`components/Media/useMediaMarquee.ts`da saqlanadi. CSS tokenlari, animatsiyalar va icon
 fontlari `src/styles/`da; layout qoidalari o'z fayllarida qoladi.
 
 Buildless variantida status/icon tanlash qoidalari `src/status.jsx`ga ajratilgan.
@@ -168,3 +173,57 @@ Walnut lock'da `start.ps1` lifecycle va hodisalarni boshqaradi,
 `credentials.ps1` credential saqlaydi, `ui.ps1` oynalarni yaratadi. Har bir
 credential amali fayl yo'lini parametr sifatida oladi. `-SelfTest` hookni
 yoqishdan oldin tugaydi; regression test foydalanuvchi inputini bloklamaydi.
+
+## Hozirgi qatlamlar va ularni kengaytirish
+
+Root kirish skriptlari foydalanuvchi bilan ishlaydi; `scripts/` amallarni birlashtiradi;
+`lib/` qayta ishlatiladigan funksiyalarni beradi. Konfiguratsiya va assetlar ma'lumot
+sifatida saqlanadi. Bu yo'nalishni teskari bog'lamang: masalan, umumiy backup
+funksiyasi install entry point'ini ishga tushirmasligi kerak.
+
+`lib/utils.ps1` core va setup helperlarini, `lib/setup.ps1` post-clone module/Zebar
+helperlarini yuklaydi. Doctor va kichik adapterlar kerakli aniq modulni import
+qilishi mumkin. Importning o'zi install, theme almashtirish yoki build boshlamaydi.
+Bootstrap esa repo hali mavjud bo'lmagan kompyuterda ishlashi sababli mustaqil qoladi.
+
+`config/symlinks.ps1` avvalgi buyruqlar uchun ikki qatorli compatibility kirish
+nuqtasi. Haqiqiy link va profil amallari `scripts/install/links.ps1`da. Boshqa
+`config/` skriptlari dastur talab qiladigan profil yoki startup adapterlaridir.
+
+Faol Zebar widgetida `components/` ko'rinishni, `services/` desktop/provider
+amallarini, `shared/` esa oddiy hisob va formatlashni saqlaydi. Xizmatlar
+komponentlarni import qilmaydi. Variant widgetlar mustaqil entry point va build
+formatlarini saqlaydi; ularni faol Solid widgetiga majburan bog'lamang.
+[Widget xaritasi](../widgets/zebar/attaquer-solid-ts/README.md).
+
+Neovim ichida ham shu qoida: `config` ulaydi, `plugins` yuklanishni e'lon qiladi,
+`features` xatti-harakatni, `platform` OS moslashuvini, `ui` ko'rinishni boshqaradi.
+[Neovim arxitekturasi](../config/nvim/docs/architecture.md).
+LazyVim va shaxsiy tugmalar orasidagi istisnolar
+`config/nvim/lua/standalone/keymaps/defaults.lua`da boshqariladi: global defaultlar
+shaxsiy mappinglardan oldin o'chiriladi, plugin/LSP defaultlari o'z `keys`
+spec'laridan o'chiriladi. [Keymap qoidalari](../config/nvim/docs/keymaps.md).
+
+Yangi kod uchun qisqa tartib va tekshiruvlar: [CONTRIBUTING.md](../CONTRIBUTING.md).
+Mahalliy dot-source yo'llari, kutubxona kirish nuqtalari, Neovim import yo'nalishlari
+va widget xizmatlari/komponentlari orasidagi chegaralar regression testlar bilan tekshiriladi.
+
+## Papka nomlari va o'qish tartibi
+
+Root'da ishga tushirish buyruqlari va umumiy sozlash fayllari turadi. Kod turini
+bildiradigan papka nomlari (`config`, `lib`, `scripts`, `tools`, `tests`, `widgets`)
+bir xil mas'uliyatni saqlaydi; bitta amal uchun yana parallel `helpers`, `utils`
+yoki bo'sh `src` qatlami yaratilmaydi. Faylni ko'chirishning o'zi arxitektura emas:
+chaqiruvchilar, yuklanish tartibi, testlar va hujjatlar ham birga o'zgaradi.
+
+Testlar texnologiyasi bo'yicha ajratilgan: `tests/powershell/` va `tests/neovim/`.
+Umumiy test kodi `tests/support/`da; `tests/run.ps1` faqat PowerShell suite'larini
+yangi jarayonlarda ishga tushiradi. Widgetning testlari o'z paketi yonida qoladi.
+
+Joriy hujjatlar `docs/`da, tarixiy qaydlar `docs/history/`da. Asosiy papkalarning
+README fayli kirish nuqtasi, mas'uliyat va boshqa qatlamga bog'lanishni tushuntiradi.
+Boshlash uchun [hujjatlar xaritasi](README.md), testlar uchun [tests/README.md](../tests/README.md).
+
+Yangi PowerShell suite pastki papkadan ham `-RepoRoot` qabul qiladi. Neovim
+sinovlari repo ildizini `setup.json` orqali topadi; katalog chuqurligiga yoki
+foydalanuvchining kompyuteridagi mutlaq yo'lga bog'lanmaydi.

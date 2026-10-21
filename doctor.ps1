@@ -8,11 +8,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Diagnostics dependencies:
-# - lib/settings.ps1: Get-SetupConfig, Get-PowerShellModules, Assert-ZebarConfiguration
-# - lib/files.ps1: Test-ConfigLink, Get-TerminalSettingsPath
+# - lib/setup/settings.ps1: Get-SetupConfig, Get-PowerShellModules, Assert-ZebarConfiguration
+# - lib/core/files.ps1: Test-ConfigLink, Get-TerminalSettingsPath
 # - lib/diagnostics.ps1: Get-DoctorResults, New-DoctorResult, Invoke-DoctorCheck
-. "$PSScriptRoot\lib\settings.ps1"
-. "$PSScriptRoot\lib\files.ps1"
+. "$PSScriptRoot\lib\setup\settings.ps1"
+. "$PSScriptRoot\lib\core\files.ps1"
 . "$PSScriptRoot\lib\diagnostics.ps1"
 
 try {

@@ -4,7 +4,7 @@ pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_wrap_spell")
 local group = vim.api.nvim_create_augroup("minimal_nvim", { clear = true })
 vim.schedule(function()
   if #vim.api.nvim_list_uis() > 0 and vim.bo.buftype == "" and vim.fn.argv(0) ~= "-" then
-    require("standalone.ui.explorer").open()
+    require("standalone.features.files.explorer").open()
   end
 end)
 

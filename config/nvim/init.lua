@@ -1,6 +1,6 @@
--- Select the configuration for the current editor environment.
+-- Route once; each environment owns its startup and plugin configuration.
 if vim.g.vscode then
-  require("vscode_nvim.config")
+  require("vscode_nvim")
 else
-  require("standalone.config")
+  require("standalone")
 end

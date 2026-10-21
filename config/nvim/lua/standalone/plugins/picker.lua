@@ -1,7 +1,7 @@
-local ignore = require("standalone.config.ignore")
+local ignore = require("standalone.features.files.ignore")
 local popup = require("standalone.ui.popup")
-local picker_ui = require("standalone.ui.picker")
-local explorer_ui = require("standalone.ui.explorer")
+local picker_ui = require("standalone.features.files.picker")
+local explorer_ui = require("standalone.features.files.explorer")
 
 local function quick_open(overrides)
   return vim.tbl_deep_extend("force", {
@@ -15,6 +15,7 @@ end
 
 return {
   "folke/snacks.nvim",
+  keys = require("standalone.keymaps.defaults").plugin_keys("snacks"),
   opts = {
     dashboard = { enabled = false },
     indent = { enabled = false },
@@ -68,6 +69,19 @@ return {
         buffers = quick_open(),
         grep = { args = { "--no-require-git" } },
         explorer = {
+          win = {
+            input = { keys = { ["<Esc>"] = false } },
+            list = {
+              wo = { winbar = "" },
+              keys = {
+                ["<Esc>"] = false,
+                ["w"] = {
+                  explorer_ui.editor,
+                  desc = "Return to editor",
+                },
+              },
+            },
+          },
           config = function(opts)
             ignore.configure(opts)
             return require("snacks.picker.source.explorer").setup(opts)
@@ -93,11 +107,18 @@ return {
             layout = {
               box = "vertical",
               backdrop = false,
-              border = "none",
-              height = 0,
-              position = "right",
-              width = 0.31,
-              min_width = 26,
+              border = "rounded",
+              position = "float",
+              relative = "editor",
+              zindex = 30,
+              row = 0,
+              col = -1,
+              width = function()
+                return math.max(1, math.min(math.max(26, math.floor(vim.o.columns * 0.31)), vim.o.columns - 4))
+              end,
+              height = function()
+                return math.max(1, vim.o.lines - vim.o.cmdheight - (vim.o.laststatus == 0 and 0 or 1) - 2)
+              end,
               { win = "input", height = 1, border = "none" },
               { win = "list", border = "none" },
             },

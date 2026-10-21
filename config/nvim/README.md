@@ -1,61 +1,68 @@
-# Minimal Neovim
+# Neovim configuration
 
-VS Code sozlamalaringizga mos, kodga e'tibor beradigan LazyVim konfiguratsiyasi.
-`init.lua` muhitni avtomatik tanlaydi: VS Code uchun `vscode_nvim.config`,
-oddiy Neovim uchun `standalone.config` yuklanadi.
+Terminaldagi Neovim va VS Code Neovim uchun alohida muhitlar, umumiy tahrirlash sozlamalari bilan.
+`init.lua` muhitni tanlaydi; har bir muhit o'z ishga tushish tartibi va plaginlariga egalik qiladi.
 
-## Papkalar tuzilishi
+## Qayerni tahrirlash kerak?
+
+| O'zgarish | Fayl yoki papka |
+| --- | --- |
+| Terminal sessiyalari va oynalar orasida o'tish | `lua/standalone/features/terminal/init.lua` |
+| Terminal balandligi, floating joylashuvi, fullscreen | `lua/standalone/features/terminal/layout.lua` |
+| Terminal ichidagi `Esc`, `Ctrl+g`, `Ctrl+k` | `lua/standalone/features/terminal/keymaps.lua` |
+| `Space tt`, `tn`, `ts`, `tf`, `1/2/3` | `lua/standalone/plugins/toggleterm.lua` |
+| Sidebar va fayl qidiruvi | `lua/standalone/features/files/` |
+| `.gitignore` filtri | `lua/standalone/features/files/ignore.lua` |
+| Neovim tugmalari | `lua/standalone/keymaps/` |
+| O'chirilgan LazyVim standart tugmalari | `lua/standalone/keymaps/defaults.lua` |
+| VS Code buyruq tugmalari | `lua/vscode_nvim/keymaps/commands.lua` |
+| Ikkala muhitdagi umumiy workflow tugmalari | `lua/shared/workflow.lua` |
+| Shrift, indent, satrlar va editor options | `lua/standalone/config/options.lua` |
+| PowerShell topish va shell sozlash | `lua/standalone/platform/shell.lua` |
+| Windows bloklagan parserlar uchun zaxira yo'l | `lua/standalone/platform/treesitter.lua` |
+| Popup, sarlavha va rang yuzalari | `lua/standalone/ui/` |
+| Ranglar | `lua/shared/colors.lua`, `lua/standalone/plugins/theme.lua` |
+| Plagin, uning options va yuklanish sharti | Tegishli muhitning `plugins/` papkasi |
+
+## Tuzilma va yuklanish
 
 ```text
-nvim/
-├── init.lua                     # Muhitni tanlash
-├── lua/
-│   ├── standalone/              # Terminaldagi oddiy Neovim
-│   │   ├── config/              # Options, keymaps, shell, ignore va workflow
-│   │   ├── ui/                  # Winbar, sidebar, picker, popup va rang yuzalari
-│   │   └── plugins/             # Theme, sidebar, LSP, terminal, HTTP
-│   ├── vscode_nvim/             # VS Code Neovim extension
-│   │   ├── config/              # VS Code options, keymaps va autocmds
-│   │   └── plugins/             # VS Code multi-cursor va Treesitter sozlamalari
-│   ├── shared/                  # Ikkala muhitga umumiy
-│   │   ├── bootstrap.lua        # lazy.nvim yuklovchisi
-│   │   ├── colors.lua           # Ranglarning yagona manbasi
-│   │   ├── options.lua          # Umumiy qidiruv, clipboard va leader sozlamalari
-│   │   ├── workflow.lua         # Hotkeylar; muhit o'z amallarini uzatadi
-│   │   └── plugins/             # Comment, Exchange, Flash, Surround, textobjects
-│   └── config/                  # LazyVim uchun uchta kichik yuklovchi
-├── colors/                      # Neovimning standart colorscheme katalogi
-├── lazy-lock.json               # Standalone plugin versiyalari
-├── lazy-lock-vscode.json        # VS Code plugin versiyalari
-└── lazyvim.json                 # LazyVim extras va holati
+init.lua
+lua/
+  config/            LazyVim talab qiladigan uchta kirish hook'i
+  shared/            Ikkala muhitga umumiy sozlamalar va plaginlar
+  standalone/
+    init.lua         Oddiy Neovim kirish nuqtasi
+    config/          LazyVim setup, options, autocmds va keymaplarni ulash
+    features/        Terminal va fayllar bilan ishlash xatti-harakatlari
+    keymaps/         Editor, workspace va terminal tugmalari
+    platform/        Windows / PowerShell moslashtirishlari
+    plugins/         lazy.nvim plagin deklaratsiyalari
+    ui/              Ko'rinish uchun umumiy kichik yordamchilar
+  vscode_nvim/
+    init.lua         VS Code kirish nuqtasi
+    config/          VS Code setup, options va autocmds
+    keymaps/         Vim harakatlari va VS Code command ID'lari
+    plugins/         Faqat VS Code uchun plagin sozlamalari
 ```
 
-Faqat Neovimga tegishli o'zgarishlar `standalone/`ga, faqat VS Code'dagilar
-`vscode_nvim/`ga, ikkalasiga kerak bo'lgan plagin sozlamalari `shared/plugins/`ga
-qo'shiladi. Har bir muhit avval umumiy plaginlarni, keyin o'z sozlamalarini yuklaydi.
-Bir muhit ikkinchisining plugin katalogini import qilmaydi.
-`vscode` modul nomi extension API'siga tegishli: konfiguratsiya uchun
-`lua/vscode/` yoki `lua/vscode.lua` yaratmang; `vscode_nvim/`dan foydalaning.
+O'qishni `init.lua` → `standalone/init.lua` → `standalone/config/lazy.lua`dan boshlang.
+LazyVim `lua/config/{options,keymaps,autocmds}.lua` hook'larini o'zi chaqiradi;
+ular tegishli `standalone/config/` moduliga o'tkazadi.
+VS Code esa `vscode_nvim/init.lua` orqali o'z sozlamalarini aniq tartibda yuklaydi.
 
-`lua/config/options.lua`, `keymaps.lua` va `autocmds.lua` LazyVim talab qiladigan
-standart kirish nuqtalaridir. Ular faqat `standalone/config/`dagi mos faylni
-yuklaydi; haqiqiy sozlamalarni `standalone/` ichida tahrirlang.
+Modullar vazifasi, bog'lanish qoidalari va yangi imkoniyat qo'shish tartibi:
+[arxitektura qo'llanmasi](docs/architecture.md).
 
-`standalone/ui/` ko'rinish xatti-harakatlarini ajratadi: `winbar.lua` fayl
-sarlavhasini, `picker.lua` qidiruv ro'yxatini, `explorer.lua` sidebarni,
-`popup.lua` input o'lchamlarini, `surface.lua` oyna ranglarini boshqaradi.
-Plugin fayllarida shu qismlar ulanadi: `picker.lua`, `completion.lua`, `ui.lua`.
-
-Umumiy modul faqat `shared/`ga bog'lanadi; native va VS Code amallari tegishli
-muhit ichida qoladi. Rang o'zgartirish uchun `shared/colors.lua`ni tahrirlang.
-Quick Open manbalari bitta sozlash funksiyasidan foydalanadi, shu sabab
-fayllar, yaqindagilar va bufferlar bir xil ko'rinishni saqlaydi.
+`vscode` nomi extension API'siga tegishli: `lua/vscode.lua` yoki `lua/vscode/` yaratmang.
+VS Code plaginlari `lazy-vscode/` va `lazy-lock-vscode.json` bilan alohida saqlanadi.
 
 ## Ko'rinish va ishlash
 
 - Catppuccin asosida VS Code'ga mos qoramtir fon, yashil aksent va Monokai uslubidagi kod ranglari.
 - Editor, o'ngdagi fayllar paneli, qidiruv va popup fonlari bir xil `#0B1015`.
-- O'ng tomonda fayllar paneli avtomatik ochiladi; tepada loyiha nomi.
+- O'ng tomonda floating fayllar paneli avtomatik ochiladi; loyiha nomi faqat ildiz papkada ko'rinadi.
+  Panel kod ustida turadi va editor o'lchamini o'zgartirmaydi. Terminal uning ustida ochiladi.
 - `.gitignore`dagi fayl va papkalar explorer, fayl/matn qidiruvi va yaqindagi fayllarda
   yashiriladi; Git reposi bo'lmagan papkalarda ham `fd --no-require-git` ishlatiladi.
   `node_modules` va `.git` doim yashiriladi. `I` bu majburiy filtrni o'chirmaydi.
@@ -109,6 +116,9 @@ Shu sababli format uchun `cF`, rename uchun `cn` tanlangan.
 
 `leader` = Space, `localleader` = vergul.
 
+Standart va shaxsiy mappinglar orasidagi takrorlarni boshqarish:
+[tugmalar qo'llanmasi](docs/keymaps.md).
+
 | Tugma | Amal |
 | --- | --- |
 | `jk` / `kj` | Insert rejimidan chiqish |
@@ -116,7 +126,6 @@ Shu sababli format uchun `cF`, rename uchun `cn` tanlangan.
 | `Space Space` | Fayl qidirish |
 | `Space fg` | Loyihada matn qidirish |
 | `Space fb` | Ochiq bufferlar |
-| `Space ef` | Fayl explorer |
 | `Space fe` | Fayllar panelini ochish yoki unga fokus berish |
 | `Space sd` / `Space si` | Sidebarni 4 ustunga kengaytirish / toraytirish |
 | `Space rl` | Yaqinda ochilgan fayllar |
@@ -129,8 +138,16 @@ Shu sababli format uchun `cF`, rename uchun `cn` tanlangan.
 | `Space vd` | Joriy qatordagi diagnostika |
 | `Space pr` | Loyihadagi diagnostika |
 | `Space fm` | Formatlash |
-| `Space tt` | Pastda ustma-ust ochiladigan PowerShell terminali; editor o'lchami saqlanadi |
-| Terminalda `Esc` | Terminalni yashirish va faylga qaytish; sessiya saqlanadi |
+| `Space tt` / `Ctrl+/` | Kod va sidebar ustidagi floating terminalni ochish / yashirish; sessiya saqlanadi |
+| `Space tn` | Loyiha papkasida yangi PowerShell sessiyasi; floating oynada ochiladi |
+| `Space ts` | Terminal sessiyasini tanlash |
+| `Space tf` | Terminalni ekran bo'ylab kattalashtirish / avvalgi o'lchamga qaytarish |
+| `Space 1` / `Space 2` / `Space 3` | Mavjud terminal #1 / #2 / #3 ga o'tish; Normal va Terminal rejimida ishlaydi |
+| Terminalda `Esc` | PowerShell Vi command rejimi: `w`, `b`, `dw`, `ciw`; `i` bilan yozishga qaytish |
+| Terminalda `Ctrl+g` | Neovim Normal rejimi: terminal chiqishida yurish, qidirish va nusxalash |
+| Terminalning Neovim Normal rejimida `Esc` | Terminal oynasini yashirish; sessiya saqlanadi |
+| Terminalda `Ctrl+k` | Panelni yopmasdan kod oynasiga qaytish |
+| Sidebar ichida `w` | Sidebarni yopmasdan chapdagi faylga qaytish |
 | `Space ui` | Editor tepasidagi fayl nomini ko'rsatish / yashirish |
 | `Space ud` | Diagnostika matni va underline'ni ko'rsatish / yashirish |
 | `Space ?` | LazyVim tugmalarini ko'rish |
@@ -222,15 +239,22 @@ Shrift, font o'lchami va qator balandligi terminal sozlamalarida boshqariladi.
 VS Code'dagi 18px / 50px qator balandligi terminal Neovim konfiguratsiyasi bilan
 aynan takrorlanmaydi. Markdown'dagi ma'noli oxirgi probellar saqlanadi.
 
-Neovim: `lua/standalone/config/options.lua`, `keymaps.lua`, `workflow.lua`,
-`lua/standalone/ui/` va `lua/standalone/plugins/` ichidagi fayllar.
-VS Code: `lua/vscode_nvim/config/keymaps.lua`
+Neovim: `lua/standalone/config/options.lua`, `lua/standalone/keymaps/`,
+`lua/standalone/features/`, `lua/standalone/ui/` va `lua/standalone/plugins/`.
+VS Code: `lua/vscode_nvim/keymaps/commands.lua`, `editor.lua`
 va `lua/vscode_nvim/plugins/`. Umumiy hotkeylar: `lua/shared/workflow.lua`.
 
-Tekshiruvlar repo ildizidagi `tests/nvim-*.lua` fayllarida: muhitlarni ajratish,
+Tekshiruvlar repo ildizidagi `tests/neovim/*.lua` fayllarida: muhitlarni ajratish,
 sidebar va inputlar, ignore qoidalari, HTTP, formatlash va PowerShell.
 
 Tema: https://github.com/catppuccin/nvim
 
 LazyVim konfiguratsiya tuzilishi: https://www.lazyvim.org/configuration
 Completion sozlamalari: https://cmp.saghen.dev/configuration/completion
+
+## Tekshirish
+
+Repo ildizidan `./tools/check-nvim.ps1` ishga tushiring. Bu plagin o'rnatmasdan
+ikkala muhitni, modul yo'llarini, qatlamlar orasidagi bog'lanishlarni va terminal
+sessiyalarini tekshiradi. `./tools/check-nvim.ps1 -Integration` o'rnatilgan
+plaginlar bilan sidebar, shell, fayl filtri, HTTP va formatlashni ham tekshiradi.

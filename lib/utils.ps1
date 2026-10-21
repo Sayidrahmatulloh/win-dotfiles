@@ -1,8 +1,8 @@
-﻿# Shared setup helpers. Dot-source this once; imports define functions only.
-. "$PSScriptRoot\output.ps1"
-. "$PSScriptRoot\results.ps1"
-. "$PSScriptRoot\settings.ps1"
-. "$PSScriptRoot\files.ps1"
-. "$PSScriptRoot\packages.ps1"
-. "$PSScriptRoot\scoop.ps1"
-. "$PSScriptRoot\commands.ps1"
+# Shared helpers. Imports define functions; no installation runs here.
+. "$PSScriptRoot/core/output.ps1"
+. "$PSScriptRoot/core/results.ps1"
+. "$PSScriptRoot/core/files.ps1"
+. "$PSScriptRoot/core/commands.ps1"
+. "$PSScriptRoot/setup/settings.ps1"
+. "$PSScriptRoot/setup/packages.ps1"
+. "$PSScriptRoot/setup/scoop.ps1"

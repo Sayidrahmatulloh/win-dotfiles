@@ -18,16 +18,34 @@ to'g'ridan-to'g'ri build qiladi; oddiy production yangilash uchun `build` ishlat
 
 ## Kod joylashuvi
 
-- `src/index.tsx` — sahifani ishga tushirish va umumiy CSS importlari.
-- `src/App.tsx` — panel qismlarini joylashtirish.
-- `src/hooks/useProviders.ts` — provider ma'lumotlari, xatolar, retry va cleanup.
-- `src/providerHealth.ts` — xatoni ko'rsatish qoidalari.
-- `src/actions.ts`, `src/widgetActions.ts` — desktop amallari va executable topish.
-- `src/Media/` — media boshqaruvi va matn animatsiyasi.
-- `src/styles/` — tokenlar, animatsiyalar va icon fontlari.
-- `src/compact.css` — ixcham panel va umumiy interaction uslublari.
-- `tests/` — desktop action va provider lifecycle regression testlari.
-- `tooling/desktop-assets.mjs` — umumiy theme assetlarini build'ga yig'ish.
+```text
+src/
+  index.tsx              Brauzer kirish nuqtasi
+  App.tsx                Panel qismlarini joylashtirish
+  components/            Har bir panel qismi: TSX va yonidagi CSS
+    Media/               Media boshqaruvi va marquee lifecycle
+    Tooltip/             Tooltip komponenti va uslubi
+    ThemeSwitcher/       Theme katalogini ko'rsatish
+  services/
+    desktop/             GlazeWM/Windows amallari va executable topish
+    providers/           Zebar provider state, retry, xato va cleanup
+    runtime/             Widget brauzer hodisalari
+  hooks/                 Umumiy UI hook'lari
+  shared/                UI va desktop API'dan mustaqil format funksiyalari
+  styles/                Rang tokenlari, animatsiyalar, ikonlar va compact layout
+  fonts/                 Build uchun shrift assetlari
+```
+
+`App.tsx` xizmatlardan ma'lumot olib komponentlarga uzatadi. Komponentlar xizmatlar
+va oddiy helperlardan foydalanishi mumkin. `services/` komponentlarni import
+qilmaydi; `shared/` esa komponent va xizmatlardan mustaqil qoladi. `tests/architecture.test.ts`
+shu bog'lanishlar va modul yo'llarini tekshiradi.
+
+- `services/providers/useProviders.ts` — provider ma'lumotlari, retry va cleanup.
+- `services/providers/health.ts` — xatolarni ko'rsatish qoidalari.
+- `services/desktop/actions.ts` — Solid state va Zebar desktop API adapteri.
+- `services/desktop/widgetActions.ts` — desktop amallarining testlanadigan modeli.
+- `tooling/desktop-assets.mjs` — theme va desktop assetlarini build'ga yig'ish.
 
 Desktop va ma'lumot manbalarini amalda ishlatish uchun Zebar kerak. Testlar
 desktop buyruqlarini bajarmaydi. Butun repo tekshiruvi: `tools/check.ps1`.

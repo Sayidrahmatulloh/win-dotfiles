@@ -6,12 +6,12 @@ function New-DoctorResult {
 function Test-DoctorLink {
     param([string]$Source, [string]$Destination)
     $item = Get-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
-    if (-not $item) { return New-DoctorResult $Destination FAIL 'Configuration destination is missing.' '.\config\symlinks.ps1' }
+    if (-not $item) { return New-DoctorResult $Destination FAIL 'Configuration destination is missing.' '.\scripts\install\links.ps1' }
     if ($item.LinkType -notin @('Junction', 'SymbolicLink')) {
-        return New-DoctorResult $Destination WARN 'A separate copy exists; repo edits will not update it.' '.\config\symlinks.ps1 (backs up existing config)'
+        return New-DoctorResult $Destination WARN 'A separate copy exists; repo edits will not update it.' '.\scripts\install\links.ps1 (backs up existing config)'
     }
     if (-not (Test-ConfigLink -Source $Source -Destination $Destination)) {
-        return New-DoctorResult $Destination FAIL 'Link points to a different checkout.' '.\config\symlinks.ps1'
+        return New-DoctorResult $Destination FAIL 'Link points to a different checkout.' '.\scripts\install\links.ps1'
     }
     if (-not (Test-Path -LiteralPath $Source -PathType Container)) { return New-DoctorResult $Destination FAIL 'Link source is missing.' 'Restore the missing repo configuration.' }
     New-DoctorResult $Destination OK "Linked to $Source"
@@ -71,7 +71,7 @@ function Get-DoctorResults {
     $profileLine = Get-PowerShellProfileLine
     if ((Test-Path -LiteralPath $profilePath) -and @((Get-Content -LiteralPath $profilePath) | Where-Object { $_.Trim() -eq $profileLine }).Count) {
         New-DoctorResult 'PowerShell profile' OK $profilePath
-    } else { New-DoctorResult 'PowerShell profile' FAIL "Profile does not load repo config: $profilePath" 'Run .\config\symlinks.ps1 from PowerShell 7.' }
+    } else { New-DoctorResult 'PowerShell profile' FAIL "Profile does not load repo config: $profilePath" 'Run .\scripts\install\links.ps1 from PowerShell 7.' }
     Invoke-DoctorCheck 'Shared Git config' {
         $source = [IO.Path]::GetFullPath((Join-Path $RepoRoot 'config\git\gitconfig')).Replace('\','/')
         $origins = @(& git -C $RepoRoot config --global --includes --show-origin --list 2>&1)
@@ -176,9 +176,9 @@ function Test-DoctorZebarRuntime {
         $source = Join-Path $RepoRoot $pair[0]
         $live = Join-Path $RuntimeDirectory $pair[1]
         if (-not (Test-Path -LiteralPath $live -PathType Leaf)) {
-            New-DoctorResult "Zebar runtime: $($pair[1])" FAIL 'Runtime file is missing.' '.\config\symlinks.ps1'
+            New-DoctorResult "Zebar runtime: $($pair[1])" FAIL 'Runtime file is missing.' '.\scripts\install\links.ps1'
         } elseif ((Get-FileHash $source).Hash -ne (Get-FileHash $live).Hash) {
-            New-DoctorResult "Zebar runtime: $($pair[1])" WARN 'Runtime file differs from the repo.' '.\config\symlinks.ps1 (backs up existing settings)'
+            New-DoctorResult "Zebar runtime: $($pair[1])" WARN 'Runtime file differs from the repo.' '.\scripts\install\links.ps1 (backs up existing settings)'
         } else { New-DoctorResult "Zebar runtime: $($pair[1])" OK 'Runtime file matches the repo.' }
     }
 }

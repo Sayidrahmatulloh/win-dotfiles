@@ -9,7 +9,7 @@ funksiyalari esa **amal** hisoblanadi. Bu ikki qism alohida saqlanadi.
 1. `setup.json` — nima o'rnatiladi, konfiguratsiyalar qayerga ulanadi?
 2. `install.ps1` ichidagi `Main` — bosqichlar qanday tartibda bajariladi?
 3. `scripts/install/scoop.ps1` yoki `scripts/install/winget.ps1` — bitta bosqich qanday ishlaydi?
-4. `lib/packages.ps1` — barcha paketlar uchun umumiy install/update sikli.
+4. `lib/setup/packages.ps1` — barcha paketlar uchun umumiy install/update sikli.
 5. `doctor.ps1`, keyin `lib/diagnostics.ps1` — setup qanday tekshiriladi?
 
 `bootstrap.ps1` faqat boshlang'ich tayyorgarlik qiladi: PowerShell 7 topadi yoki
@@ -32,17 +32,17 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `themes/themes.json` | Mavzu ID, ranglar, wallpaper va cursor varianti |
 | `scripts/theme/ApplyTheme.ps1` | GlazeWM, wallpaper va cursor'ni birga almashtirish |
 | `assets/` | Shrift arxivlari, cursor ZIP va wallpaper manbalari |
-| `config/symlinks.ps1` | Papkalarni ulash va PowerShell profilini sozlash |
+| `scripts/install/links.ps1` | Papkalarni ulash va PowerShell profilini sozlash |
 | `scripts/install/git.ps1` | Umumiy Git konfiguratsiyasini include qilish |
 | `scripts/install/terminal.ps1` | Terminal sozlamalarini saqlash yoki tiklash |
 | `lib/utils.ps1` | Setup uchun umumiy yordamchilarni yuklash |
-| `lib/settings.ps1` | JSON ro'yxatlarini o'qish, link yo'llarini hisoblash |
-| `lib/files.ps1` | Backup, Terminal yo'li, link manzilini tekshirish |
-| `lib/packages.ps1` | Barcha menejerlar uchun yagona paket sikli |
-| `lib/commands.ps1` | Buyruq chiqishi va exit code; xatoni aniq qaytarish |
-| `lib/scoop.ps1` | Scoop buyruqlari; tools va fonts birga foydalanadi |
+| `lib/setup/settings.ps1` | JSON ro'yxatlarini o'qish, link yo'llarini hisoblash |
+| `lib/core/files.ps1` | Backup, Terminal yo'li, link manzilini tekshirish |
+| `lib/setup/packages.ps1` | Barcha menejerlar uchun yagona paket sikli |
+| `lib/core/commands.ps1` | Buyruq chiqishi va exit code; xatoni aniq qaytarish |
+| `lib/setup/scoop.ps1` | Scoop buyruqlari; tools va fonts birga foydalanadi |
 | `lib/setup.ps1` | Post-clone yordamchilarini yuklash; o'rnatish boshlamaydi |
-| `lib/modules.ps1` | Yetishmayotgan PowerShell modullarini o'rnatish |
+| `lib/setup/modules.ps1` | Yetishmayotgan PowerShell modullarini o'rnatish |
 | `lib/zebar/build.ps1` | Shrift, staged build va tekshirilgan build'ni yoqish |
 | `lib/zebar/runtime.ps1` | Runtime fayllari va widget linklarini tiklash imkoniyati bilan ko'chirish |
 | `config/powershell/profile/` | Interaktiv profil, muhit, development va maintenance buyruqlari |
@@ -50,9 +50,9 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `tools/walnut-lock/credentials.ps1` | Faqat berilgan yo'ldagi credentialni o'qish/yozish |
 | `tools/walnut-lock/ui.ps1` | Oyna va ekran tasvirini yaratish |
 | `lib/diagnostics.ps1` | Doctor tekshiruvlari |
-| `lib/results.ps1` | Bosqich natijalari va xatolarni yig'ish |
-| `lib/output.ps1` | Terminaldagi ranglar va hisobot ko'rinishi |
-| `tests/helpers.ps1` | Testlar uchun umumiy loader va assertion |
+| `lib/core/results.ps1` | Bosqich natijalari va xatolarni yig'ish |
+| `lib/core/output.ps1` | Terminaldagi ranglar va hisobot ko'rinishi |
+| `tests/support/powershell.ps1` | Testlar uchun umumiy loader va assertion |
 | `tests/run.ps1` | Barcha testlarni alohida jarayonda ishga tushirish |
 
 `lib/` fayllari yuklanganda o'rnatish boshlanmaydi; ular faqat funksiyalarni
@@ -105,7 +105,7 @@ Test, build, qo'shimcha widgetlar va o'rnatilgan Neovim integratsiyasini birga t
 ```
 
 `-Neovim` uchun pluginlar, formatterlar va profil modullari avval o'rnatilgan
-bo'lishi kerak. `tools/check-nvim.ps1` parametrsiz faqat ikki muhitning tuzilmasi
+bo'lishi kerak. `tools/check-nvim.ps1` parametrsiz muhitlar, import chegaralari, terminal sessiyalari
 va Lua sintaksisini plugin o'rnatmasdan tekshiradi; CI shu rejimni ishlatadi.
 `-Variants` qo'shimcha widget dependency'larini lockfile bilan tayyorlaydi va yig'adi.
 
@@ -140,7 +140,7 @@ aylantirmang. Funksiya nomi vazifani aytsin, izoh esa sababni tushuntirsin.
   chiqadigan nisbiy yo'l aniq xato bilan to'xtaydi.
 - Inventar tekshiruvi ishlamasa, install boshlanmaydi. Menejerning aniq
   "paket topilmadi" natijasigina yetishmagan paket deb olinadi.
-- Paket buyruqlari xato bersa, `lib/commands.ps1` buyruq, exit code va chiqishni
+- Paket buyruqlari xato bersa, `lib/core/commands.ps1` buyruq, exit code va chiqishni
   qaytaradi. Setup transcript'i shu ma'lumotni logga yozadi.
 - Link yaratish ishlamasa, oldingi papka yoki link qaytariladi. Agar rollback
   ham ishlamasa, tiklash uchun backup manzili ko'rsatiladi.
@@ -153,3 +153,9 @@ PowerShell profilining optional modullari yo'q bo'lsa shell ochilishi davom
 etadi. `Update-Scoop` xatoda keyingi cleanup bosqichlarini boshlamaydi.
 C++ va Zig yordamchilari natijalarni maxsus vaqtinchalik build papkasida yaratadi;
 manba yonidagi oldingi `.exe`, `.obj` va `.pdb` fayllari o'chirilmaydi.
+
+## Batafsil xaritalar
+
+- [Neovim: muhitlar, features, keymaps va pluginlar](../config/nvim/README.md).
+- [Zebar: components, services, hooks va shared](../widgets/zebar/attaquer-solid-ts/README.md).
+- [O'zgartirish qoidalari va tekshiruvlar](../CONTRIBUTING.md).

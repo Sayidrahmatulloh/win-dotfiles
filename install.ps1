@@ -1,4 +1,4 @@
-﻿# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
+# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
 [CmdletBinding()]
 param([string]$DotfilesPath, [string[]]$Only = @(), [string[]]$Skip = @())
 Set-StrictMode -Version Latest
@@ -54,7 +54,7 @@ function Get-SetupStages {
         @{Id = 'Fonts'; Name = 'Fonts'; Action = { & "$DOTFILES/scripts/install/fonts.ps1" } }
         @{Id = 'Cursors'; Name = 'Bibata cursors'; Action = { & "$DOTFILES/scripts/install/cursors.ps1" } }
         @{Id = 'Modules'; Name = 'PS modules'; Action = { Install-PSModules -RepoRoot $DOTFILES } }
-        @{Id = 'Symlinks'; Name = 'Symlinks'; Action = { & "$DOTFILES/config/symlinks.ps1" } }
+        @{Id = 'Symlinks'; Name = 'Symlinks'; Action = { & "$DOTFILES/scripts/install/links.ps1" } }
         @{Id = 'Git'; Name = 'Git config'; Action = { & "$DOTFILES/scripts/install/git.ps1" } }
         @{Id = 'Terminal'; Name = 'Windows Terminal'; Action = { & "$DOTFILES/scripts/install/terminal.ps1" } }
         @{Id = 'Zebar'; Name = 'Build Zebar widget'; Action = { Build-Zebar -RepoRoot $DOTFILES } }

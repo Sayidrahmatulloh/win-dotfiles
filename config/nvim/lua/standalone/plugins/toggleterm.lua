@@ -1,43 +1,64 @@
-local function available_height()
-  return vim.o.lines - vim.o.cmdheight - (vim.o.laststatus == 0 and 0 or 1)
-end
-
-local function terminal_height()
-  return math.max(1, math.min(12, math.floor(available_height() * 0.35)))
-end
+local terminal = require("standalone.features.terminal")
+local layout = require("standalone.features.terminal.layout")
 
 return {
   "akinsho/toggleterm.nvim",
-  cmd = { "ToggleTerm", "TermExec" },
+  cmd = { "ToggleTerm", "TermExec", "TermSelect" },
   keys = {
-    { "<leader>tt", "<cmd>ToggleTerm<cr>", desc = "Toggle terminal" },
+    {
+      "<leader>tt",
+      function() terminal.toggle() end,
+      desc = "Toggle terminal panel",
+    },
+    {
+      "<leader>tn",
+      function() terminal.new() end,
+      desc = "New terminal",
+    },
+    {
+      "<leader>ts",
+      function() terminal.select() end,
+      desc = "Select terminal",
+    },
+    {
+      "<leader>tf",
+      function() terminal.maximize() end,
+      mode = { "n", "t" },
+      desc = "Maximize / restore terminal",
+    },
+    {
+      "<leader>1",
+      function() terminal.switch(1) end,
+      mode = { "n", "t" },
+      desc = "Terminal #1",
+    },
+    {
+      "<leader>2",
+      function() terminal.switch(2) end,
+      mode = { "n", "t" },
+      desc = "Terminal #2",
+    },
+    {
+      "<leader>3",
+      function() terminal.switch(3) end,
+      mode = { "n", "t" },
+      desc = "Terminal #3",
+    },
   },
   opts = {
     shell = function()
-      return require("standalone.config.shell").terminal()
+      return require("standalone.platform.shell").terminal()
     end,
     direction = "float",
-    float_opts = {
-      border = "curved",
-      width = function()
-        return math.max(1, vim.o.columns - 4)
-      end,
-      height = terminal_height,
-      row = function()
-        return math.max(0, available_height() - terminal_height() - 2)
-      end,
-      col = 1,
-      winblend = 0,
-    },
+    float_opts = layout.options(),
     shade_terminals = false,
     start_in_insert = true,
+    persist_mode = false,
     persist_size = true,
+    close_on_exit = true,
     winbar = { enabled = false },
     on_open = function(term)
-      vim.wo[term.window].winbar = ""
-      vim.keymap.set({ "t", "n" }, "<Esc>", function()
-        term:close()
-      end, { buffer = term.bufnr, silent = true, desc = "Hide terminal and return to editor" })
+      terminal.on_open(term)
     end,
   },
 }

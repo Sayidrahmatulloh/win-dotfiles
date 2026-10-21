@@ -13,7 +13,10 @@ return {
       },
       inlay_hints = { enabled = false },
       codelens = { enabled = false },
-      servers = { svelte = {} },
+      servers = {
+        ["*"] = { keys = require("standalone.keymaps.defaults").plugin_keys("lsp") },
+        svelte = {},
+      },
     },
   },
 }

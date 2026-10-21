@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { createWidgetActions } from '../src/widgetActions';
+import { createWidgetActions } from '../src/services/desktop/widgetActions';
 
 describe('direct widget actions', () => {
   test('startup and repeated clicks share a single executable lookup', async () => {

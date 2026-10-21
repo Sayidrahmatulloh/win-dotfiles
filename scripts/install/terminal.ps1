@@ -6,7 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. "$PSScriptRoot\..\..\lib\files.ps1"
+. "$PSScriptRoot\..\..\lib\core\files.ps1"
 
 function Copy-TerminalSettings {
     param([string]$Source, [string]$Destination)

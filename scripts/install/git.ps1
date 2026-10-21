@@ -3,7 +3,7 @@ param([string]$GlobalConfigPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-. "$PSScriptRoot\..\..\lib\files.ps1"
+. "$PSScriptRoot\..\..\lib\core\files.ps1"
 
 function Install-GitConfig {
     param([string]$Source, [string]$Destination)

@@ -2,9 +2,11 @@
 
 Windows 10/11 uchun mukammal sozlangan, tezkor va zamonaviy dasturchi muhiti konfiguratsiyalari.
 
-Loyihani birinchi marta ko'rayotgan bo'lsangiz, [kodni o'qish yo'riqnomasi](docs/code-guide.md)dan boshlang. Paket va yo'llar `setup.json` ichida; bajariladigan amallar PowerShell fayllarida saqlanadi.
+Loyihani birinchi marta ko'rayotgan bo'lsangiz, [hujjatlar xaritasi](docs/README.md) va [kodni o'qish yo'riqnomasi](docs/code-guide.md)dan boshlang. Paket va yo'llar `setup.json` ichida; bajariladigan amallar PowerShell fayllarida saqlanadi.
 
-Kod sifatini bosqichma-bosqich yaxshilash tartibi: [Clean Code refaktor rejasi](docs/clean-code-plan.md).
+Arxitektura va modul chegaralari: [architecture.md](docs/architecture.md).
+O'zgartirish kiritish va tekshirish: [CONTRIBUTING.md](CONTRIBUTING.md).
+Oldingi refaktor qaydlari: [refaktor tarixi](docs/history/2026-10-clean-code.md).
 
 ---
 
@@ -96,9 +98,9 @@ win-dotfiles/
 │   ├── nvim/           # Neovim / VS Code Neovim
 │   ├── vscode/         # Custom UI CSS va ulash yo'riqnomasi
 │   ├── glzr/           # GlazeWM va Zebar
-│   └── symlinks.ps1    # Konfiguratsiya papkalarini ulash
+│   └── symlinks.ps1    # Eski link buyrug'i uchun compatibility entry
 ├── scripts/
-│   ├── install/        # Scoop, Winget, fonts va cursors bosqichlari
+│   ├── install/        # Paketlar, fonts, cursors, links, Git va Terminal
 │   └── theme/          # Windows mavzusini boshqarish
 ├── assets/
 │   ├── fonts/          # ZIP shriftlar
@@ -106,9 +108,23 @@ win-dotfiles/
 │   └── wallpapers/    # Wallpaper manbalari
 ├── themes/themes.json  # Yagona mavzu katalogi
 ├── tools/              # CI va build tekshirish vositalari
-├── lib/                # Vazifasi bo'yicha ajratilgan umumiy funksiyalar
-├── docs/code-guide.md  # Kodni o'qish va kengaytirish yo'riqnomasi
-└── tests/run.ps1       # Barcha regression testlarni ishga tushirish
+├── lib/
+│   ├── core/           # Buyruqlar, fayllar, natijalar va hisobot
+│   ├── setup/          # Manifest, paketlar va modullar
+│   ├── zebar/          # Build va runtime migratsiyasi
+│   ├── utils.ps1       # Umumiy helperlarni yuklash
+│   ├── setup.ps1       # Post-clone helperlarni yuklash
+│   └── diagnostics.ps1 # Doctor tekshiruvlari
+├── docs/
+│   ├── README.md       # Hujjatlar xaritasi
+│   ├── architecture.md # Joriy arxitektura va modul chegaralari
+│   ├── code-guide.md   # Kodni o'qish va kengaytirish
+│   └── history/        # Oldingi refaktor qaydlari
+└── tests/
+    ├── run.ps1         # PowerShell suite'larini ishga tushirish
+    ├── powershell/     # Setup, theme, library va diagnostika testlari
+    ├── neovim/         # Lua va Neovim integratsiya testlari
+    └── support/        # Test loader va assertion yordamchilari
 ```
 
 ---
@@ -134,7 +150,7 @@ win-dotfiles/
 Faqatgina simvolik havolalarni (symlink/junction) yangilash yoki qayta tekshirish uchun:
 
 ```powershell
-.\config\symlinks.ps1
+.\scripts\install\links.ps1
 ```
 
 Ushbu skript mavjud konfiguratsiyalarni xavfsiz ravishda `.bak` nusxasini saqlab oladi va yangi fayllarni bog'laydi.

@@ -37,6 +37,25 @@ else {
 Set-PSReadLineOption -EditMode Vi
 Set-PSReadLineOption -BellStyle None
 Set-PSReadLineOption -ViModeIndicator Cursor
+# PSReadLine supports two-key chords; finish the inner-word change explicitly.
+Set-PSReadLineKeyHandler -ViMode Command -Chord 'c,i' -BriefDescription 'ChangeInnerWord' -ScriptBlock {
+  $nextKey = [Console]::ReadKey($true)
+  if ($nextKey.KeyChar -cne 'w') {
+    [Microsoft.PowerShell.PSConsoleReadLine]::Ding()
+    return
+  }
+  $commandLine = $null
+  $cursor = 0
+  [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$commandLine, [ref]$cursor)
+  foreach ($word in [regex]::Matches($commandLine, '\w+|\s+|[^\w\s]+')) {
+    if ($cursor -ge $word.Index -and $cursor -lt ($word.Index + $word.Length)) {
+      [Microsoft.PowerShell.PSConsoleReadLine]::Delete($word.Index, $word.Length)
+      [Microsoft.PowerShell.PSConsoleReadLine]::SetCursorPosition($word.Index)
+      break
+    }
+  }
+  [Microsoft.PowerShell.PSConsoleReadLine]::ViInsertMode($null, $null)
+}
 Set-PSReadLineOption -Colors @{
   Command = '#A6E22E'; Parameter = '#AAB4C2'; Operator = '#CDD3DC'
   Variable = '#CDD3DC'; String = '#F9E2AF'; Number = '#C4A7E7'

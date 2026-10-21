@@ -1,7 +1,7 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param([string]$RepoRoot = (Split-Path $PSScriptRoot -Parent), [switch]$Neovim, [switch]$Variants)
 $ErrorActionPreference = 'Stop'
-. "$RepoRoot/lib/settings.ps1"
+. "$RepoRoot/lib/setup/settings.ps1"
 
 function Invoke-Check {
     param([string]$Name, [scriptblock]$Command)

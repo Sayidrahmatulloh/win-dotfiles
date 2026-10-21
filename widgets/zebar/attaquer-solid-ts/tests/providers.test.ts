@@ -27,7 +27,7 @@ function fakeGroup() {
   };
 }
 mock.module('zebar', () => ({ createProviderGroup: () => group }));
-const { useProviders } = await import('../src/hooks/useProviders');
+const { useProviders } = await import('../src/services/providers/useProviders');
 
 const originalSetTimeout = globalThis.setTimeout;
 const originalClearTimeout = globalThis.clearTimeout;

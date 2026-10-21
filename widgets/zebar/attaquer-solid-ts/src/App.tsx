@@ -1,21 +1,21 @@
 import { onMount } from 'solid-js';
-import { actionError, setActionError, prepareWidgetActions } from './actions';
-import { useProviders } from './hooks/useProviders';
-import WindowsButton from './Buttons/WindowsButton';
-import SearchButton from './Buttons/SearchButton';
-import Workspaces from './Workspaces/Workspaces';
-import TilingBinding from './TilingBinding/TilingBinding';
-import VolumeStatus from './VolumeStatus/VolumeStatus';
-import MediaStatus from './Media/MediaStatus';
-import CpuStatus from './CpuStatus/CpuStatus';
-import MemoryStatus from './MemoryStatus/MemoryStatus';
+import { actionError, setActionError, prepareWidgetActions } from './services/desktop/actions';
+import { useProviders } from './services/providers/useProviders';
+import WindowsButton from './components/Buttons/WindowsButton';
+import SearchButton from './components/Buttons/SearchButton';
+import Workspaces from './components/Workspaces/Workspaces';
+import TilingBinding from './components/TilingBinding/TilingBinding';
+import VolumeStatus from './components/VolumeStatus/VolumeStatus';
+import MediaStatus from './components/Media/MediaStatus';
+import CpuStatus from './components/CpuStatus/CpuStatus';
+import MemoryStatus from './components/MemoryStatus/MemoryStatus';
 
-import NetworkStatus from './NetworkStatus/NetworkStatus';
-import BatteryStatus from './BatteryStatus/BatteryStatus';
-import TimeStatus from './Time/TimeStatus';
-import './compact.css';
-import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher';
-import Tooltip from './Tooltip';
+import NetworkStatus from './components/NetworkStatus/NetworkStatus';
+import BatteryStatus from './components/BatteryStatus/BatteryStatus';
+import TimeStatus from './components/Time/TimeStatus';
+import './styles/compact.css';
+import ThemeSwitcher from './components/ThemeSwitcher/ThemeSwitcher';
+import Tooltip from './components/Tooltip/Tooltip';
 
 export default function App() {
   const { output, error: providerError, dismissError } = useProviders();
