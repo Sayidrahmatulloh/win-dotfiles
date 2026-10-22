@@ -1,4 +1,4 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot/../support/powershell.ps1"
@@ -19,36 +19,36 @@ Assert-That (-not $failure.Success -and $failure.Message -eq 'simulated error') 
 $next=Invoke-Step 'next' { }
 Assert-That $next.Success 'A failed stage prevented later stages.'
 
-Invoke-Expression (Read-Functions 'scripts/install/scoop.ps1')
-$Update=$false
-function Test-ToolInstalled { param($Name) return $Name -eq 'existing' }
-function Install-Tool { param($Name) $script:installedTools.Add($Name); return $Name -ne 'broken' }
-function Update-Tool { throw 'Existing tools must not be upgraded by default.' }
+. "$RepoRoot/lib/setup/scoop.ps1"
+$Update=$true # Domain helpers must ignore ambient variables unless passed explicitly.
+function Test-ScoopPackageInstalled { param($Name) return $Name -eq 'existing' }
+function Install-ScoopPackage { param($Name) $script:installedTools.Add($Name); if ($Name -eq 'broken') { throw 'simulated package failure' }; New-InstallResult -Name $Name -Status Installed }
+function Update-ScoopPackage { throw 'Existing tools must not be upgraded by default.' }
 $script:installedTools=[Collections.Generic.List[string]]::new()
-$result=Sync-Tools @('existing','missing','broken')
+$result=Sync-ScoopPackages @('existing','missing','broken')
 Assert-That ($result.Latest -contains 'existing') 'Existing Scoop tool was not skipped.'
 Assert-That ($result.Installed -contains 'missing') 'Missing Scoop tool was not installed.'
 Assert-That ($result.Failed -contains 'broken') 'Scoop failure was not captured.'
 Assert-That ($script:installedTools.Count -eq 2) 'Existing Scoop tool was reinstalled.'
 function Assert-ScoopAvailable {}
-function Sync-Buckets {}
+function Sync-ScoopBuckets {}
 $BUCKETS=@(); $TOOLS=@('broken')
 $threw=$false
-try { Main } catch { $threw=$true }
+try { Install-ScoopPackages -Buckets $BUCKETS -Tools $TOOLS } catch { $threw=$true }
 Assert-That $threw 'Scoop package failure did not reach installer.'
-$TOOLS=@('existing'); Main
+$TOOLS=@('existing'); Install-ScoopPackages -Buckets $BUCKETS -Tools $TOOLS
 
-Invoke-Expression (Read-Functions 'scripts/install/winget.ps1')
-function Test-AppInstalled { param($AppId) return $AppId -eq 'existing' }
-function Install-App { param($AppId) return $AppId -ne 'broken' }
-function Update-App { throw 'Existing apps must not be upgraded by default.' }
-$result=Sync-Apps @('existing','missing','broken')
+. "$RepoRoot/lib/setup/winget.ps1"
+function Test-WingetPackageInstalled { param($AppId) return $AppId -eq 'existing' }
+function Install-WingetPackage { param($AppId) if ($AppId -eq 'broken') { throw 'simulated package failure' }; New-InstallResult -Name $AppId -Status Installed }
+function Update-WingetPackage { throw 'Existing apps must not be upgraded by default.' }
+$result=Sync-WingetPackages @('existing','missing','broken')
 Assert-That ($result.Latest -contains 'existing') 'Existing Winget app was not skipped.'
 Assert-That ($result.Installed -contains 'missing') 'Missing Winget app was not installed.'
 Assert-That ($result.Failed -contains 'broken') 'Winget failure was not captured.'
 function Assert-WingetAvailable {}
 $APPS=@('broken'); $threw=$false
-try { Main } catch { $threw=$true }
+try { Install-WingetApps -Apps $APPS } catch { $threw=$true }
 Assert-That $threw 'Winget package failure did not reach installer.'
 
 Invoke-Expression (Read-Functions 'install.ps1')
@@ -65,7 +65,7 @@ $threw=$false
 try { Build-Zebar -RepoRoot $RepoRoot } catch { $threw=$_.Exception.Message -like 'Zebar build failed*' }
 Assert-That $threw 'A stale dist directory hid build failure.'
 
-Invoke-Expression (Read-Functions 'scripts/install/links.ps1')
+. "$RepoRoot/lib/setup/links.ps1"
 $threw=$false
 try { Initialize-SourceDirs @(@{Src=(Join-Path $env:TEMP ('missing-dotfiles-'+[guid]::NewGuid()))}) } catch { $threw=$true }
 Assert-That $threw 'Missing config source was silently replaced with an empty folder.'

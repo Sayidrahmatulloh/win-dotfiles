@@ -1,4 +1,4 @@
-# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
+﻿# Setup order and reporting. Bootstrap helpers stay here for first-run downloads.
 [CmdletBinding()]
 param([string]$DotfilesPath, [string[]]$Only = @(), [string[]]$Skip = @())
 Set-StrictMode -Version Latest
@@ -48,23 +48,24 @@ function Sync-Repo {
 }
 
 function Get-SetupStages {
+    param([Parameter(Mandatory)][string]$RepoRoot)
     @(
-        @{Id = 'Scoop'; Name = 'Scoop packages'; Action = { & "$DOTFILES/scripts/install/scoop.ps1" } }
-        @{Id = 'Winget'; Name = 'Winget apps'; Action = { & "$DOTFILES/scripts/install/winget.ps1" } }
-        @{Id = 'Fonts'; Name = 'Fonts'; Action = { & "$DOTFILES/scripts/install/fonts.ps1" } }
-        @{Id = 'Cursors'; Name = 'Bibata cursors'; Action = { & "$DOTFILES/scripts/install/cursors.ps1" } }
-        @{Id = 'Modules'; Name = 'PS modules'; Action = { Install-PSModules -RepoRoot $DOTFILES } }
-        @{Id = 'Symlinks'; Name = 'Symlinks'; Action = { & "$DOTFILES/scripts/install/links.ps1" } }
-        @{Id = 'Git'; Name = 'Git config'; Action = { & "$DOTFILES/scripts/install/git.ps1" } }
-        @{Id = 'Terminal'; Name = 'Windows Terminal'; Action = { & "$DOTFILES/scripts/install/terminal.ps1" } }
-        @{Id = 'Zebar'; Name = 'Build Zebar widget'; Action = { Build-Zebar -RepoRoot $DOTFILES } }
+        @{Id = 'Scoop'; Name = 'Scoop packages'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/scoop.ps1" } }
+        @{Id = 'Winget'; Name = 'Winget apps'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/winget.ps1" } }
+        @{Id = 'Fonts'; Name = 'Fonts'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/fonts.ps1" } }
+        @{Id = 'Cursors'; Name = 'Bibata cursors'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/cursors.ps1" } }
+        @{Id = 'Modules'; Name = 'PS modules'; RepoRoot = $RepoRoot; Action = { param($Root) Install-PSModules -RepoRoot $Root } }
+        @{Id = 'Symlinks'; Name = 'Symlinks'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/links.ps1" } }
+        @{Id = 'Git'; Name = 'Git config'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/git.ps1" } }
+        @{Id = 'Terminal'; Name = 'Windows Terminal'; RepoRoot = $RepoRoot; Action = { param($Root) & "$Root/scripts/install/terminal.ps1" } }
+        @{Id = 'Zebar'; Name = 'Build Zebar widget'; RepoRoot = $RepoRoot; Action = { param($Root) Build-Zebar -RepoRoot $Root } }
     )
 }
 
 function Select-SetupStages {
-    param([string[]]$Only = @(), [string[]]$Skip = @())
+    param([Parameter(Mandatory)][string]$RepoRoot, [string[]]$Only = @(), [string[]]$Skip = @())
     if ($Only.Count -and $Skip.Count) { throw 'Use either -Only or -Skip, not both.' }
-    $stages = @(Get-SetupStages)
+    $stages = @(Get-SetupStages -RepoRoot $RepoRoot)
     $names = @($stages.Id)
     $onlyNames = @($Only | ForEach-Object { $_ -split ',' | ForEach-Object { $_.Trim() } })
     $skipNames = @($Skip | ForEach-Object { $_ -split ',' | ForEach-Object { $_.Trim() } })
@@ -76,30 +77,11 @@ function Select-SetupStages {
     return $selected
 }
 
-function Assert-SetupStageConfiguration {
-    param([string]$RepoRoot, [string[]]$StageIds)
-    $null = Get-SetupConfig -RepoRoot $RepoRoot
-    if ('Zebar' -in $StageIds -or 'Symlinks' -in $StageIds) { Assert-ZebarConfiguration -RepoRoot $RepoRoot }
-    if ('Modules' -in $StageIds) { $null = Get-PowerShellModules -RepoRoot $RepoRoot }
-    if ('Cursors' -in $StageIds -or 'Zebar' -in $StageIds) {
-        . "$RepoRoot/scripts/theme/ThemeConfig.ps1"
-        $null = Get-ThemeCatalog -Root $RepoRoot
-    }
-}
-
-function Invoke-SetupStages {
-    param([object[]]$Stages)
-    foreach ($stage in $Stages) {
-        Invoke-Step -Name $stage.Name -Block $stage.Action
-        if ($stage.Id -in @('Scoop', 'Winget')) { Refresh-SetupEnvironment }
-    }
-}
-
 function Main {
     if ($PSVersionTable.PSVersion.Major -lt 7 -or -not $IsWindows) { throw 'Use bootstrap.ps1 from Windows PowerShell to install PowerShell 7 first.' }
     $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
     if ($principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Run setup in a normal user terminal. App installers request elevation when needed.' }
-    $stages = @(Select-SetupStages -Only $Only -Skip $Skip)
+    $stages = @(Select-SetupStages -RepoRoot $DOTFILES -Only $Only -Skip $Skip)
     $stageIds = @($stages.Id)
     $logDir = Join-Path $env:LOCALAPPDATA 'win-dotfiles\logs'
     New-Item -ItemType Directory -Path $logDir -Force | Out-Null
@@ -115,7 +97,7 @@ function Main {
         Assert-SetupStageConfiguration -RepoRoot $DOTFILES -StageIds $stageIds
         Write-Banner
         Write-Host "Selected stages: $($stageIds -join ', ')"
-        $results = @(Invoke-SetupStages -Stages $stages)
+        $results = @(Invoke-SetupStages -Stages $stages -RefreshEnvironment { Refresh-SetupEnvironment })
         Write-Host "`nSetup results:"
         $results | Format-Table Name, Success, Message -Wrap | Out-Host
         Write-Host "Log: $logPath"

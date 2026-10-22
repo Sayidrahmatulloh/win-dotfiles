@@ -7,8 +7,8 @@ funksiyalari esa **amal** hisoblanadi. Bu ikki qism alohida saqlanadi.
 ## Qayerdan boshlash kerak?
 
 1. `setup.json` — nima o'rnatiladi, konfiguratsiyalar qayerga ulanadi?
-2. `install.ps1` ichidagi `Main` — bosqichlar qanday tartibda bajariladi?
-3. `scripts/install/scoop.ps1` yoki `scripts/install/winget.ps1` — bitta bosqich qanday ishlaydi?
+2. `install.ps1` ichidagi `Main` va `Get-SetupStages` — bosqichlar qanday tartibda bajariladi?
+3. `scripts/install/scoop.ps1` va `lib/setup/scoop.ps1` — CLI va o'rnatish funksiyalari qanday ajratilgan?
 4. `lib/setup/packages.ps1` — barcha paketlar uchun umumiy install/update sikli.
 5. `doctor.ps1`, keyin `lib/diagnostics.ps1` — setup qanday tekshiriladi?
 
@@ -26,8 +26,8 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `config/powershell/modules.json` | Profil, setup va doctor ishlatadigan yagona modul ro'yxati |
 | `install.ps1` | Bosqichlarni ketma-ket ishga tushirish, log va yakuniy natija |
 | `doctor.ps1` | Faqat tekshirish va hisobot chiqarish |
-| `scripts/install/{scoop,winget}.ps1` | Paket menejeriga tegishli buyruqlar va bosqich |
-| `scripts/install/fonts.ps1` | Scoop shriftlari va ZIP shriftlarini ro'yxatdan o'tkazish |
+| `scripts/install/{scoop,winget}.ps1` | Manifest va CLI parametrlarini soha funksiyalariga uzatish |
+| `scripts/install/fonts.ps1` | Scoop/ZIP font funksiyalarini ulash |
 | `scripts/install/cursors.ps1` | Bibata ZIP'ni ochish va faol rangni qo'llash |
 | `themes/themes.json` | Mavzu ID, ranglar, wallpaper va cursor varianti |
 | `scripts/theme/ApplyTheme.ps1` | GlazeWM, wallpaper va cursor'ni birga almashtirish |
@@ -41,14 +41,20 @@ Repo tayyor bo'lgach, qolgan funksiyalar `lib/` dan olinadi.
 | `lib/setup/packages.ps1` | Barcha menejerlar uchun yagona paket sikli |
 | `lib/core/commands.ps1` | Buyruq chiqishi va exit code; xatoni aniq qaytarish |
 | `lib/setup/scoop.ps1` | Scoop buyruqlari; tools va fonts birga foydalanadi |
+| `lib/setup/winget.ps1` | Winget inventari, install/update va umumiy flaglar |
+| `lib/setup/fonts.ps1` | Font fayli/registry tekshiruvi, ZIP ochish va o'rnatish |
+| `lib/setup/links.ps1` | Link rollback'i, profil entrysi va konfiguratsiya ulash |
+| `lib/setup/git.ps1` | Git konfiguratsiyasini tekshirish va include qilish |
+| `lib/setup/terminal.ps1` | Terminal JSON tekshiruvi, backup va nusxalash |
+| `lib/setup/stages.ps1` | Post-clone validatsiya va bosqichlarni bajarish |
 | `lib/setup.ps1` | Post-clone yordamchilarini yuklash; o'rnatish boshlamaydi |
 | `lib/setup/modules.ps1` | Yetishmayotgan PowerShell modullarini o'rnatish |
 | `lib/zebar/build.ps1` | Shrift, staged build va tekshirilgan build'ni yoqish |
 | `lib/zebar/runtime.ps1` | Runtime fayllari va widget linklarini tiklash imkoniyati bilan ko'chirish |
 | `config/powershell/profile/` | Interaktiv profil, muhit, development va maintenance buyruqlari |
 | `scripts/theme/GlazeConfig.ps1` | GlazeWM reload va focused border matnini hisoblash |
-| `tools/walnut-lock/credentials.ps1` | Faqat berilgan yo'ldagi credentialni o'qish/yozish |
-| `tools/walnut-lock/ui.ps1` | Oyna va ekran tasvirini yaratish |
+| `apps/walnut-lock/credentials.ps1` | Faqat berilgan yo'ldagi credentialni o'qish/yozish |
+| `apps/walnut-lock/ui.ps1` | Oyna va ekran tasvirini yaratish |
 | `lib/diagnostics.ps1` | Doctor tekshiruvlari |
 | `lib/core/results.ps1` | Bosqich natijalari va xatolarni yig'ish |
 | `lib/core/output.ps1` | Terminaldagi ranglar va hisobot ko'rinishi |

@@ -6,16 +6,15 @@ Set-StrictMode -Version Latest
 . "$RepoRoot/lib/setup.ps1"
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('staged-build-' + [guid]::NewGuid().ToString('N'))
 $widget = Join-Path $fixture 'widgets/zebar/attaquer-solid-ts'
-New-Item -ItemType Directory -Path "$widget/src/fonts","$widget/dist","$fixture/tools" -Force | Out-Null
+New-Item -ItemType Directory -Path "$widget/src/fonts","$widget/dist" -Force | Out-Null
 Copy-Item "$RepoRoot/setup.json" "$fixture/setup.json"
 Set-Content "$widget/package.json" '{}'
 Set-Content "$widget/src/fonts/CaskaydiaMonoNerdFont-Regular.ttf" 'fixture font'
 Set-Content "$widget/dist/index.html" 'old build'
-@'
-param($RepoRoot, $BuildDirectory)
-$ErrorActionPreference = 'Stop'
-if (-not (Test-Path "$BuildDirectory/validated.txt")) { throw 'simulated asset validation failure' }
-'@ | Set-Content "$fixture/tools/check-desktop-build.ps1"
+function Assert-ZebarDesktopAssets {
+    param($RepoRoot, $BuildDirectory)
+    if (-not (Test-Path "$BuildDirectory/validated.txt")) { throw 'simulated asset validation failure' }
+}
 $script:buildMode = 'build-failure'
 function bun {
     if ($args[0] -eq 'install') { $global:LASTEXITCODE = 0; return }

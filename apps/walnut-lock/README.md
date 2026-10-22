@@ -14,7 +14,7 @@ Input va yozilayotgan belgilar ko'rinmaydi. Kodni yozib Enter bosing. Xato bo'ls
 
 Ctrl, Shift, Caps, Tab, Win, Alt va F1–F12 bloklanadi. Space, harflar, raqamlar, Enter va Backspace ochiq. Avtomatik yopilish va Ctrl+Shift+F12 orqali chiqish yo'q. Ichki tekshiruv xatosida hook bekor qilinadi.
 
-Bu Windows xavfsizlik qulfi emas. Zaruratda Ctrl+Alt+Delete orqali Task Manager ochib, faqat `tools/walnut-lock/start.ps1` ishlatayotgan powershell.exe jarayonini tugating. Startupni o'chirish uchun GlazeWM konfiguratsiyasidagi start-walnut-lock.ps1 komandasini olib tashlang. `-Preview` klaviaturani bloklamaydi; `-SelfTest` oyna va kod tekshiruvlarini bajaradi.
+Bu Windows xavfsizlik qulfi emas. Zaruratda Ctrl+Alt+Delete orqali Task Manager ochib, faqat `apps/walnut-lock/start.ps1` ishlatayotgan powershell.exe jarayonini tugating. Startupni o'chirish uchun GlazeWM konfiguratsiyasidagi start-walnut-lock.ps1 komandasini olib tashlang. `-Preview` klaviaturani bloklamaydi; `-SelfTest` oyna va kod tekshiruvlarini bajaradi.
 
 Terminal chaqnashisiz ishga tushirish: `start.vbs`ni oching. GlazeWM ham `wscript.exe` orqali boshlaydi. `start.cmd` eski usul uchun qolgan (uni bosganda cmd oynasi qisqa ko'rinishi mumkin). Bloklash qoplami ikki buferli, alohida fon tozalashsiz chiziladi; GlazeWM uni tiling/reflowdan chiqaradi.
 

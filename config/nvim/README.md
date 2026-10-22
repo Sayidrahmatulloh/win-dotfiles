@@ -144,10 +144,13 @@ Standart va shaxsiy mappinglar orasidagi takrorlarni boshqarish:
 | `Space tf` | Terminalni ekran bo'ylab kattalashtirish / avvalgi o'lchamga qaytarish |
 | `Space 1` / `Space 2` / `Space 3` | Mavjud terminal #1 / #2 / #3 ga o'tish; Normal va Terminal rejimida ishlaydi |
 | Terminalda `Esc` | PowerShell Vi command rejimi: `w`, `b`, `dw`, `ciw`; `i` bilan yozishga qaytish |
+| Terminalda `Esc`, `Esc` | Terminal oynasini yopish; sessiya saqlanadi |
+| Terminalda `Ctrl+w` | Faol terminal sessiyasini tugatish (kill) |
 | Terminalda `Ctrl+g` | Neovim Normal rejimi: terminal chiqishida yurish, qidirish va nusxalash |
 | Terminalning Neovim Normal rejimida `Esc` | Terminal oynasini yashirish; sessiya saqlanadi |
 | Terminalda `Ctrl+k` | Panelni yopmasdan kod oynasiga qaytish |
 | Sidebar ichida `w` | Sidebarni yopmasdan chapdagi faylga qaytish |
+| Sidebar ichida `\` | Ochilgan barcha papkalarni yig'ish |
 | `Space ui` | Editor tepasidagi fayl nomini ko'rsatish / yashirish |
 | `Space ud` | Diagnostika matni va underline'ni ko'rsatish / yashirish |
 | `Space ?` | LazyVim tugmalarini ko'rish |

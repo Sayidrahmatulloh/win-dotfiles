@@ -1,8 +1,8 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/../support/powershell.ps1"
 
-foreach ($directory in @('lib/core', 'lib/setup', 'lib/zebar', 'scripts/install', 'scripts/theme',
+foreach ($directory in @('lib/core', 'lib/setup', 'lib/zebar', 'scripts/install', 'scripts/theme', 'apps/walnut-lock',
     'tests/powershell', 'tests/neovim', 'tests/support', 'docs/history')) {
     Assert-That (Test-Path -LiteralPath (Join-Path $RepoRoot $directory) -PathType Container) "Missing architecture directory: $directory"
 }
@@ -13,6 +13,7 @@ Assert-That ($flatSuites.Count -eq 0) 'Place test suites under powershell/ or ne
 # Catch documentation links left pointing to old locations after folder moves.
 $documents = @(Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'docs') -Recurse -Filter '*.md' -File)
 $documents += Get-Item -LiteralPath (Join-Path $RepoRoot 'README.md'), (Join-Path $RepoRoot 'CONTRIBUTING.md')
+$documents += Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'apps'), (Join-Path $RepoRoot 'tools') -Recurse -Filter '*.md' -File
 foreach ($document in $documents) {
     $content = Get-Content -LiteralPath $document.FullName -Raw
     foreach ($link in [regex]::Matches($content, '\[[^\]]*\]\(([^)]+)\)')) {
@@ -25,7 +26,7 @@ foreach ($document in $documents) {
 
 # Resolve authored dot-source imports without executing installers or applications.
 $sources = @(Get-ChildItem -LiteralPath $RepoRoot -Filter '*.ps1' -File)
-foreach ($directory in @('lib', 'scripts', 'tools', 'config/powershell', 'tests')) {
+foreach ($directory in @('lib', 'scripts', 'tools', 'apps', 'config/powershell', 'tests')) {
     $sources += Get-ChildItem -LiteralPath (Join-Path $RepoRoot $directory) -Filter '*.ps1' -File -Recurse
 }
 $sources += Get-Item -LiteralPath (Join-Path $RepoRoot 'config/symlinks.ps1')
@@ -54,9 +55,21 @@ foreach ($source in $sources) {
 . "$RepoRoot/lib/utils.ps1"
 . "$RepoRoot/lib/setup.ps1"
 foreach ($function in @('Get-SetupConfig', 'Invoke-PackageCommand', 'Sync-Packages', 'Invoke-Step',
-    'New-ConfigBackup', 'Install-PSModules', 'Build-Zebar', 'Initialize-ZebarRuntime')) {
+    'New-ConfigBackup', 'Install-PSModules', 'Assert-ZebarDesktopAssets', 'Build-Zebar', 'Initialize-ZebarRuntime')) {
     Assert-That ($null -ne (Get-Command $function -CommandType Function -ErrorAction SilentlyContinue)) "Missing helper: $function"
 }
 $wrapper = Get-Content -LiteralPath (Join-Path $RepoRoot 'config/symlinks.ps1') -Raw
 Assert-That ($wrapper -match 'scripts/install/links\.ps1') 'Legacy symlink entry no longer forwards to its installation stage.'
+# Domain files can be imported directly; they must contain no entry-point work.
+foreach ($name in @('scoop', 'winget', 'fonts', 'links', 'git', 'terminal', 'stages')) {
+    $path = Join-Path $RepoRoot "lib/setup/$name.ps1"
+    $tokens = $null; $errors = $null
+    $ast = [Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$errors)
+    $work = @($ast.EndBlock.Statements | Where-Object { $_ -isnot [Management.Automation.Language.FunctionDefinitionAst] })
+    Assert-That ($work.Count -eq 0) "Importing $name can perform setup work. Keep only function definitions in domain libraries."
+}
+foreach ($source in Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'lib') -Recurse -Filter '*.ps1' -File) {
+    $content = Get-Content -LiteralPath $source.FullName -Raw
+    Assert-That ($content -notmatch '(?i)\$(?:RepoRoot|PSScriptRoot)[/\\](?:\.\.[/\\])*tools[/\\]') "Library depends on developer tools: $($source.Name)"
+}
 Write-Host 'Architecture: PowerShell imports resolve, library entry points load, and legacy link command forwards correctly.'

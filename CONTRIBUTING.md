@@ -13,6 +13,7 @@ konfiguratsiyasi link orqali bog'langan bo'lishi mumkin.
 | O'rnatish bosqichi | `scripts/install/` |
 | Qayta ishlatiladigan file/command/result amali | `lib/core/` |
 | Manifest, paket va modul qoidalari | `lib/setup/` |
+| Font, link, Git, Terminal yoki Winget amali | `lib/setup/<soha>.ps1` |
 | Zebar build yoki runtime migratsiyasi | `lib/zebar/` |
 | Dastur konfiguratsiyasi | `config/<dastur>/` |
 | Theme ma'lumoti | `themes/themes.json` |
@@ -22,6 +23,7 @@ konfiguratsiyasi link orqali bog'langan bo'lishi mumkin.
 | Neovim xatti-harakati | `config/nvim/lua/standalone/features/` |
 | Neovim plugin sozlamasi | Tegishli muhitning `plugins/` papkasi |
 | Qo'lda bajariladigan build/check/repair vositasi | `tools/` |
+| Sessiyada ishlaydigan mustaqil ilova | `apps/<ilova>/` |
 | PowerShell suite / Neovim sinovi | `tests/powershell/` / `tests/neovim/` |
 | Test yordamchisi | `tests/support/` |
 | Oldingi ish qaydi | `docs/history/` |
@@ -29,8 +31,13 @@ konfiguratsiyasi link orqali bog'langan bo'lishi mumkin.
 ## Yozish qoidalari
 
 - Avval mavjud yordamchini toping. Bitta amal uchun keraksiz wrapperlar va umumiy `helpers` kataloglari yaratmang.
+- O'rnatish funksiyalarini `lib/setup/`da, qisqa CLI entry point'ni `scripts/install/`da saqlang. Domain faylini yuklash hech qanday amal bajarmasin.
+- Funksiyaga kerakli yo'l va `-Update` tanlovini parametr orqali bering; chaqiruvchining o'zgaruvchilariga yashirin bog'lanmang.
+- Paket install/update adapteri `New-InstallResult` qaytarsin, buyruq xatosida exception tashlasin. Inventar `Test-*` funksiyasi boolean qaytarsin. Adapter ichida hisobot chiqarmang; `Sync-Packages -Report` orqali ko'rsating.
+- Natijalarni faqat `Add-InstallResult` bilan `Entries`ga qo'shing. Hisobotning status ro'yxatlari hisoblanadi. Rollback xatosi va backup yo'lini faqat ekranga chiqarib yo'qotmang; natija tafsilotlarida saqlang.
 - Funksiya nomi bajaradigan ishini aytsin; izoh nima uchun shunday qilinganini tushuntirsin.
 - Kutubxona importi o'rnatish yoki desktop amalini boshlamasin. Jarayon entry point yoki aniq funksiyadan boshlanadi.
+- Installer va `lib/` dev/CI uchun ajratilgan `tools/`ga bog'lanmasin. Umumiy build tekshiruvi `lib/zebar/`da saqlanadi.
 - Bootstrap PowerShell 5.1 bilan mos va repo yo'q holatda mustaqil ishlashi kerak; qolgan setup PowerShell 7 uchun.
 - Buyruq exit code va xatolarni yashirmang. Backup, rollback va takroriy ishga tushirish qoidalarini saqlang.
 - Konfiguratsiya ro'yxatlarini kod ichiga takrorlamang: setup va theme JSON'lari asosiy manba.

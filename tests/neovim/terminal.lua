@@ -30,6 +30,10 @@ local function check()
       end
       self.window = nil
     end
+    function term:shutdown()
+      self:close()
+      terms[self.id] = nil
+    end
     function term:open(_, direction)
       assert(direction == "float", "Terminal stopped using a floating window")
       if not self.bufnr then
@@ -54,6 +58,12 @@ local function check()
   assert(vim.fn.maparg("<Esc>", "t") == "", "Escape no longer reaches PowerShell Vi mode")
   assert(vim.fn.maparg("<C-g>", "t") ~= "", "Missing Neovim Normal-mode shortcut")
   assert(vim.fn.maparg("<Esc>", "n") ~= "", "Normal-mode Escape no longer hides the terminal")
+  local escape = vim.fn.maparg("<Esc><Esc>", "t", false, true)
+  assert(type(escape.callback) == "function", "Missing double-Escape terminal shortcut")
+  escape.callback()
+  assert(not terms[1]:is_open(), "Double Escape did not hide the terminal")
+  terminal.toggle()
+  assert(serial == 1 and terms[1]:is_open(), "Double Escape destroyed the terminal session")
   terminal.editor()
   assert(vim.api.nvim_get_current_win() == editor, "Editor focus was not restored")
   terminal.toggle()
@@ -89,7 +99,10 @@ local function check()
   assert(terms[1]:is_open() and serial == 2, "Exited-session fallback failed")
   assert(vim.api.nvim_win_get_width(editor) == editor_width)
   assert(vim.api.nvim_win_get_height(editor) == editor_height, "Floating terminal resized the editor")
-  terms[1]:close()
+  local kill = vim.fn.maparg("<C-w>", "t", false, true)
+  assert(type(kill.callback) == "function", "Missing terminal kill shortcut")
+  kill.callback()
+  assert(terms[1] == nil, "Ctrl+w only hid the terminal instead of terminating its session")
   print("Terminal: sessions, focus, Vi keymaps, float layout, maximize/restore and exit fallback OK")
 end
 

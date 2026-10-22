@@ -15,10 +15,11 @@ PowerShell 7'ni tayyorlaydi, `install.ps1` o'rnatish bosqichlarini bajaradi,
 | `assets/` | ZIP va rasm kabi manba fayllar, tegishli litsenziyalar |
 | `themes/` | Mavzularning yagona JSON katalogi |
 | `lib/core/` | Buyruq bajarish, fayl/backup, natija va hisobot yordamchilari |
-| `lib/setup/` | Manifest, paket va modul o'rnatish qoidalari |
+| `lib/setup/` | Manifest, paket, font, link, Git, Terminal va bosqich funksiyalari |
 | `lib/zebar/` | Staged build va runtime migratsiyasi |
 | `lib/{utils,setup,diagnostics}.ps1` | Barqaror kutubxona kirish nuqtalari va read-only diagnostika |
 | `tools/` | CI tayyorgarligi va build tekshiruvlari |
+| `apps/` | Sessiyada ishlaydigan ilovalar, jumladan Walnut lock |
 | `tests/powershell/` | Setup, helper, theme va diagnostika regression suite'lari |
 | `tests/neovim/` | Lua tuzilma, terminal, keymap va integratsiya sinovlari |
 | `tests/support/` | Suite sifatida ishga tushirilmaydigan test yordamchilari |
@@ -121,7 +122,9 @@ pack, widget va presetni ham tekshiradi. Repo va runtime settings yoki
 normalize.css farq qilsa WARN, settings yo'q yoki noto'g'ri bo'lsa FAIL
 qaytaradi. Doctor fayllarni o'zgartirmaydi.
 
-`bun run build` va installer `tools/build-zebar.ps1` orqali production
+`bun run build` uchun `tools/build-zebar.ps1` adapteri va installer bir xil
+`lib/zebar/build.ps1` funksiyasini chaqiradi. Installer `tools/`ga bog'lanmaydi;
+desktop asset tekshiruvi `lib/zebar/check-assets.ps1`da. Umumiy funksiya production
 build'ni `.dist-stage-<id>` papkasida tayyorlaydi. Index va desktop asset
 hash'lari tekshirilgandan keyin eski `dist` `.dist-backup-<id>`ga ko'chadi,
 yangi build `dist` bo'ladi. Almashtirish xato bersa eski build qaytariladi;
@@ -135,7 +138,9 @@ Oddiy production yangilash uchun `build` ishlatiladi.
 ## Setup bosqichlarini tanlash
 
 `Get-SetupStages` installer ichidagi ID, label va action'larning yagona
-ro'yxatini qaytaradi. `Select-SetupStages` `-Only` yoki `-Skip` ro'yxatini
+ro'yxatini qaytaradi. `Get-SetupStages` va `Select-SetupStages` repo yo'lini
+`-RepoRoot` orqali oladi. Har descriptor o'z repo yo'lini saqlaydi; action uni
+argument sifatida qabul qiladi. `Select-SetupStages` `-Only` yoki `-Skip` ro'yxatini
 filtrlaydi: comma bilan berilgan CLI argumentlari ham qabul qilinadi,
 registr farqi va takrorlangan nomlar qo'shimcha bosqich yaratmaydi.
 Noma'lum nomlar, ziddiyatli parametrlar va bo'sh yakuniy tanlov log yoki
@@ -186,6 +191,29 @@ helperlarini yuklaydi. Doctor va kichik adapterlar kerakli aniq modulni import
 qilishi mumkin. Importning o'zi install, theme almashtirish yoki build boshlamaydi.
 Bootstrap esa repo hali mavjud bo'lmagan kompyuterda ishlashi sababli mustaqil qoladi.
 
+O'rnatishning soha funksiyalari `lib/setup/{scoop,winget,fonts,links,git,terminal}.ps1`da.
+`scripts/install/` ularni yuklab, argument va konfiguratsiyani uzatadigan qisqa
+entry point'lardir. `lib/setup/stages.ps1` post-clone validatsiya va bajarishni
+boshqaradi. `-Update`, Scoop root va font destination parametr sifatida uzatiladi;
+ambient o'zgaruvchi o'rnatish xatti-harakatini o'zgartirmaydi. Hisobot va yig'ilgan
+xatolar `Complete-InstallResults`, paket sikli `Sync-Packages` orqali bir joyda boshqariladi.
+
+Paket va font amallari `Name`, `Status`, `Message` natija formatini ishlatadi.
+Paket engine'i inventarning boolean natijasini va adapter qaytargan nom/statusni
+tekshiradi; exceptionlarni tafsilotli `Failed` yozuviga aylantiradi. Jamlama
+ro'yxatlar yagona `Entries` manbasidan hisoblanadi. Taqdimot engine'dan ajratilgan:
+`-Report` orqali berilgan `Write-InstallResult` har bir yakunlangan amalni ko'rsatadi.
+
+Link tranzaksiyasi natijani qaytaradi; `Restore-ConfigLinkBackup` tiklashni
+bajaradi va band haqiqiy papkani saqlaydi. Asosiy xato, backup yo'li va rollback
+xatosi natijada, keyin esa bosqich exception'ining `InstallResults` ma'lumotida
+saqlanadi. PowerShell modullari ham umumiy paket sikli va natija modelini ishlatadi.
+
+`install.ps1`ning repo yuklanishidan oldin kerak bo'ladigan Scoop/Git tayyorgarligi,
+clone, bosqich tanlovi va PATH yangilashi mustaqil qoladi: bootstrap bu faylni
+repo hali yo'q kompyuterga alohida yuklay oladi. Post-clone runner PATH yangilash
+amalini aniq scriptblock parametri orqali oladi.
+
 `config/symlinks.ps1` avvalgi buyruqlar uchun ikki qatorli compatibility kirish
 nuqtasi. Haqiqiy link va profil amallari `scripts/install/links.ps1`da. Boshqa
 `config/` skriptlari dastur talab qiladigan profil yoki startup adapterlaridir.
@@ -211,7 +239,7 @@ va widget xizmatlari/komponentlari orasidagi chegaralar regression testlar bilan
 ## Papka nomlari va o'qish tartibi
 
 Root'da ishga tushirish buyruqlari va umumiy sozlash fayllari turadi. Kod turini
-bildiradigan papka nomlari (`config`, `lib`, `scripts`, `tools`, `tests`, `widgets`)
+bildiradigan papka nomlari (`config`, `lib`, `scripts`, `tools`, `apps`, `tests`, `widgets`)
 bir xil mas'uliyatni saqlaydi; bitta amal uchun yana parallel `helpers`, `utils`
 yoki bo'sh `src` qatlami yaratilmaydi. Faylni ko'chirishning o'zi arxitektura emas:
 chaqiruvchilar, yuklanish tartibi, testlar va hujjatlar ham birga o'zgaradi.
@@ -227,3 +255,8 @@ Boshlash uchun [hujjatlar xaritasi](README.md), testlar uchun [tests/README.md](
 Yangi PowerShell suite pastki papkadan ham `-RepoRoot` qabul qiladi. Neovim
 sinovlari repo ildizini `setup.json` orqali topadi; katalog chuqurligiga yoki
 foydalanuvchining kompyuteridagi mutlaq yo'lga bog'lanmaydi.
+
+`apps/walnut-lock/` runtime ilova: launcher, supervisor va UI birga saqlanadi.
+GlazeWM startup adapteri yangi yo'lni ishlatadi; konfiguratsiya junction'i va
+credential joyi o'zgarmaydi. Qo'lda yaratilgan shortcut va ishlayotgan eski
+supervisor uchun [migratsiya tartibi](../apps/README.md)ga qarang.

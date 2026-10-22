@@ -1,10 +1,10 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot/../support/powershell.ps1"
 . "$RepoRoot\lib\core\files.ps1"
 . "$RepoRoot\lib\setup\settings.ps1"
-Invoke-Expression (Read-Functions 'scripts/install/terminal.ps1')
+. "$RepoRoot/lib/setup/terminal.ps1"
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('terminal-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 $packaged = Join-Path $fixture 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'

@@ -3,7 +3,13 @@ local M = {}
 
 function M.attach(term, focus_editor)
   local options = { buffer = term.bufnr }
-  -- Escape reaches PowerShell's Vi mode; Ctrl+g enters Neovim Normal mode.
+  map({ "n", "t" }, "<C-w>", function()
+    term:shutdown()
+  end, "Kill terminal session", options)
+  -- A single Escape reaches the shell; double Escape hides the panel.
+  map("t", "<Esc><Esc>", function()
+    term:close()
+  end, "Hide terminal", options)
   map("t", "<C-g>", [[<C-\><C-n>]], "Neovim terminal Normal mode", options)
   map("n", "<Esc>", function()
     term:close()

@@ -16,6 +16,6 @@ Repo ildizidan:
 Bu fayllar qulay kirish buyruqlari. Umumiy amallar `lib/`da, tekshiruvlarning
 suite'lari `tests/`da saqlanadi. Build va repair buyruqlari fayllarni o'zgartirishi mumkin.
 
-`walnut-lock/` — o'z launcher, UI va [qo'llanmasi](walnut-lock/README.md) bor
-alohida Windows yordamchi vositasi. Uning ichki kodini umumiy setup helperlari bilan
-aralashtirmang.
+Installer `tools/`ni chaqirmaydi. Umumiy build va asset tekshiruvi `lib/zebar/`da;
+bu yerdagi buyruqlar shu funksiyalar uchun dev/CI kirish nuqtalari.
+Foydalanuvchi sessiyasida ishlaydigan ilovalar [apps/](../apps/README.md)da.

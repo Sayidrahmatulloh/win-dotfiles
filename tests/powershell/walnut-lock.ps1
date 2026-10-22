@@ -2,7 +2,7 @@ param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/../support/powershell.ps1"
 Add-Type -AssemblyName System.Security
-. "$RepoRoot/tools/walnut-lock/credentials.ps1"
+. "$RepoRoot/apps/walnut-lock/credentials.ps1"
 
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('walnut-credential-test-' + [guid]::NewGuid().ToString('N'))
 $path = Join-Path $fixture 'credential.dat'
@@ -17,7 +17,22 @@ Save-Credential -Code 'FixtureOnly123' -Path $path
 Assert-That ((Read-Credential -Path $path).salt -cne $record.salt) 'Saving a credential reused its salt.'
 
 # SelfTest compiles and constructs windows, then exits before installing hooks.
-& "$RepoRoot/tools/walnut-lock/start.ps1" -SelfTest
+& "$RepoRoot/apps/walnut-lock/start.ps1" -SelfTest
 if ($LASTEXITCODE -ne 0) { throw 'Walnut self-test failed.' }
-& "$RepoRoot/tools/walnut-lock/watch.ps1" -CheckOnly
-Write-Host 'Walnut credential, host forwarding and UI self-tests passed without locking input.'
+& "$RepoRoot/apps/walnut-lock/watch.ps1" -CheckOnly
+
+# Exercise the deployed startup adapter without starting the supervisor or input lock.
+$launcherCalls = [Collections.Generic.List[string]]::new()
+function Start-Process {
+    param($FilePath, $WindowStyle, $ArgumentList)
+    Assert-That ($FilePath -eq 'powershell.exe' -and $WindowStyle -eq 'Hidden') 'Startup did not select the hidden Windows PowerShell host.'
+    $fileIndex = [array]::IndexOf($ArgumentList, '-File')
+    Assert-That ($fileIndex -ge 0) 'Startup omitted its script argument.'
+    $target = $ArgumentList[$fileIndex + 1].Trim('"')
+    Assert-That ([IO.Path]::GetFullPath($target) -eq [IO.Path]::GetFullPath("$RepoRoot/apps/walnut-lock/watch.ps1")) 'Startup still points to the old application directory.'
+    $launcherCalls.Add($target)
+}
+& "$RepoRoot/config/glzr/glazewm/start-walnut-lock.ps1"
+Assert-That ($launcherCalls.Count -eq 1) 'GlazeWM startup did not invoke the supervisor exactly once.'
+Remove-Item Function:\Start-Process
+Write-Host 'Walnut credential, host forwarding, UI and migrated startup tests passed without locking input.'

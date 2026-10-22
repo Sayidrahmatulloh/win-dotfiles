@@ -1,19 +1,32 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot/../support/powershell.ps1"
 Invoke-Expression (Read-Functions 'install.ps1')
 $ids = @('Scoop','Winget','Fonts','Cursors','Modules','Symlinks','Git','Terminal','Zebar')
-Assert-That ((@(Select-SetupStages).Id -join ',') -eq ($ids -join ',')) 'Default selection changed.'
-Assert-That ((@(Select-SetupStages -Only @('zebar','terminal','Terminal')).Id -join ',') -eq 'Terminal,Zebar') 'Case-insensitive selection, deduplication or ordering failed.'
-Assert-That ((@(Select-SetupStages -Only ' Zebar , Terminal ').Id -join ',') -eq 'Terminal,Zebar') 'Comma-separated CLI argument failed.'
-Assert-That (@(Select-SetupStages -Skip 'Winget,Fonts').Count -eq 7) 'Skip array parsing failed.'
+Assert-That ((@(Select-SetupStages -RepoRoot $RepoRoot).Id -join ',') -eq ($ids -join ',')) 'Default selection changed.'
+Assert-That ((@(Select-SetupStages -RepoRoot $RepoRoot -Only @('zebar','terminal','Terminal')).Id -join ',') -eq 'Terminal,Zebar') 'Case-insensitive selection, deduplication or ordering failed.'
+Assert-That ((@(Select-SetupStages -RepoRoot $RepoRoot -Only ' Zebar , Terminal ').Id -join ',') -eq 'Terminal,Zebar') 'Comma-separated CLI argument failed.'
+Assert-That (@(Select-SetupStages -RepoRoot $RepoRoot -Skip 'Winget,Fonts').Count -eq 7) 'Skip array parsing failed.'
 foreach ($case in @(@{Only=@('Unknown')}, @{Only=@('')}, @{Only=@('Terminal,')}, @{Only=@('Terminal');Skip=@('Winget')}, @{Skip=$ids})) {
     $threw = $false
-    try { Select-SetupStages @case | Out-Null } catch { $threw = $true }
+    try { Select-SetupStages -RepoRoot $RepoRoot @case | Out-Null } catch { $threw = $true }
     Assert-That $threw 'Invalid or empty stage selection was accepted.'
 }
 Write-Host 'Setup stage selection tests passed.'
+
+# Each descriptor carries its explicit root, even when another plan is built later.
+$firstRoot = Join-Path $RepoRoot 'fixture first repo'
+$secondRoot = Join-Path $RepoRoot 'fixture second repo'
+$firstPlan = @(Get-SetupStages -RepoRoot $firstRoot)
+$secondPlan = @(Get-SetupStages -RepoRoot $secondRoot)
+$receivedRoots = [Collections.Generic.List[string]]::new()
+function Install-PSModules { param($RepoRoot) $receivedRoots.Add($RepoRoot) }
+. "$RepoRoot/lib/setup/stages.ps1"
+function Invoke-Step { param($Name, $Block) & $Block }
+$moduleStages = @($firstPlan | Where-Object Id -eq 'Modules') + @($secondPlan | Where-Object Id -eq 'Modules')
+Invoke-SetupStages -Stages $moduleStages -RefreshEnvironment {}
+Assert-That (($receivedRoots -join '|') -eq "$firstRoot|$secondRoot") 'Stage actions used an ambient or later repository root.'
 
 # Exercise Windows PowerShell -> pwsh -File forwarding without any installers.
 $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()

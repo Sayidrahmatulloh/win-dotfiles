@@ -75,6 +75,7 @@ return {
               wo = { winbar = "" },
               keys = {
                 ["<Esc>"] = false,
+                ["\\"] = "explorer_close_all",
                 ["w"] = {
                   explorer_ui.editor,
                   desc = "Return to editor",

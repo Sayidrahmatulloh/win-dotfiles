@@ -1,4 +1,20 @@
-# Console formatting only. No setup actions run when loaded.
+﻿# Console formatting only. No setup actions run when loaded.
+function Write-InstallResult {
+    param($Entry)
+    switch ($Entry.Status) {
+        Installed {
+            Write-Done "installed: $($Entry.Name)"
+            if ($Entry.BackupPath) { Write-Warn "Previous configuration retained: $($Entry.BackupPath)" }
+        }
+        Upgraded { Write-Done "upgraded: $($Entry.Name)" }
+        Latest { Write-Skip "$($Entry.Message): $($Entry.Name)" }
+        Failed {
+            Write-Fail "$($Entry.Name) : $($Entry.Message)"
+            if ($Entry.RollbackError) { Write-Fail "Rollback failed: $($Entry.RollbackError). Recover from: $($Entry.BackupPath)" }
+        }
+    }
+}
+
 # ============================================================
 #  lib/core/output.ps1 — Console formatting helpers for dotfiles scripts
 # ============================================================
@@ -122,11 +138,11 @@ function Write-Warn {
 # ── Summary box ───────────────────────────────────────────────────────────────
 
 function Write-Summary {
-  param([string]$Label, [hashtable]$R)
+  param([string]$Label, $R)
 
   $installed = $R.Installed.Count
-  $upgraded = if ($R.ContainsKey('Upgraded')) { $R.Upgraded.Count } else { 0 }
-  $latest = if ($R.ContainsKey('Latest')) { $R.Latest.Count } else { 0 }
+  $upgraded = $R.Upgraded.Count
+  $latest = $R.Latest.Count
   $failed = $R.Failed.Count
   $title = "$Label Summary"
   $rows = [Collections.Generic.List[string]]::new()

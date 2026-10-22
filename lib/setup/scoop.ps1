@@ -8,7 +8,7 @@ function Assert-ScoopAvailable {
 
 # ── Bucket helpers ─────────────────────────────────────────────────────────────
 
-function Test-BucketAdded {
+function Test-ScoopBucketAdded {
     param([string]$Name)
     $result = Invoke-PackageCommand scoop @('bucket','list') -AllowedExitCodes @(0,2)
     if ($result.ExitCode -eq 2) {
@@ -18,13 +18,13 @@ function Test-BucketAdded {
     return [bool]($result.Output | Where-Object { $_.PSObject.Properties['Name'] -and $_.Name -eq $Name })
 }
 
-function Add-Bucket {
+function Add-ScoopBucket {
     param([string]$Name)
     $null = Invoke-PackageCommand scoop @('bucket','add',$Name)
-    return $true
+    New-InstallResult -Name $Name -Status Installed
 }
 
-function Test-ToolInstalled {
+function Test-ScoopPackageInstalled {
     param([string]$Name)
     $result = Invoke-PackageCommand scoop @('list') -AllowedExitCodes @(0,1)
     if ($result.ExitCode -eq 1) {
@@ -34,17 +34,19 @@ function Test-ToolInstalled {
     return [bool]($result.Output | Where-Object { $_.PSObject.Properties['Name'] -and $_.Name -eq $Name })
 }
 
-function Install-Tool {
+function Install-ScoopPackage {
     param([string]$Name)
     $null = Invoke-PackageCommand scoop @('install',$Name)
-    return $true
+    New-InstallResult -Name $Name -Status Installed
 }
 
-function Update-Tool {
+function Update-ScoopPackage {
     param([string]$Name)
     $result = Invoke-PackageCommand scoop @('update',$Name)
-    if (($result.Output | Out-String) -match 'Latest versions for all apps are installed|is already the newest version') { return 'latest' }
-    return 'upgraded'
+    if (($result.Output | Out-String) -match 'Latest versions for all apps are installed|is already the newest version') {
+        return New-InstallResult -Name $Name -Status Latest -Message 'up to date'
+    }
+    New-InstallResult -Name $Name -Status Upgraded
 }
 
 # ── Scoop root resolver ───────────────────────────────────────────────────────
@@ -59,4 +61,36 @@ function Get-ScoopRoot {
   @("$env:USERPROFILE\scoop", "$env:ProgramData\scoop") |
   Where-Object { Test-Path "$_\buckets" } |
   Select-Object -First 1
+}
+
+function Sync-ScoopBuckets {
+    param([string[]]$Buckets)
+    Write-Section 'Buckets:'
+    $results = Sync-Packages -Names $Buckets `
+        -IsInstalled { param($name) Test-ScoopBucketAdded $name } `
+        -Install { param($name) Add-ScoopBucket $name } `
+        -Report { param($entry) Write-InstallResult $entry }
+    if ($results.Installed.Count) {
+        $null = Invoke-PackageCommand scoop @('update')
+        Write-Done 'index updated'
+    }
+    Complete-InstallResults -Name 'Scoop buckets' -Results $results
+}
+
+function Sync-ScoopPackages {
+    param([string[]]$Tools, [switch]$Update)
+    Write-Section 'Tools:'
+    Sync-Packages -Names $Tools -Update:$Update `
+        -IsInstalled { param($name) Test-ScoopPackageInstalled $name } `
+        -Install { param($name) Install-ScoopPackage $name } `
+        -Upgrade { param($name) Update-ScoopPackage $name } `
+        -Report { param($entry) Write-InstallResult $entry }
+}
+
+function Install-ScoopPackages {
+    param([string[]]$Buckets, [string[]]$Tools, [switch]$Update)
+    Assert-ScoopAvailable
+    Sync-ScoopBuckets $Buckets
+    $results = Sync-ScoopPackages -Tools $Tools -Update:$Update
+    Complete-InstallResults -Name 'Scoop' -Results $results -FailureLabel 'Scoop packages'
 }

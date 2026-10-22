@@ -1,9 +1,9 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot/../support/powershell.ps1"
 . "$RepoRoot\lib\utils.ps1"
-Invoke-Expression (Read-Functions 'scripts/install/links.ps1')
+. "$RepoRoot/lib/setup/links.ps1"
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('profile-entry-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $fixture | Out-Null
 $loader = '$global:dotfilesProfileLoaded = $true'

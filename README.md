@@ -108,9 +108,12 @@ win-dotfiles/
 │   └── wallpapers/    # Wallpaper manbalari
 ├── themes/themes.json  # Yagona mavzu katalogi
 ├── tools/              # CI va build tekshirish vositalari
+├── apps/               # Sessiyada ishlaydigan mustaqil ilovalar
+│   └── walnut-lock/    # Overlay, launcher va supervisor
+├── widgets/            # Zebar paneli va variantlar
 ├── lib/
 │   ├── core/           # Buyruqlar, fayllar, natijalar va hisobot
-│   ├── setup/          # Manifest, paketlar va modullar
+│   ├── setup/          # Paket, font, link, Git, Terminal va bosqich funksiyalari
 │   ├── zebar/          # Build va runtime migratsiyasi
 │   ├── utils.ps1       # Umumiy helperlarni yuklash
 │   ├── setup.ps1       # Post-clone helperlarni yuklash

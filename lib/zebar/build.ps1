@@ -30,7 +30,7 @@ function Build-Zebar {
         & bun run --cwd $widgetDir build:raw --outDir $stage --emptyOutDir
         if ($LASTEXITCODE -ne 0) { throw "Zebar build failed (exit $LASTEXITCODE)." }
         if (-not (Test-Path -LiteralPath "$stage/index.html" -PathType Leaf)) { throw 'Zebar build did not produce staged index.html.' }
-        & "$RepoRoot/tools/check-desktop-build.ps1" -RepoRoot $RepoRoot -BuildDirectory $stage
+        Assert-ZebarDesktopAssets -RepoRoot $RepoRoot -BuildDirectory $stage
         Publish-ZebarBuild -Stage $stage -Destination $dist -Backup $backup
     } finally {
         # Only remove the generated sibling directory, never the active build or a link.

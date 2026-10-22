@@ -9,7 +9,8 @@ file, command va rollback funksiyalari `../lib/`da qoladi.
 
 Yangi install bosqichini alohida faylga yozing va installer ro'yxatiga qo'shing.
 Entry point'ni dot-source qilish bajarilishni boshlashi mumkin; testda funksiyalarni
-`tests/support/powershell.ps1`dagi loader orqali ajratib yuklang.
+bevosita tegishli `lib/setup/<soha>.ps1`dan yuklang. Install entry point'lari
+faqat argument, konfiguratsiya va kutubxona funksiyasini ulaydi.
 
 Bootstrap repo hali yo'q paytda ham ishlashi kerak. Uning dastlabki tayyorgarligini
 repo ichidagi kutubxonaga majburan bog'lamang.

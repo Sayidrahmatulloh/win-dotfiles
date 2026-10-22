@@ -1,41 +1,42 @@
 ﻿# One install/update loop for Scoop tools, Winget apps and Scoop fonts.
-# Adapters provide only manager-specific commands; results and errors are shared.
+# Adapters return install records or throw. Presentation is supplied by the caller.
+function Assert-PackageResult {
+    param($Result, [string]$Name, [string[]]$AllowedStatuses)
+    if ($null -eq $Result -or $Result -is [array] -or
+        $Result.PSObject.TypeNames -notcontains 'WinDotfiles.InstallResult' -or
+        $Result.Name -cne $Name -or $Result.Status -notin $AllowedStatuses) {
+        throw "Invalid package result for $Name. Expected: $($AllowedStatuses -join ', ')."
+    }
+}
+
 function Sync-Packages {
     param(
         [string[]]$Names,
         [scriptblock]$IsInstalled,
         [scriptblock]$Install,
         [scriptblock]$Upgrade,
-        [switch]$Update
+        [switch]$Update,
+        [scriptblock]$Report
     )
     $results = New-Results
-    $index = 0
     foreach ($name in $Names) {
-        $index++
         try {
-            if (-not (& $IsInstalled $name)) {
-                Write-Step "[$index/$($Names.Count)]" $name 'installing'
-                if (-not (& $Install $name)) { throw "Install failed: $name" }
-                Write-Done "installed: $name"
-                $results.Installed.Add($name)
-                continue
-            }
-            if (-not $Update) {
-                Write-Skip "already installed: $name"
-                $results.Latest.Add($name)
-                continue
-            }
-            Write-Step "[$index/$($Names.Count)]" $name 'upgrading'
-            $status = & $Upgrade $name
-            switch ($status) {
-                'upgraded' { Write-Done "upgraded: $name"; $results.Upgraded.Add($name) }
-                'latest' { Write-Skip "up to date: $name"; $results.Latest.Add($name) }
-                default { throw "Upgrade failed: $name" }
+            $installed = & $IsInstalled $name
+            if ($installed -isnot [bool]) { throw "Invalid inventory result for $name. Expected a boolean." }
+            if (-not $installed) {
+                $entry = & $Install $name
+                Assert-PackageResult -Result $entry -Name $name -AllowedStatuses Installed
+            } elseif (-not $Update) {
+                $entry = New-InstallResult -Name $name -Status Latest -Message 'already installed'
+            } else {
+                $entry = & $Upgrade $name
+                Assert-PackageResult -Result $entry -Name $name -AllowedStatuses Upgraded,Latest
             }
         } catch {
-            Write-Fail "$name : $($_.Exception.Message)"
-            $results.Failed.Add($name)
+            $entry = New-InstallResult -Name $name -Status Failed -Message $_.Exception.Message
         }
+        Add-InstallResult -Results $results -Entry $entry
+        if ($Report) { & $Report $entry | Out-Null }
     }
     return $results
 }

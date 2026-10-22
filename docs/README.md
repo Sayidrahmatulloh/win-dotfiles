@@ -14,6 +14,7 @@ Muayyan qism uchun:
 | Umumiy PowerShell modullari | [lib/](../lib/README.md) |
 | Install va theme skriptlari | [scripts/](../scripts/README.md) |
 | Build, check va repair vositalari | [tools/](../tools/README.md) |
+| Runtime ilovalar va eski o'rnatishdan o'tish | [apps/](../apps/README.md) |
 | Testlarni ishga tushirish | [tests/](../tests/README.md) |
 | Neovim | [Tuzilma](../config/nvim/docs/architecture.md), [tugmalar](../config/nvim/docs/keymaps.md) |
 | Zebar | [Variantlar](../widgets/README.md), [asosiy panel](../widgets/zebar/attaquer-solid-ts/README.md) |

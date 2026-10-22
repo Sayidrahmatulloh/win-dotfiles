@@ -1,9 +1,9 @@
-param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
+﻿param([string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent))
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . "$PSScriptRoot/../support/powershell.ps1"
 . "$RepoRoot\lib\utils.ps1"
-Invoke-Expression (Read-Functions 'scripts/install/fonts.ps1')
+. "$RepoRoot/lib/setup/fonts.ps1"
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('font-repair-test-' + [guid]::NewGuid().ToString('N'))
 $SYSTEM_FONTS = Join-Path $fixture 'installed'
 New-Item -ItemType Directory -Path $fixture | Out-Null
@@ -28,15 +28,14 @@ function New-ItemProperty {
     if ($script:registrationFails) { throw 'simulated registry failure' }
     $script:registered = $Value
 }
-$result = New-Results
-Install-FontFile $font $result.Installed $result.Failed
+$message = $null
+try { Install-FontFile $font -SystemFonts $SYSTEM_FONTS } catch { $message = $_.Exception.Message }
 $destination = Join-Path $SYSTEM_FONTS 'fixture.ttf'
-Assert-That ((Test-Path $destination) -and $result.Failed.Count -eq 1) 'Partial registration failure was not reported.'
+Assert-That ((Test-Path $destination) -and $message -eq 'simulated registry failure') 'Partial registration failure was not propagated.'
 $script:registrationFails = $false
-$result = New-Results
-Install-FontFile $font $result.Installed $result.Failed
-Assert-That ($result.Installed.Count -eq 1 -and (Test-FontRegistered $destination)) 'Rerun did not repair the existing font registration.'
+$result = Install-FontFile $font -SystemFonts $SYSTEM_FONTS
+Assert-That ($result.Status -eq 'Installed' -and (Test-FontRegistered $destination)) 'Rerun did not repair the existing font registration.'
 $calls = $script:registrationCalls
-Install-FontFile $font $result.Installed $result.Failed
-Assert-That ($script:registrationCalls -eq $calls) 'Registered font was rewritten on rerun.'
+$result = Install-FontFile $font -SystemFonts $SYSTEM_FONTS
+Assert-That ($result.Status -eq 'Latest' -and $script:registrationCalls -eq $calls) 'Registered font was rewritten on rerun.'
 Write-Host 'Partial font installation repair tests passed.'
