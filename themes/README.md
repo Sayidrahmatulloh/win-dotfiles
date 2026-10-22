@@ -14,7 +14,7 @@ The default green theme uses these shared colors:
 | Errors | `#F38BA8` |
 | Warnings | `#F9E2AF` |
 
-Applied to Windows Terminal, PowerShell prompt, PSReadLine, FZF, Neovim,
+Applied to qutebrowser, Windows Terminal, PowerShell prompt, PSReadLine, FZF, Neovim,
 GlazeWM, the SolidJS Zebar bar, and keyboard/laptop widgets. Syntax and
 diagnostic colors retain their meaning. Existing blue and purple desktop
 variants remain available through the bar's theme button.

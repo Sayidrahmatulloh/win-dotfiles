@@ -10,6 +10,7 @@ Bu papkada dasturlar o'z formatida o'qiydigan sozlamalar saqlanadi:
 | `git/` | Umumiy Git sozlamalari |
 | `glzr/` | GlazeWM va Zebar startup sozlamalari |
 | `vscode/` | VS Code ko'rinish sozlamalari |
+| `qutebrowser/` | Dark green brauzer interfeysi, sessiya va qidiruvlar |
 
 Qayerga ulanishi `../setup.json`da, ulash amali esa
 `../scripts/install/links.ps1`da belgilanadi. `symlinks.ps1` eski buyruqlar uchun

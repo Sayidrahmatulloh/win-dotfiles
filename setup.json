@@ -29,6 +29,7 @@
       "nodejs",
       "oh-my-posh",
       "python",
+      "qutebrowser",
       "ripgrep",
       "rust",
       "stylua",
@@ -61,6 +62,11 @@
     "Devolutions.UniGetUI"
   ],
   "links": [
+    {
+      "source": "config/qutebrowser",
+      "root": "APPDATA",
+      "destination": "qutebrowser/config"
+    },
     {
       "source": "config/powershell",
       "root": "USERPROFILE",

@@ -34,7 +34,7 @@ function Assert-SetupConfig {
     if ($configuration.links -isnot [array]) { throw 'links must be a JSON array.' }
     foreach ($link in $configuration.links) {
         foreach ($key in @('source','root','destination')) { $null = Get-ConfigProperty $link $key }
-        if ($link.root -notin @('USERPROFILE','LOCALAPPDATA')) { throw 'Link root must be USERPROFILE or LOCALAPPDATA.' }
+        if ($link.root -notin @('USERPROFILE','LOCALAPPDATA','APPDATA')) { throw 'Link root must be USERPROFILE, LOCALAPPDATA or APPDATA.' }
         Assert-RelativeConfigPath $link.source 'links.source'
         Assert-RelativeConfigPath $link.destination 'links.destination'
     }

@@ -1,0 +1,5 @@
+# Browser-owned settings and personal data stay on this machine.
+*
+!.gitignore
+!config.py
+!README.md
